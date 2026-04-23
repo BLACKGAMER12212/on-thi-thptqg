@@ -20,8 +20,13 @@
         .fade-in { animation: fadeIn 0.3s ease-in-out; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* Auth Screen */
-        #auth-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--bg-color); display: flex; justify-content: center; align-items: center; z-index: 10000; }
+        /* Loading Screen Mới */
+        #global-loader { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--bg-color); display: flex; justify-content: center; align-items: center; z-index: 99999; font-size: 16px; font-weight: bold; color: var(--thpt-main); flex-direction: column; gap: 15px;}
+        .spinner { width: 45px; height: 45px; border: 4px solid #e0f2fe; border-top: 4px solid var(--thpt-main); border-radius: 50%; animation: spin 1s linear infinite; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        /* Auth Screen (Đã ẩn mặc định để tránh chớp màn hình) */
+        #auth-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--bg-color); display: none; justify-content: center; align-items: center; z-index: 10000; }
         .auth-card { background: white; padding: 40px; border-radius: 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.08); width: 380px; text-align: center; border: 1px solid var(--border-color); display: none;}
         .auth-card.active { display: block; animation: fadeIn 0.4s ease-out; }
         .auth-card h1 { color: var(--thpt-main); font-weight: 900; margin-bottom: 5px; font-size: 28px;}
@@ -86,33 +91,24 @@
         .btn-history:hover { background: #e2e8f0; }
         .score-badge { position: absolute; top: 20px; right: 20px; background: var(--thpt-success); color: white; padding: 5px 10px; border-radius: 8px; font-weight: bold; font-size: 18px; box-shadow: 0 2px 4px rgba(16,185,129,0.3);}
 
-        /* Main Workspace - ĐÃ CHIA LẠI TỶ LỆ */
+        /* Main Workspace */
         #exam-workspace { display: none; flex: 1; overflow: hidden; background: #e2e8f0;}
-        
-        /* Cột trái (PDF) lấy toàn bộ không gian còn lại */
         .left-panel { flex: 1; display: flex; flex-direction: column; }
         #pdf-frame { width: 100%; height: 100%; border: none; }
-
-        /* Cột phải (Phiếu làm bài) chốt chiều rộng cố định */
         .right-panel { width: 480px; flex-shrink: 0; display: flex; flex-direction: column; background: white; border-left: 2px solid var(--border-color); z-index: 10;}
         
         .timer-header { display: flex; justify-content: space-between; align-items: center; background: white; padding: 15px 20px; border-bottom: 1px solid var(--border-color); box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); z-index: 11;}
         .submit-btn { background: var(--thpt-success); color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 15px; transition: 0.2s; box-shadow: 0 4px 6px rgba(16, 185, 129, 0.2); white-space: nowrap;}
         .submit-btn:hover { filter: brightness(1.1); transform: translateY(-1px);}
 
-        /* BẢNG PHIẾU TRẢ LỜI MỚI (CHUNG 1 TRANG) */
+        /* BẢNG PHIẾU TRẢ LỜI */
         #sheets-container { flex: 1; overflow-y: auto; padding: 20px; background: #f8fafc; }
-        
         .section-title { font-weight: 900; color: var(--thpt-main); padding: 15px 0 10px; border-bottom: 2px solid #cbd5e1; margin-bottom: 15px; font-size: 15px; text-transform: uppercase; letter-spacing: 0.5px;}
         .section-title:first-child { padding-top: 0; }
-
-        /* Grid 2 cột siêu gọn gàng */
         .mcq-grid, .tf-grid-compact, .short-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-
         .q-compact-row { background: white; border: 1px solid var(--border-color); border-radius: 8px; padding: 10px; display: flex; align-items: center; flex-wrap: wrap; box-shadow: 0 1px 2px rgba(0,0,0,0.02);}
         .q-compact-num { font-weight: bold; color: var(--thpt-dark); font-size: 14px; width: 55px; }
 
-        /* UI Trắc nghiệm gọn (Hình tròn) */
         .mcq-options.compact { display: flex; gap: 6px; flex: 1; justify-content: flex-end;}
         .mcq-label { cursor: pointer; display: inline-block; }
         .mcq-label input { display: none; } 
@@ -121,7 +117,6 @@
         .mcq-label input:checked + .mcq-box { background: var(--thpt-main); border-color: var(--thpt-main); color: white; }
         .mcq-label input:disabled + .mcq-box { cursor: not-allowed; opacity: 0.7; }
 
-        /* UI Đúng sai gọn */
         .tf-block { flex-direction: column; align-items: flex-start; }
         .tf-items { display: flex; flex-direction: column; gap: 8px; width: 100%; }
         .tf-item-row { display: flex; align-items: center; justify-content: space-between; width: 100%; background: #f8fafc; padding: 4px 8px; border-radius: 6px; border: 1px solid #f1f5f9;}
@@ -134,7 +129,6 @@
         .tf-label input:checked + .true-box { background: var(--thpt-success); border-color: var(--thpt-success); color: white; }
         .tf-label input:checked + .false-box { background: var(--thpt-danger); border-color: var(--thpt-danger); color: white; }
 
-        /* UI Trả lời ngắn gọn */
         .short-block { flex-direction: column; align-items: flex-start; }
         .short-answer-input.compact { width: 100%; padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 15px; outline: none; transition: 0.2s; font-weight: bold; color: var(--thpt-dark); margin-top: 5px;}
         .short-answer-input.compact:focus { border-color: var(--thpt-main); box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.1);}
@@ -181,6 +175,11 @@
     </style>
 </head>
 <body>
+
+    <div id="global-loader">
+        <div class="spinner"></div>
+        <div>Đang kết nối hệ thống...</div>
+    </div>
 
     <div id="auth-screen">
         <div class="auth-card active" id="login-form">
@@ -301,9 +300,6 @@
         import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
         import { getFirestore, doc, setDoc, getDoc, updateDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-        // ==========================================
-        // 1. CẤU HÌNH FIREBASE CỦA EM
-        // ==========================================
         const firebaseConfig = {
             apiKey: "AIzaSyBC7rq22ZxFomEry31TtCKqNnO2g3gJUlU",
             authDomain: "thptqg-2026.firebaseapp.com",
@@ -317,10 +313,7 @@
         const auth = getAuth(app);
         const db = getFirestore(app);
 
-        // ==========================================
-        // 2. KHO ĐỀ THI CỦA EM
-        // ==========================================
-           const EXAM_DATABASE = [
+        const EXAM_DATABASE = [
             {
                 id: "toan_de_ninhbinh",
                 title: "Khảo sát THPT Ninh Bình-Bạc Liêu - Mã 1111",
@@ -337,7 +330,7 @@
                     },
                     P3: { 1: "84", 2: "3646", 3: "32", 4: "92", 5: "30,1", 6: "14,5" }
                 }
-            }, // <--- DẤU PHẨY QUAN TRỌNG ANH VỪA THÊM VÀO ĐÂY NÀY!
+            },
             {
                 id: "toan_de_nghean-0101",
                 title: "Khảo sát Sở Nghệ An - Mã 0101",
@@ -357,14 +350,9 @@
             }
         ];
 
-
-        // ==========================================
-        // 3. LOGIC XỬ LÝ ONLINE VÀ CHỐNG ĐĂNG NHẬP ĐÈ
-        // ==========================================
         let currentUser = null, currentExam = null, totalTime = 0, timerInterval = null, isSubmitted = false, isReviewMode = false, pendingAction = null;
         let userDataCache = { history: {}, activeExam: null, activeState: null }; 
         
-        // Tạo Session ID cho máy hiện tại
         let currentSessionId = localStorage.getItem('thpt_session_id');
         if (!currentSessionId) {
             currentSessionId = Date.now().toString() + Math.random().toString(36).substr(2, 5);
@@ -374,7 +362,6 @@
         let unsubSnapshot = null; 
         let isInitialLoad = true; 
 
-        // Lắng nghe đăng nhập
         onAuthStateChanged(auth, (user) => {
             if (user) {
                 currentUser = user;
@@ -384,16 +371,16 @@
                     if (docSnap.exists()) {
                         userDataCache = docSnap.data();
 
-                      // KICK THIẾT BỊ CŨ NẾU BỊ ĐĂNG NHẬP ĐÈ
                         if (userDataCache.sessionId && currentSessionId && userDataCache.sessionId !== currentSessionId) {
-                            clearInterval(timerInterval); // Dừng đồng hồ đếm ngược ngay lập tức
-                            openModal('kickout'); // Gọi cái bảng thông báo xịn xò ra
+                            document.getElementById('global-loader').style.display = 'none'; // Ẩn loading
+                            clearInterval(timerInterval);
+                            openModal('kickout');
                             return;
                         }
 
-                        // CHUYỂN HƯỚNG MƯỢT MÀ
                         if (isInitialLoad) {
                             isInitialLoad = false;
+                            document.getElementById('global-loader').style.display = 'none'; // Ẩn loading
                             document.getElementById('auth-screen').style.display = 'none';
                             document.getElementById('display-username').innerText = user.email.split('@')[0];
                             document.getElementById('user-header-info').style.display = 'flex';
@@ -405,11 +392,12 @@
                             }
                         }
                     } else {
-                        // User mới hoàn toàn
                         if (isInitialLoad) {
                             isInitialLoad = false;
                             userDataCache = { history: {}, activeExam: null, activeState: null, sessionId: currentSessionId };
                             await setDoc(doc(db, "users", user.uid), userDataCache);
+                            
+                            document.getElementById('global-loader').style.display = 'none'; // Ẩn loading
                             document.getElementById('auth-screen').style.display = 'none';
                             document.getElementById('display-username').innerText = user.email.split('@')[0];
                             document.getElementById('user-header-info').style.display = 'flex';
@@ -421,14 +409,11 @@
                 isInitialLoad = true;
                 currentUser = null;
                 if (unsubSnapshot) unsubSnapshot(); 
+                document.getElementById('global-loader').style.display = 'none'; // Ẩn loading
                 document.getElementById('auth-screen').style.display = 'flex';
                 document.getElementById('user-header-info').style.display = 'none';
             }
         });
-
-        // ------------------------------------------
-        // CÁC HÀM TƯƠNG TÁC XUẤT RA WINDOW
-        // ------------------------------------------
 
         function togglePassword(inputId, iconEl) {
             const input = document.getElementById(inputId);
@@ -488,15 +473,20 @@
 
         async function saveProgress() {
             if (!currentUser || !currentExam || isSubmitted || isReviewMode) return;
-            if (userDataCache.sessionId !== currentSessionId) return; // Bị đá thì ngừng lưu
+            if (userDataCache.sessionId !== currentSessionId) return; 
             userDataCache.activeState = { timeLeft: totalTime, answers: getAllCurrentAnswers() };
             await updateDoc(doc(db, "users", currentUser.uid), { activeExam: currentExam.id, activeState: userDataCache.activeState });
         }
         window.saveProgress = saveProgress;
 
         function showHome(forceHome = false) {
-            document.getElementById('user-header-info').style.display = 'flex'; document.getElementById('home-screen').style.display = 'block';
-            if (!forceHome && userDataCache.activeExam) { startExam(userDataCache.activeExam, 'continue'); return; }
+            // Sửa lại thứ tự logic để tránh chớp màn hình khi F5
+            if (!forceHome && userDataCache.activeExam) { 
+                startExam(userDataCache.activeExam, 'continue'); 
+                return; 
+            }
+            document.getElementById('user-header-info').style.display = 'flex'; 
+            document.getElementById('home-screen').style.display = 'block';
             renderHome();
         }
         window.showHome = showHome;
@@ -576,12 +566,12 @@
             const title = document.getElementById('modal-title');
             const msg = document.getElementById('modal-message');
             const confirmBtn = document.getElementById('modal-confirm-btn');
-            const cancelBtn = document.querySelector('#custom-modal .btn-cancel'); // Tìm nút Quay lại
+            const cancelBtn = document.querySelector('#custom-modal .btn-cancel'); 
 
             document.getElementById('modal-history-list').style.display = 'none'; 
             msg.style.display = 'block'; 
             document.getElementById('modal-action-buttons').style.display = 'flex';
-            cancelBtn.style.display = 'block'; // Mặc định luôn hiện nút Quay lại
+            cancelBtn.style.display = 'block'; 
             
             if (action === 'submit') { 
                 title.innerText = "Nộp bài"; 
@@ -597,13 +587,12 @@
                 confirmBtn.innerText = "Thoát"; 
                 pendingAction = goHome; 
             }
-            // THÊM MỚI: Xử lý khi bị đăng nhập đè
             else if (action === 'kickout') {
                 title.innerText = "⚠️ Cảnh báo bảo mật"; 
                 msg.innerText = "Tài khoản của bạn vừa được đăng nhập trên một thiết bị khác!\n\nBài làm dở ở máy này đã bị hủy. Vui lòng đăng xuất."; 
                 confirmBtn.className = "btn-confirm danger"; 
                 confirmBtn.innerText = "Đăng xuất"; 
-                cancelBtn.style.display = 'none'; // Ẩn nút Quay lại vì bắt buộc phải thoát
+                cancelBtn.style.display = 'none'; 
                 pendingAction = handleLogout;
             }
             
@@ -650,7 +639,7 @@
                 if (totalTime <= 0) { openModal('submit'); return; }
                 totalTime--; const m = Math.floor(totalTime / 60).toString().padStart(2, '0'), s = (totalTime % 60).toString().padStart(2, '0');
                 document.getElementById('global-timer').innerText = `${m}:${s}`;
-                if(totalTime % 5 === 0) saveProgress(); // Tự lưu mỗi 5 giây
+                if(totalTime % 5 === 0) saveProgress(); 
             }, 1000);
         }
 
@@ -706,4 +695,3 @@
     </script>
 </body>
 </html>
- 
