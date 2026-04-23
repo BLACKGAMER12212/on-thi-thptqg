@@ -384,10 +384,10 @@
                     if (docSnap.exists()) {
                         userDataCache = docSnap.data();
 
-                        // KICK THIẾT BỊ CŨ NẾU BỊ ĐĂNG NHẬP ĐÈ
+                      // KICK THIẾT BỊ CŨ NẾU BỊ ĐĂNG NHẬP ĐÈ
                         if (userDataCache.sessionId && currentSessionId && userDataCache.sessionId !== currentSessionId) {
-                            alert("Tài khoản của bạn vừa được đăng nhập trên một thiết bị khác!\n\nDữ liệu bài làm chưa nộp đã bị hủy và bạn sẽ bị đăng xuất khỏi thiết bị này.");
-                            handleLogout();
+                            clearInterval(timerInterval); // Dừng đồng hồ đếm ngược ngay lập tức
+                            openModal('kickout'); // Gọi cái bảng thông báo xịn xò ra
                             return;
                         }
 
@@ -570,12 +570,43 @@
         }
         window.showHistory = showHistory;
 
-        function openModal(action) {
+       function openModal(action) {
             if (action === 'exit' && (isSubmitted || isReviewMode)) { goHome(); return; }
-            const modal = document.getElementById('custom-modal'); const title = document.getElementById('modal-title'), msg = document.getElementById('modal-message'), confirmBtn = document.getElementById('modal-confirm-btn');
-            document.getElementById('modal-history-list').style.display = 'none'; msg.style.display = 'block'; document.getElementById('modal-action-buttons').style.display = 'flex';
-            if (action === 'submit') { title.innerText = "Nộp bài"; msg.innerText = "Bạn có chắc chắn nộp bài?"; confirmBtn.className = "btn-confirm"; confirmBtn.innerText = "Nộp"; pendingAction = submitAndGrade; } 
-            else if (action === 'exit') { title.innerText = "Thoát"; msg.innerText = "Trạng thái sẽ được tự động lưu. Đồng ý thoát?"; confirmBtn.className = "btn-confirm danger"; confirmBtn.innerText = "Thoát"; pendingAction = goHome; }
+            const modal = document.getElementById('custom-modal'); 
+            const title = document.getElementById('modal-title');
+            const msg = document.getElementById('modal-message');
+            const confirmBtn = document.getElementById('modal-confirm-btn');
+            const cancelBtn = document.querySelector('#custom-modal .btn-cancel'); // Tìm nút Quay lại
+
+            document.getElementById('modal-history-list').style.display = 'none'; 
+            msg.style.display = 'block'; 
+            document.getElementById('modal-action-buttons').style.display = 'flex';
+            cancelBtn.style.display = 'block'; // Mặc định luôn hiện nút Quay lại
+            
+            if (action === 'submit') { 
+                title.innerText = "Nộp bài"; 
+                msg.innerText = "Bạn có chắc chắn nộp bài?"; 
+                confirmBtn.className = "btn-confirm"; 
+                confirmBtn.innerText = "Nộp"; 
+                pendingAction = submitAndGrade; 
+            } 
+            else if (action === 'exit') { 
+                title.innerText = "Thoát"; 
+                msg.innerText = "Trạng thái sẽ được tự động lưu. Đồng ý thoát?"; 
+                confirmBtn.className = "btn-confirm danger"; 
+                confirmBtn.innerText = "Thoát"; 
+                pendingAction = goHome; 
+            }
+            // THÊM MỚI: Xử lý khi bị đăng nhập đè
+            else if (action === 'kickout') {
+                title.innerText = "⚠️ Cảnh báo bảo mật"; 
+                msg.innerText = "Tài khoản của bạn vừa được đăng nhập trên một thiết bị khác!\n\nBài làm dở ở máy này đã bị hủy. Vui lòng đăng xuất."; 
+                confirmBtn.className = "btn-confirm danger"; 
+                confirmBtn.innerText = "Đăng xuất"; 
+                cancelBtn.style.display = 'none'; // Ẩn nút Quay lại vì bắt buộc phải thoát
+                pendingAction = handleLogout;
+            }
+            
             modal.style.display = 'flex'; setTimeout(() => modal.classList.add('show'), 10);
         }
         window.openModal = openModal;
@@ -675,3 +706,4 @@
     </script>
 </body>
 </html>
+ 
