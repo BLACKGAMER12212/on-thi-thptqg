@@ -299,30 +299,28 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-        import { getFirestore, doc, setDoc, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { getFirestore, doc, setDoc, getDoc, updateDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
         // ==========================================
-        // 1. DÁN ĐOẠN FIREBASE CONFIG CỦA EM VÀO ĐÂY
+        // 1. CẤU HÌNH FIREBASE CỦA EM
         // ==========================================
-       const firebaseConfig = {
-  apiKey: "AIzaSyBC7rq22ZxFomEry31TtCKqNnO2g3gJUlU",
-  authDomain: "thptqg-2026.firebaseapp.com",
-  projectId: "thptqg-2026",
-  storageBucket: "thptqg-2026.firebasestorage.app",
-  messagingSenderId: "858999109520",
-  appId: "1:858999109520:web:634de94c0a8173a3ba2515",
-  measurementId: "G-5P5P6SSSGL"
-};
-
-
+        const firebaseConfig = {
+            apiKey: "AIzaSyBC7rq22ZxFomEry31TtCKqNnO2g3gJUlU",
+            authDomain: "thptqg-2026.firebaseapp.com",
+            projectId: "thptqg-2026",
+            storageBucket: "thptqg-2026.firebasestorage.app",
+            messagingSenderId: "858999109520",
+            appId: "1:858999109520:web:634de94c0a8173a3ba2515",
+            measurementId: "G-5P5P6SSSGL"
+        };
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
 
         // ==========================================
-        // 2. GIỮ NGUYÊN ĐỀ THI CỦA EM Ở ĐÂY
+        // 2. KHO ĐỀ THI CỦA EM
         // ==========================================
-        const EXAM_DATABASE = [
+           const EXAM_DATABASE = [
             {
                 id: "toan_de_ninhbinh",
                 title: "Khảo sát THPT Ninh Bình-Bạc Liêu - Mã 1111",
@@ -359,58 +357,99 @@
             }
         ];
 
+
         // ==========================================
-        // 3. LOGIC XỬ LÝ ONLINE
+        // 3. LOGIC XỬ LÝ ONLINE VÀ CHỐNG ĐĂNG NHẬP ĐÈ
         // ==========================================
         let currentUser = null, currentExam = null, totalTime = 0, timerInterval = null, isSubmitted = false, isReviewMode = false, pendingAction = null;
-        let userDataCache = { history: {}, activeExam: null, activeState: null }; // Lưu tạm dữ liệu user để hiển thị
+        let userDataCache = { history: {}, activeExam: null, activeState: null }; 
+        
+        // Tạo Session ID cho máy hiện tại
+        let currentSessionId = localStorage.getItem('thpt_session_id');
+        if (!currentSessionId) {
+            currentSessionId = Date.now().toString() + Math.random().toString(36).substr(2, 5);
+            localStorage.setItem('thpt_session_id', currentSessionId);
+        }
 
-        // Tự động kiểm tra đăng nhập & F5
-    // Tự động kiểm tra đăng nhập & F5
-        onAuthStateChanged(auth, async (user) => {
+        let unsubSnapshot = null; 
+        let isInitialLoad = true; 
+
+        // Lắng nghe đăng nhập
+        onAuthStateChanged(auth, (user) => {
             if (user) {
                 currentUser = user;
-                document.getElementById('auth-screen').style.display = 'none';
-                document.getElementById('display-username').innerText = user.email.split('@')[0];
-                document.getElementById('user-header-info').style.display = 'flex';
-                
-                // Lấy dữ liệu bài làm dở từ Cloud Firestore
-                const userDoc = await getDoc(doc(db, "users", user.uid));
-                if (userDoc.exists()) {
-                    userDataCache = userDoc.data();
-                    if (userDataCache.activeExam) {
-                        startExam(userDataCache.activeExam, 'continue');
-                        return;
+
+                if (unsubSnapshot) unsubSnapshot();
+                unsubSnapshot = onSnapshot(doc(db, "users", user.uid), async (docSnap) => {
+                    if (docSnap.exists()) {
+                        userDataCache = docSnap.data();
+
+                        // KICK THIẾT BỊ CŨ NẾU BỊ ĐĂNG NHẬP ĐÈ
+                        if (userDataCache.sessionId && currentSessionId && userDataCache.sessionId !== currentSessionId) {
+                            alert("Tài khoản của bạn vừa được đăng nhập trên một thiết bị khác!\n\nDữ liệu bài làm chưa nộp đã bị hủy và bạn sẽ bị đăng xuất khỏi thiết bị này.");
+                            handleLogout();
+                            return;
+                        }
+
+                        // CHUYỂN HƯỚNG MƯỢT MÀ
+                        if (isInitialLoad) {
+                            isInitialLoad = false;
+                            document.getElementById('auth-screen').style.display = 'none';
+                            document.getElementById('display-username').innerText = user.email.split('@')[0];
+                            document.getElementById('user-header-info').style.display = 'flex';
+
+                            if (userDataCache.activeExam) {
+                                startExam(userDataCache.activeExam, 'continue');
+                            } else {
+                                showHome();
+                            }
+                        }
+                    } else {
+                        // User mới hoàn toàn
+                        if (isInitialLoad) {
+                            isInitialLoad = false;
+                            userDataCache = { history: {}, activeExam: null, activeState: null, sessionId: currentSessionId };
+                            await setDoc(doc(db, "users", user.uid), userDataCache);
+                            document.getElementById('auth-screen').style.display = 'none';
+                            document.getElementById('display-username').innerText = user.email.split('@')[0];
+                            document.getElementById('user-header-info').style.display = 'flex';
+                            showHome();
+                        }
                     }
-                } else {
-                    // FIX: Nếu là user mới tinh vừa đăng ký xong, hồ sơ chưa kịp tạo thì mình tạo luôn ở đây
-                    userDataCache = { history: {}, activeExam: null, activeState: null };
-                    await setDoc(doc(db, "users", user.uid), userDataCache);
-                }
-                showHome();
+                });
             } else {
+                isInitialLoad = true;
+                currentUser = null;
+                if (unsubSnapshot) unsubSnapshot(); 
                 document.getElementById('auth-screen').style.display = 'flex';
+                document.getElementById('user-header-info').style.display = 'none';
             }
         });
 
-        // Nút Mắt nhắm/Mắt mở mật khẩu
-        window.togglePassword = (inputId, iconEl) => {
+        // ------------------------------------------
+        // CÁC HÀM TƯƠNG TÁC XUẤT RA WINDOW
+        // ------------------------------------------
+
+        function togglePassword(inputId, iconEl) {
             const input = document.getElementById(inputId);
             if (input.type === "password") { input.type = "text"; iconEl.innerText = "🙈"; } 
             else { input.type = "password"; iconEl.innerText = "👁️"; }
-        };
+        }
+        window.togglePassword = togglePassword;
 
-        window.checkEnter = (e, type) => {
+        function checkEnter(e, type) {
             if (e.key === 'Enter') { if (type === 'login') handleLogin(); else if (type === 'register') handleRegister(); }
-        };
+        }
+        window.checkEnter = checkEnter;
 
-        window.toggleAuth = (type) => {
+        function toggleAuth(type) {
             document.getElementById('login-form').classList.remove('active'); document.getElementById('register-form').classList.remove('active');
             document.getElementById('login-error').style.display = 'none'; document.getElementById('reg-error').style.display = 'none'; document.getElementById('reg-success').style.display = 'none';
             if(type === 'login') document.getElementById('login-form').classList.add('active'); else document.getElementById('register-form').classList.add('active');
-        };
+        }
+        window.toggleAuth = toggleAuth;
 
-        window.handleRegister = async () => {
+        async function handleRegister() {
             const user = document.getElementById('reg-user').value.trim(); const pass = document.getElementById('reg-pass').value; const confirm = document.getElementById('reg-pass-confirm').value;
             const error = document.getElementById('reg-error'); const success = document.getElementById('reg-success');
             error.style.display = 'none'; success.style.display = 'none';
@@ -420,34 +459,47 @@
 
             const email = user + "@thpt.com";
             try {
+                currentSessionId = Date.now().toString() + Math.random().toString(36).substr(2, 5);
+                localStorage.setItem('thpt_session_id', currentSessionId);
                 const res = await createUserWithEmailAndPassword(auth, email, pass);
-                await setDoc(doc(db, "users", res.user.uid), { history: {}, activeExam: null, activeState: null });
+                await setDoc(doc(db, "users", res.user.uid), { history: {}, activeExam: null, activeState: null, sessionId: currentSessionId });
                 success.innerText = "Đăng ký thành công! Đang vào hệ thống..."; success.style.display = "block";
-            } catch (err) { error.innerText = "Tên đăng nhập đã tồn tại hoặc mật khẩu quá ngắn!"; error.style.display = "block"; }
-        };
+            } catch (err) { error.innerText = "Tên đăng nhập đã tồn tại hoặc mật khẩu quá ngắn (ít nhất 6 ký tự)!"; error.style.display = "block"; }
+        }
+        window.handleRegister = handleRegister;
 
-        window.handleLogin = async () => {
+        async function handleLogin() {
             const user = document.getElementById('login-user').value.trim(); const pass = document.getElementById('login-pass').value;
             const error = document.getElementById('login-error'); error.style.display = 'none';
             const email = user + "@thpt.com";
-            try { await signInWithEmailAndPassword(auth, email, pass); } 
+            try { 
+                currentSessionId = Date.now().toString() + Math.random().toString(36).substr(2, 5);
+                localStorage.setItem('thpt_session_id', currentSessionId);
+                const res = await signInWithEmailAndPassword(auth, email, pass); 
+                
+                await updateDoc(doc(db, "users", res.user.uid), { sessionId: currentSessionId, activeExam: null, activeState: null });
+            } 
             catch (err) { error.innerText = "Tài khoản hoặc mật khẩu sai!"; error.style.display = "block"; }
-        };
+        }
+        window.handleLogin = handleLogin;
 
-        window.handleLogout = () => { signOut(auth).then(() => location.reload()); };
+        function handleLogout() { signOut(auth).then(() => location.reload()); }
+        window.handleLogout = handleLogout;
 
-        window.saveProgress = async () => {
+        async function saveProgress() {
             if (!currentUser || !currentExam || isSubmitted || isReviewMode) return;
+            if (userDataCache.sessionId !== currentSessionId) return; // Bị đá thì ngừng lưu
             userDataCache.activeState = { timeLeft: totalTime, answers: getAllCurrentAnswers() };
             await updateDoc(doc(db, "users", currentUser.uid), { activeExam: currentExam.id, activeState: userDataCache.activeState });
-        };
+        }
+        window.saveProgress = saveProgress;
 
-        // Giao diện
         function showHome(forceHome = false) {
             document.getElementById('user-header-info').style.display = 'flex'; document.getElementById('home-screen').style.display = 'block';
             if (!forceHome && userDataCache.activeExam) { startExam(userDataCache.activeExam, 'continue'); return; }
             renderHome();
         }
+        window.showHome = showHome;
 
         function renderHome() {
             const list = document.getElementById('exam-list'); list.innerHTML = '';
@@ -469,7 +521,7 @@
             });
         }
 
-        window.startExam = async (examId, mode, attemptIndex = null) => {
+        async function startExam(examId, mode, attemptIndex = null) {
             currentExam = EXAM_DATABASE.find(e => e.id === examId);
             isReviewMode = (mode === 'review'); isSubmitted = isReviewMode;
             
@@ -498,11 +550,13 @@
                 }
                 startTimer();
             }
-        };
+        }
+        window.startExam = startExam;
 
-        window.goHome = () => { clearInterval(timerInterval); document.getElementById('exam-workspace').style.display = 'none'; document.getElementById('header-controls').style.display = 'none'; showHome(true); };
+        function goHome() { clearInterval(timerInterval); document.getElementById('exam-workspace').style.display = 'none'; document.getElementById('header-controls').style.display = 'none'; showHome(true); }
+        window.goHome = goHome;
 
-        window.showHistory = (examId) => {
+        function showHistory(examId) {
             const historyData = userDataCache.history[examId] || []; const examInfo = EXAM_DATABASE.find(e => e.id === examId);
             const modal = document.getElementById('custom-modal'); document.getElementById('modal-title').innerText = `Lịch sử: ${examInfo.title}`;
             document.getElementById('modal-message').style.display = 'none'; document.getElementById('modal-action-buttons').style.display = 'none'; 
@@ -513,19 +567,24 @@
             });
             listContainer.innerHTML += `<button class="btn-cancel" onclick="closeModal()" style="width: 100%; margin-top: 15px;">Đóng</button>`;
             modal.style.display = 'flex'; setTimeout(() => modal.classList.add('show'), 10);
-        };
+        }
+        window.showHistory = showHistory;
 
-        window.openModal = (action) => {
+        function openModal(action) {
             if (action === 'exit' && (isSubmitted || isReviewMode)) { goHome(); return; }
             const modal = document.getElementById('custom-modal'); const title = document.getElementById('modal-title'), msg = document.getElementById('modal-message'), confirmBtn = document.getElementById('modal-confirm-btn');
             document.getElementById('modal-history-list').style.display = 'none'; msg.style.display = 'block'; document.getElementById('modal-action-buttons').style.display = 'flex';
             if (action === 'submit') { title.innerText = "Nộp bài"; msg.innerText = "Bạn có chắc chắn nộp bài?"; confirmBtn.className = "btn-confirm"; confirmBtn.innerText = "Nộp"; pendingAction = submitAndGrade; } 
             else if (action === 'exit') { title.innerText = "Thoát"; msg.innerText = "Trạng thái sẽ được tự động lưu. Đồng ý thoát?"; confirmBtn.className = "btn-confirm danger"; confirmBtn.innerText = "Thoát"; pendingAction = goHome; }
             modal.style.display = 'flex'; setTimeout(() => modal.classList.add('show'), 10);
-        };
+        }
+        window.openModal = openModal;
 
-        window.closeModal = () => { const modal = document.getElementById('custom-modal'); modal.classList.remove('show'); setTimeout(() => modal.style.display = 'none', 300); pendingAction = null; };
-        window.confirmAction = () => { if (pendingAction) pendingAction(); closeModal(); };
+        function closeModal() { const modal = document.getElementById('custom-modal'); modal.classList.remove('show'); setTimeout(() => modal.style.display = 'none', 300); pendingAction = null; }
+        window.closeModal = closeModal;
+
+        function confirmAction() { if (pendingAction) pendingAction(); closeModal(); }
+        window.confirmAction = confirmAction;
 
         function initAnswerSheets() {
             const sheets = document.getElementById('sheets-container'); sheets.innerHTML = ''; let html = '';
@@ -564,18 +623,18 @@
             }, 1000);
         }
 
-        window.submitAndGrade = async () => {
+        async function submitAndGrade() {
             clearInterval(timerInterval); isSubmitted = true;
             const finalAnswers = getAllCurrentAnswers(); const score = runGradingLogic(finalAnswers);
             
-            // Cập nhật Database
             if (!userDataCache.history[currentExam.id]) userDataCache.history[currentExam.id] = [];
             const now = new Date(); const dateStr = now.toLocaleDateString('vi-VN') + ' - ' + now.toLocaleTimeString('vi-VN', {hour: '2-digit', minute:'2-digit'});
             userDataCache.history[currentExam.id].push({ score: score, answers: finalAnswers, date: dateStr });
             userDataCache.activeExam = null; userDataCache.activeState = null;
             
             await updateDoc(doc(db, "users", currentUser.uid), { history: userDataCache.history, activeExam: null, activeState: null });
-        };
+        }
+        window.submitAndGrade = submitAndGrade;
 
         function runGradingLogic(userAnswers, attemptNum = null) {
             document.getElementById('control-header').style.display = 'none'; document.getElementById('header-timer').style.display = 'none'; 
@@ -610,7 +669,9 @@
             return totalScore;
         }
 
-        window.addEventListener('beforeunload', () => { if (currentUser && currentExam && !isSubmitted && !isReviewMode) saveProgress(); });
+        window.addEventListener('beforeunload', () => { 
+            if (currentUser && currentExam && !isSubmitted && !isReviewMode && userDataCache.sessionId === currentSessionId) saveProgress(); 
+        });
     </script>
 </body>
 </html>
