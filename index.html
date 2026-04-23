@@ -17,22 +17,30 @@
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
         body { background-color: var(--bg-color); height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
 
-        .fade-in { animation: fadeIn 0.4s ease-in-out; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+        .fade-in { animation: fadeIn 0.3s ease-in-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* Auth Screen (Màn hình đăng nhập) */
+        /* Auth Screen (Màn hình đăng nhập/đăng ký MỚI) */
         #auth-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--bg-color); display: flex; justify-content: center; align-items: center; z-index: 10000; }
-        .auth-card { background: white; padding: 40px; border-radius: 16px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); width: 350px; text-align: center; border: 1px solid var(--border-color);}
-        .auth-card h1 { color: var(--thpt-main); font-weight: 900; margin-bottom: 5px; }
-        .auth-card p { color: #64748b; margin-bottom: 25px; font-size: 14px; }
-        .auth-input { width: 100%; padding: 12px; margin-bottom: 15px; border: 2px solid var(--border-color); border-radius: 8px; outline: none; font-size: 15px; transition: 0.2s;}
-        .auth-input:focus { border-color: var(--thpt-main); }
-        .auth-btn { width: 100%; padding: 12px; border: none; border-radius: 8px; font-weight: bold; font-size: 16px; cursor: pointer; transition: 0.2s; margin-bottom: 10px;}
-        .btn-login { background: var(--thpt-main); color: white; }
-        .btn-login:hover { filter: brightness(1.1); }
-        .btn-register { background: white; color: var(--thpt-main); border: 2px solid var(--thpt-main); }
-        .btn-register:hover { background: #f0f9ff; }
-        .auth-error { color: var(--thpt-danger); font-size: 13px; margin-bottom: 15px; display: none; font-weight: bold;}
+        .auth-card { background: white; padding: 40px; border-radius: 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.08); width: 380px; text-align: center; border: 1px solid var(--border-color); display: none;}
+        .auth-card.active { display: block; animation: fadeIn 0.4s ease-out; }
+        .auth-card h1 { color: var(--thpt-main); font-weight: 900; margin-bottom: 5px; font-size: 28px;}
+        .auth-card p { color: #64748b; margin-bottom: 25px; font-size: 15px; }
+        
+        .input-group { text-align: left; margin-bottom: 15px; }
+        .input-group label { display: block; font-size: 13px; font-weight: bold; color: var(--thpt-dark); margin-bottom: 5px;}
+        .auth-input { width: 100%; padding: 12px 15px; border: 2px solid var(--border-color); border-radius: 8px; outline: none; font-size: 15px; transition: 0.2s; background: #f8fafc;}
+        .auth-input:focus { border-color: var(--thpt-main); background: white;}
+        
+        .auth-btn { width: 100%; padding: 14px; border: none; border-radius: 8px; font-weight: bold; font-size: 16px; cursor: pointer; transition: 0.2s; margin-top: 10px;}
+        .btn-primary { background: var(--thpt-main); color: white; box-shadow: 0 4px 6px rgba(2, 132, 199, 0.2);}
+        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 6px 12px rgba(2, 132, 199, 0.3); }
+        
+        .auth-error { color: var(--thpt-danger); font-size: 14px; margin-bottom: 15px; display: none; font-weight: bold; background: #fef2f2; padding: 10px; border-radius: 8px; border: 1px solid #fca5a5;}
+        .auth-success { color: var(--thpt-success); font-size: 14px; margin-bottom: 15px; display: none; font-weight: bold; background: #ecfdf5; padding: 10px; border-radius: 8px; border: 1px solid #86efac;}
+        .auth-switch { margin-top: 20px; font-size: 14px; color: #64748b;}
+        .auth-switch span { color: var(--thpt-main); font-weight: bold; cursor: pointer; transition: 0.2s;}
+        .auth-switch span:hover { text-decoration: underline; }
 
         /* Header */
         header { background: white; padding: 0 20px; display: flex; align-items: center; border-bottom: 2px solid var(--border-color); height: 60px; justify-content: space-between;}
@@ -52,8 +60,8 @@
         .exit-btn:hover { background: var(--thpt-danger); color: white; }
 
         .user-info { font-weight: bold; color: var(--thpt-dark); display: flex; align-items: center; gap: 15px;}
-        .logout-btn { background: #f1f5f9; color: #64748b; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: bold;}
-        .logout-btn:hover { background: #e2e8f0; color: var(--thpt-dark); }
+        .logout-btn { background: #f1f5f9; color: #64748b; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: bold; transition: 0.2s;}
+        .logout-btn:hover { background: #fee2e2; color: var(--thpt-danger); }
 
         /* Giao diện HOME */
         #home-screen { display: none; flex: 1; padding: 40px; overflow-y: auto; background: var(--bg-color); }
@@ -66,7 +74,6 @@
         .exam-meta { font-size: 14px; color: #64748b; margin-bottom: 20px; display: flex; justify-content: space-between;}
         .start-btn { background: var(--thpt-main); color: white; border: none; padding: 10px; border-radius: 6px; font-weight: bold; width: 100%; transition: 0.2s;}
         
-        /* Hiển thị điểm ngoài Home */
         .score-badge { position: absolute; top: 20px; right: 20px; background: var(--thpt-success); color: white; padding: 5px 10px; border-radius: 8px; font-weight: bold; font-size: 18px; box-shadow: 0 2px 4px rgba(16,185,129,0.3);}
 
         /* Main Workspace */
@@ -121,7 +128,7 @@
         .correct-bg { background-color: #f0fdf4 !important; border-color: #86efac !important; }
 
         /* Modal */
-        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.6); z-index: 9999; display: none; justify-content: center; align-items: center; opacity: 0; transition: opacity 0.3s ease; }
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.6); z-index: 99999; display: none; justify-content: center; align-items: center; opacity: 0; transition: opacity 0.3s ease; }
         .modal-overlay.show { display: flex; opacity: 1; }
         .custom-modal-content { background: white; padding: 35px 30px; border-radius: 16px; width: 420px; text-align: center; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25); transform: scale(0.9); transition: transform 0.3s ease;}
         .modal-overlay.show .custom-modal-content { transform: scale(1); }
@@ -135,21 +142,52 @@
         .btn-confirm.danger { background: var(--thpt-danger); }
         .btn-confirm:hover { filter: brightness(1.1); transform: translateY(-1px);}
 
-        /* Giao diện Header khi đã đăng nhập */
         #user-header-info { display: none; }
     </style>
 </head>
 <body>
 
     <div id="auth-screen">
-        <div class="auth-card">
+        
+        <div class="auth-card active" id="login-form">
             <h1>THPTQG 2026</h1>
-            <p>Đăng nhập để lưu lịch sử làm bài</p>
-            <div class="auth-error" id="auth-error">Tài khoản hoặc mật khẩu sai!</div>
-            <input type="text" id="username" class="auth-input" placeholder="Tên đăng nhập (VD: tri123)" autocomplete="off">
-            <input type="password" id="password" class="auth-input" placeholder="Mật khẩu">
-            <button class="auth-btn btn-login" onclick="handleLogin()">Đăng Nhập</button>
-            <button class="auth-btn btn-register" onclick="handleRegister()">Tạo Tài Khoản Mới</button>
+            <p>Hệ thống tự động lưu trữ dữ liệu thi</p>
+            <div class="auth-error" id="login-error"></div>
+            
+            <div class="input-group">
+                <label>TÀI KHOẢN</label>
+                <input type="text" id="login-user" class="auth-input" placeholder="Nhập tên đăng nhập" autocomplete="off">
+            </div>
+            <div class="input-group">
+                <label>MẬT KHẨU</label>
+                <input type="password" id="login-pass" class="auth-input" placeholder="Nhập mật khẩu">
+            </div>
+            
+            <button class="auth-btn btn-primary" onclick="handleLogin()">ĐĂNG NHẬP</button>
+            <div class="auth-switch">Chưa có tài khoản? <span onclick="toggleAuth('register')">Đăng ký ngay</span></div>
+        </div>
+
+        <div class="auth-card" id="register-form">
+            <h1>TẠO TÀI KHOẢN</h1>
+            <p>Tạo mới để bắt đầu lưu điểm số</p>
+            <div class="auth-error" id="reg-error"></div>
+            <div class="auth-success" id="reg-success"></div>
+            
+            <div class="input-group">
+                <label>TÀI KHOẢN</label>
+                <input type="text" id="reg-user" class="auth-input" placeholder="Tên đăng nhập (viết liền, không dấu)" autocomplete="off">
+            </div>
+            <div class="input-group">
+                <label>MẬT KHẨU</label>
+                <input type="password" id="reg-pass" class="auth-input" placeholder="Nhập mật khẩu">
+            </div>
+            <div class="input-group">
+                <label>XÁC NHẬN MẬT KHẨU</label>
+                <input type="password" id="reg-pass-confirm" class="auth-input" placeholder="Nhập lại mật khẩu">
+            </div>
+            
+            <button class="auth-btn btn-primary" onclick="handleRegister()">ĐĂNG KÝ</button>
+            <div class="auth-switch">Đã có tài khoản? <span onclick="toggleAuth('login')">Đăng nhập</span></div>
         </div>
     </div>
 
@@ -248,7 +286,7 @@
         ];
 
         // ==========================================
-        // HỆ THỐNG TÀI KHOẢN (DATABASE ẢO TRÊN TRÌNH DUYỆT)
+        // HỆ THỐNG TÀI KHOẢN ĐƯỢC LÀM LẠI HOÀN TOÀN
         // ==========================================
         let currentUser = null;
         let usersDB = JSON.parse(localStorage.getItem('thpt_users_db')) || {};
@@ -264,31 +302,59 @@
                 showHome();
             } else {
                 document.getElementById('auth-screen').style.display = 'flex';
+                toggleAuth('login');
             }
         };
 
+        function toggleAuth(type) {
+            document.getElementById('login-form').classList.remove('active');
+            document.getElementById('register-form').classList.remove('active');
+            document.getElementById('login-error').style.display = 'none';
+            document.getElementById('reg-error').style.display = 'none';
+            document.getElementById('reg-success').style.display = 'none';
+            
+            if(type === 'login') {
+                document.getElementById('login-form').classList.add('active');
+            } else {
+                document.getElementById('register-form').classList.add('active');
+            }
+        }
+
         function handleRegister() {
-            const user = document.getElementById('username').value.trim();
-            const pass = document.getElementById('password').value.trim();
-            const error = document.getElementById('auth-error');
+            const user = document.getElementById('reg-user').value.trim();
+            const pass = document.getElementById('reg-pass').value.trim();
+            const confirm = document.getElementById('reg-pass-confirm').value.trim();
+            const error = document.getElementById('reg-error');
+            const success = document.getElementById('reg-success');
             
-            if(!user || !pass) { error.innerText = "Vui lòng nhập đủ thông tin!"; error.style.display = "block"; return; }
-            if(usersDB[user]) { error.innerText = "Tên đăng nhập đã tồn tại!"; error.style.display = "block"; return; }
+            error.style.display = 'none';
+            success.style.display = 'none';
+
+            if(!user || !pass || !confirm) { error.innerText = "Vui lòng nhập đầy đủ các ô!"; error.style.display = "block"; return; }
+            if(pass !== confirm) { error.innerText = "Xác nhận mật khẩu không khớp!"; error.style.display = "block"; return; }
+            if(usersDB[user]) { error.innerText = "Tên đăng nhập đã có người sử dụng!"; error.style.display = "block"; return; }
             
+            // Khởi tạo Database cho người dùng mới
             usersDB[user] = { password: pass, history: {}, activeExam: null, activeState: null };
             saveUsersDB();
             
-            error.innerText = "Đăng ký thành công! Đang đăng nhập...";
-            error.style.color = "var(--thpt-success)";
-            error.style.display = "block";
-            setTimeout(() => { doLogin(user); }, 1000);
+            success.innerText = "Đăng ký thành công! Đang chuyển sang Đăng nhập...";
+            success.style.display = "block";
+            
+            // Xoá trắng ô nhập
+            document.getElementById('reg-user').value = '';
+            document.getElementById('reg-pass').value = '';
+            document.getElementById('reg-pass-confirm').value = '';
+
+            // Tự động nhảy sang form đăng nhập sau 1.5 giây
+            setTimeout(() => { toggleAuth('login'); }, 1500);
         }
 
         function handleLogin() {
-            const user = document.getElementById('username').value.trim();
-            const pass = document.getElementById('password').value.trim();
-            const error = document.getElementById('auth-error');
-            error.style.color = "var(--thpt-danger)";
+            const user = document.getElementById('login-user').value.trim();
+            const pass = document.getElementById('login-pass').value.trim();
+            const error = document.getElementById('login-error');
+            error.style.display = 'none';
 
             if(!usersDB[user] || usersDB[user].password !== pass) {
                 error.innerText = "Tài khoản hoặc mật khẩu sai!";
@@ -300,21 +366,32 @@
 
         function doLogin(username) {
             currentUser = username;
-            localStorage.setItem('thpt_current_user', username);
+            localStorage.setItem('thpt_current_user', username); // Lệnh này giúp trình duyệt nhớ vĩnh viễn
+            
+            // Ẩn bảng đăng nhập, hiện trang chủ
             document.getElementById('auth-screen').style.display = 'none';
             document.getElementById('display-username').innerText = username;
             showHome();
         }
 
         function handleLogout() {
+            // Sửa lỗi đơ màn hình: Ẩn cẩn thận toàn bộ các khung trước khi đăng xuất
+            closeModal();
+            clearInterval(timerInterval);
+            
             currentUser = null;
-            localStorage.removeItem('thpt_current_user');
+            localStorage.removeItem('thpt_current_user'); // Xoá lệnh nhớ của trình duyệt
+            
+            document.getElementById('exam-workspace').style.display = 'none';
             document.getElementById('user-header-info').style.display = 'none';
             document.getElementById('home-screen').style.display = 'none';
+            document.getElementById('header-controls').style.display = 'none'; 
+            
+            // Hiện lại màn hình Auth và xoá trắng dữ liệu cũ
             document.getElementById('auth-screen').style.display = 'flex';
-            document.getElementById('username').value = '';
-            document.getElementById('password').value = '';
-            document.getElementById('auth-error').style.display = 'none';
+            toggleAuth('login');
+            document.getElementById('login-user').value = '';
+            document.getElementById('login-pass').value = '';
         }
 
         // ==========================================
@@ -331,7 +408,6 @@
             document.getElementById('user-header-info').style.display = 'flex';
             document.getElementById('home-screen').style.display = 'block';
             
-            // Nếu có bài đang làm dở, tự bay vào luôn
             const userData = usersDB[currentUser];
             if (userData.activeExam) {
                 startExam(userData.activeExam);
@@ -359,6 +435,10 @@
                     tagColor = "background: #d1fae5; color: #059669;";
                     btnText = "Xem lại bài";
                     scoreHtml = `<div class="score-badge">${history.score.toFixed(2)} đ</div>`;
+                } else if (userData.activeExam === exam.id) {
+                    tagText = "Đang làm dở...";
+                    tagColor = "background: #fef08a; color: #ca8a04;";
+                    btnText = "Tiếp tục làm bài";
                 }
 
                 list.innerHTML += `
@@ -404,12 +484,10 @@
             initAnswerSheets();
             
             if (isReviewMode) {
-                // Khôi phục đáp án đã nộp và tự động chấm luôn ra kết quả
                 const savedAnswers = usersDB[currentUser].history[examId].answers;
                 fillAnswers(savedAnswers);
                 runGradingLogic(savedAnswers);
             } else {
-                // Khôi phục bài làm dở
                 const state = usersDB[currentUser].activeState;
                 if (state && state.answers) {
                     totalTime = state.timeLeft;
@@ -556,14 +634,12 @@
             clearInterval(timerInterval);
             isSubmitted = true;
             
-            // Xóa state làm dở
             usersDB[currentUser].activeState = null;
             usersDB[currentUser].activeExam = null;
 
             const finalAnswers = getAllCurrentAnswers();
             const score = runGradingLogic(finalAnswers);
 
-            // LƯU VÀO LỊCH SỬ TÀI KHOẢN
             usersDB[currentUser].history[currentExam.id] = {
                 score: score,
                 answers: finalAnswers
@@ -571,7 +647,6 @@
             saveUsersDB();
         }
 
-        // Logic chấm điểm tách rời (dùng chung cho lúc Nộp bài và lúc Xem lại)
         function runGradingLogic(userAnswers) {
             document.getElementById('control-header').style.display = 'none';
             document.getElementById('header-timer').style.display = 'none'; 
@@ -579,7 +654,6 @@
             let totalScore = 0;
             const key = currentExam.keys;
             
-            // P1
             let p1Correct = 0;
             for(let i=1; i<=12; i++) {
                 const uAns = userAnswers[`ans_P1_${i}`];
@@ -590,7 +664,6 @@
             }
             totalScore += p1Correct * 0.25;
 
-            // P2
             let p2Score = 0;
             for(let i=1; i<=4; i++) {
                 let cItems = 0;
@@ -614,7 +687,6 @@
             }
             totalScore += p2Score;
 
-            // P3
             let p3Correct = 0;
             for(let i=1; i<=6; i++) {
                 const uAns = userAnswers[`ans_P3_${i}`] || "";
@@ -625,10 +697,8 @@
             }
             totalScore += p3Correct * 0.5;
 
-            // Khóa toàn bộ input
             document.querySelectorAll('input').forEach(el => el.disabled = true);
             
-            // Hiện kết quả
             document.getElementById('final-score-text').innerText = totalScore.toFixed(2);
             document.getElementById('summary-desc').innerText = isReviewMode ? "Đây là kết quả bài làm cũ của em." : "Điểm thi tối đa là 10.0.";
             document.getElementById('summary-stats').innerHTML = `
