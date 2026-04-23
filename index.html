@@ -20,6 +20,20 @@
         .fade-in { animation: fadeIn 0.4s ease-in-out; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
 
+        /* Auth Screen (Màn hình đăng nhập) */
+        #auth-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--bg-color); display: flex; justify-content: center; align-items: center; z-index: 10000; }
+        .auth-card { background: white; padding: 40px; border-radius: 16px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); width: 350px; text-align: center; border: 1px solid var(--border-color);}
+        .auth-card h1 { color: var(--thpt-main); font-weight: 900; margin-bottom: 5px; }
+        .auth-card p { color: #64748b; margin-bottom: 25px; font-size: 14px; }
+        .auth-input { width: 100%; padding: 12px; margin-bottom: 15px; border: 2px solid var(--border-color); border-radius: 8px; outline: none; font-size: 15px; transition: 0.2s;}
+        .auth-input:focus { border-color: var(--thpt-main); }
+        .auth-btn { width: 100%; padding: 12px; border: none; border-radius: 8px; font-weight: bold; font-size: 16px; cursor: pointer; transition: 0.2s; margin-bottom: 10px;}
+        .btn-login { background: var(--thpt-main); color: white; }
+        .btn-login:hover { filter: brightness(1.1); }
+        .btn-register { background: white; color: var(--thpt-main); border: 2px solid var(--thpt-main); }
+        .btn-register:hover { background: #f0f9ff; }
+        .auth-error { color: var(--thpt-danger); font-size: 13px; margin-bottom: 15px; display: none; font-weight: bold;}
+
         /* Header */
         header { background: white; padding: 0 20px; display: flex; align-items: center; border-bottom: 2px solid var(--border-color); height: 60px; justify-content: space-between;}
         .logo-area { display: flex; align-items: center; cursor: pointer; }
@@ -29,7 +43,6 @@
         .tab-btn { padding: 10px 18px; border: none; background: #f1f5f9; cursor: pointer; border-radius: 8px 8px 0 0; font-weight: 600; color: #64748b; border: 1px solid var(--border-color); border-bottom: none; transition: 0.3s; }
         .tab-btn.active { background: var(--thpt-main); color: white; border-color: var(--thpt-main); }
 
-        /* Vùng Đồng hồ & Nút thoát trên Header */
         .header-controls { display: none; align-items: center; gap: 15px; }
         .header-timer { background: #f1f5f9; padding: 6px 15px; border-radius: 8px; border: 1px solid var(--border-color); display: flex; align-items: center; gap: 10px; }
         .header-timer .time-left { font-size: 20px; font-weight: bold; color: var(--thpt-main); font-variant-numeric: tabular-nums; }
@@ -38,17 +51,24 @@
         .exit-btn { background: #fef2f2; color: var(--thpt-danger); border: 1px solid #fca5a5; }
         .exit-btn:hover { background: var(--thpt-danger); color: white; }
 
+        .user-info { font-weight: bold; color: var(--thpt-dark); display: flex; align-items: center; gap: 15px;}
+        .logout-btn { background: #f1f5f9; color: #64748b; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: bold;}
+        .logout-btn:hover { background: #e2e8f0; color: var(--thpt-dark); }
+
         /* Giao diện HOME */
-        #home-screen { flex: 1; padding: 40px; overflow-y: auto; background: var(--bg-color); }
+        #home-screen { display: none; flex: 1; padding: 40px; overflow-y: auto; background: var(--bg-color); }
         .page-title { text-align: center; color: var(--thpt-dark); margin-bottom: 30px; font-size: 32px;}
         .exam-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; max-width: 1200px; margin: 0 auto; }
-        .exam-card { background: white; border-radius: 12px; padding: 25px; border: 1px solid var(--border-color); box-shadow: 0 4px 6px rgba(0,0,0,0.05); transition: 0.3s; cursor: pointer; display: flex; flex-direction: column;}
+        .exam-card { background: white; border-radius: 12px; padding: 25px; border: 1px solid var(--border-color); box-shadow: 0 4px 6px rgba(0,0,0,0.05); transition: 0.3s; cursor: pointer; display: flex; flex-direction: column; position: relative;}
         .exam-card:hover { transform: translateY(-5px); box-shadow: 0 10px 15px rgba(0,0,0,0.1); border-color: var(--thpt-main);}
         .exam-tag { background: #e0f2fe; color: var(--thpt-main); padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: bold; align-self: flex-start; margin-bottom: 15px;}
         .exam-title { font-size: 18px; font-weight: bold; color: var(--thpt-dark); margin-bottom: 15px; line-height: 1.4;}
         .exam-meta { font-size: 14px; color: #64748b; margin-bottom: 20px; display: flex; justify-content: space-between;}
         .start-btn { background: var(--thpt-main); color: white; border: none; padding: 10px; border-radius: 6px; font-weight: bold; width: 100%; transition: 0.2s;}
         
+        /* Hiển thị điểm ngoài Home */
+        .score-badge { position: absolute; top: 20px; right: 20px; background: var(--thpt-success); color: white; padding: 5px 10px; border-radius: 8px; font-weight: bold; font-size: 18px; box-shadow: 0 2px 4px rgba(16,185,129,0.3);}
+
         /* Main Workspace */
         #exam-workspace { display: none; flex: 1; overflow: hidden; }
         .left-panel { flex: 5; background: #525659; display: flex; flex-direction: column; border-right: 2px solid #ccc; }
@@ -66,25 +86,14 @@
         .q-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #f1f5f9; padding-bottom: 12px; margin-bottom: 15px;}
         .q-num { background: #f0f9ff; padding: 6px 15px; border-radius: 20px; font-weight: bold; color: var(--thpt-main); font-size: 15px;}
 
-        /* Nâng cấp UI trắc nghiệm (MCQ) */
         .mcq-options { display: flex; gap: 20px; flex-wrap: wrap; }
         .mcq-label { cursor: pointer; display: inline-block; }
         .mcq-label input { display: none; } 
-        .mcq-box { 
-            display: flex; align-items: center; justify-content: center;
-            width: 55px; height: 55px; border: 2px solid var(--border-color); border-radius: 12px;
-            font-size: 18px; font-weight: bold; transition: all 0.2s ease; color: #475569; background: white;
-        }
-        .mcq-label:hover .mcq-box { 
-            border-color: var(--thpt-danger); background: #fef2f2; color: var(--thpt-danger); 
-            transform: translateY(-3px); box-shadow: 0 5px 10px rgba(239, 68, 68, 0.15);
-        }
-        .mcq-label input:checked + .mcq-box { 
-            background: var(--thpt-main); border-color: var(--thpt-main); color: white; 
-            transform: none; box-shadow: none;
-        }
+        .mcq-box { display: flex; align-items: center; justify-content: center; width: 55px; height: 55px; border: 2px solid var(--border-color); border-radius: 12px; font-size: 18px; font-weight: bold; transition: all 0.2s ease; color: #475569; background: white;}
+        .mcq-label:hover .mcq-box { border-color: var(--thpt-danger); background: #fef2f2; color: var(--thpt-danger); transform: translateY(-3px); box-shadow: 0 5px 10px rgba(239, 68, 68, 0.15);}
+        .mcq-label input:checked + .mcq-box { background: var(--thpt-main); border-color: var(--thpt-main); color: white; transform: none; box-shadow: none;}
+        .mcq-label input:disabled + .mcq-box { cursor: not-allowed; opacity: 0.7; }
 
-        /* Nâng cấp UI Đúng/Sai (TF) */
         .tf-grid { width: 100%; border-collapse: separate; border-spacing: 0 10px; }
         .tf-grid th, .tf-grid td { padding: 10px; text-align: center; border-bottom: 1px solid #f1f5f9; }
         .tf-grid th { background: transparent; font-size: 15px; width: 90px; color: #64748b;}
@@ -92,22 +101,16 @@
         
         .tf-label { cursor: pointer; display: inline-block; }
         .tf-label input { display: none; }
-        .tf-box {
-            display: inline-flex; align-items: center; justify-content: center;
-            width: 45px; height: 45px; border: 2px solid var(--border-color); border-radius: 10px;
-            font-weight: bold; font-size: 16px; color: #64748b; background: white; transition: 0.2s;
-        }
+        .tf-box { display: inline-flex; align-items: center; justify-content: center; width: 45px; height: 45px; border: 2px solid var(--border-color); border-radius: 10px; font-weight: bold; font-size: 16px; color: #64748b; background: white; transition: 0.2s;}
         .tf-label:hover .tf-box { transform: translateY(-3px); box-shadow: 0 5px 10px rgba(0,0,0,0.08); }
         .tf-label:hover .true-box { border-color: var(--thpt-success); color: var(--thpt-success); background: #ecfdf5;}
         .tf-label:hover .false-box { border-color: var(--thpt-danger); color: var(--thpt-danger); background: #fef2f2;}
-        
         .tf-label input:checked + .true-box { background: var(--thpt-success); border-color: var(--thpt-success); color: white; transform: none; box-shadow: none;}
         .tf-label input:checked + .false-box { background: var(--thpt-danger); border-color: var(--thpt-danger); color: white; transform: none; box-shadow: none;}
 
         .short-answer-input { width: 100%; padding: 15px; border: 2px solid var(--border-color); border-radius: 8px; font-size: 18px; outline: none; transition: 0.2s; font-weight: bold; color: var(--thpt-dark);}
         .short-answer-input:focus { border-color: var(--thpt-main); box-shadow: 0 0 0 4px rgba(2, 132, 199, 0.1);}
 
-        /* Màn hình Tổng kết */
         #summary-screen { display: none; padding: 20px; text-align: center; }
         .summary-card { background: white; border: 1px solid var(--border-color); border-radius: 12px; padding: 40px; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.05); margin-top: 20px;}
         .final-score { font-size: 70px; font-weight: 900; color: var(--thpt-danger); line-height: 1; margin: 20px 0;}
@@ -117,19 +120,10 @@
         .wrong-bg { background-color: #fef2f2 !important; border-color: #fca5a5 !important; }
         .correct-bg { background-color: #f0fdf4 !important; border-color: #86efac !important; }
 
-        /* MODAL CẢNH BÁO UI MỚI */
-        .modal-overlay {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(15, 23, 42, 0.6); z-index: 9999;
-            display: none; justify-content: center; align-items: center;
-            opacity: 0; transition: opacity 0.3s ease;
-        }
+        /* Modal */
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.6); z-index: 9999; display: none; justify-content: center; align-items: center; opacity: 0; transition: opacity 0.3s ease; }
         .modal-overlay.show { display: flex; opacity: 1; }
-        .custom-modal-content {
-            background: white; padding: 35px 30px; border-radius: 16px;
-            width: 420px; text-align: center; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25);
-            transform: scale(0.9); transition: transform 0.3s ease;
-        }
+        .custom-modal-content { background: white; padding: 35px 30px; border-radius: 16px; width: 420px; text-align: center; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25); transform: scale(0.9); transition: transform 0.3s ease;}
         .modal-overlay.show .custom-modal-content { transform: scale(1); }
         .modal-title { font-size: 22px; font-weight: 900; color: var(--thpt-dark); margin-bottom: 15px; }
         .modal-msg { font-size: 15px; color: #64748b; line-height: 1.5; margin-bottom: 25px; }
@@ -140,14 +134,30 @@
         .btn-confirm { background: var(--thpt-main); color: white; }
         .btn-confirm.danger { background: var(--thpt-danger); }
         .btn-confirm:hover { filter: brightness(1.1); transform: translateY(-1px);}
+
+        /* Giao diện Header khi đã đăng nhập */
+        #user-header-info { display: none; }
     </style>
 </head>
 <body>
+
+    <div id="auth-screen">
+        <div class="auth-card">
+            <h1>THPTQG 2026</h1>
+            <p>Đăng nhập để lưu lịch sử làm bài</p>
+            <div class="auth-error" id="auth-error">Tài khoản hoặc mật khẩu sai!</div>
+            <input type="text" id="username" class="auth-input" placeholder="Tên đăng nhập (VD: tri123)" autocomplete="off">
+            <input type="password" id="password" class="auth-input" placeholder="Mật khẩu">
+            <button class="auth-btn btn-login" onclick="handleLogin()">Đăng Nhập</button>
+            <button class="auth-btn btn-register" onclick="handleRegister()">Tạo Tài Khoản Mới</button>
+        </div>
+    </div>
 
     <header>
         <div class="logo-area" onclick="openModal('exit')">
             <h1>THPTQG 2026</h1>
         </div>
+        
         <div class="tabs" id="tab-container"></div>
         
         <div class="header-controls" id="header-controls">
@@ -157,12 +167,16 @@
             </div>
             <button class="home-btn exit-btn" onclick="openModal('exit')">Thoát Đề</button>
         </div>
+
+        <div class="user-info" id="user-header-info">
+            Xin chào, <span id="display-username" style="color: var(--thpt-main);">User</span>!
+            <button class="logout-btn" onclick="handleLogout()">Đăng xuất</button>
+        </div>
     </header>
 
     <div id="home-screen" class="fade-in">
-        <h2 class="page-title">Danh sách đề thi hiện có</h2>
-        <div class="exam-grid" id="exam-list">
-            </div>
+        <h2 class="page-title">Danh sách đề thi</h2>
+        <div class="exam-grid" id="exam-list"></div>
     </div>
 
     <div class="workspace" id="exam-workspace">
@@ -173,7 +187,7 @@
         <div class="right-panel">
             <div class="timer-header" id="control-header">
                 <div><div style="font-weight: 900; color: var(--thpt-dark); font-size: 18px;" id="current-exam-name">Đang tải...</div></div>
-                <button class="submit-btn" onclick="openModal('submit')">Nộp & Chấm điểm</button>
+                <button class="submit-btn" id="btn-submit-exam" onclick="openModal('submit')">Nộp & Chấm điểm</button>
             </div>
 
             <div id="sheets-container"></div>
@@ -182,7 +196,7 @@
                 <div class="summary-card">
                     <h2 style="color: var(--thpt-dark); font-weight: 900;">KẾT QUẢ BÀI THI</h2>
                     <div class="final-score" id="final-score-text">0.00</div>
-                    <p style="margin-bottom: 20px; color: #64748b;">Điểm thi tối đa là 10.0.</p>
+                    <p style="margin-bottom: 20px; color: #64748b;" id="summary-desc">Điểm thi tối đa là 10.0.</p>
                     <div id="summary-stats"></div>
                     <button class="submit-btn" style="background: var(--thpt-main); margin-top: 25px; width: 100%; padding: 15px;" onclick="switchTab(0)">
                         XEM LẠI ĐÁP ÁN CHI TIẾT
@@ -204,6 +218,9 @@
     </div>
 
     <script>
+        // ==========================================
+        // DATABASE ĐỀ THI
+        // ==========================================
         const EXAM_DATABASE = [
             {
                 id: "toan_hanoi_2026",
@@ -230,57 +247,154 @@
             { id: 'phan3', name: 'Phần III', type: 'short', qCount: 6, prefix: 'P3' }
         ];
 
+        // ==========================================
+        // HỆ THỐNG TÀI KHOẢN (DATABASE ẢO TRÊN TRÌNH DUYỆT)
+        // ==========================================
+        let currentUser = null;
+        let usersDB = JSON.parse(localStorage.getItem('thpt_users_db')) || {};
+
+        function saveUsersDB() {
+            localStorage.setItem('thpt_users_db', JSON.stringify(usersDB));
+        }
+
+        window.onload = () => {
+            const savedUser = localStorage.getItem('thpt_current_user');
+            if (savedUser && usersDB[savedUser]) {
+                currentUser = savedUser;
+                showHome();
+            } else {
+                document.getElementById('auth-screen').style.display = 'flex';
+            }
+        };
+
+        function handleRegister() {
+            const user = document.getElementById('username').value.trim();
+            const pass = document.getElementById('password').value.trim();
+            const error = document.getElementById('auth-error');
+            
+            if(!user || !pass) { error.innerText = "Vui lòng nhập đủ thông tin!"; error.style.display = "block"; return; }
+            if(usersDB[user]) { error.innerText = "Tên đăng nhập đã tồn tại!"; error.style.display = "block"; return; }
+            
+            usersDB[user] = { password: pass, history: {}, activeExam: null, activeState: null };
+            saveUsersDB();
+            
+            error.innerText = "Đăng ký thành công! Đang đăng nhập...";
+            error.style.color = "var(--thpt-success)";
+            error.style.display = "block";
+            setTimeout(() => { doLogin(user); }, 1000);
+        }
+
+        function handleLogin() {
+            const user = document.getElementById('username').value.trim();
+            const pass = document.getElementById('password').value.trim();
+            const error = document.getElementById('auth-error');
+            error.style.color = "var(--thpt-danger)";
+
+            if(!usersDB[user] || usersDB[user].password !== pass) {
+                error.innerText = "Tài khoản hoặc mật khẩu sai!";
+                error.style.display = "block";
+            } else {
+                doLogin(user);
+            }
+        }
+
+        function doLogin(username) {
+            currentUser = username;
+            localStorage.setItem('thpt_current_user', username);
+            document.getElementById('auth-screen').style.display = 'none';
+            document.getElementById('display-username').innerText = username;
+            showHome();
+        }
+
+        function handleLogout() {
+            currentUser = null;
+            localStorage.removeItem('thpt_current_user');
+            document.getElementById('user-header-info').style.display = 'none';
+            document.getElementById('home-screen').style.display = 'none';
+            document.getElementById('auth-screen').style.display = 'flex';
+            document.getElementById('username').value = '';
+            document.getElementById('password').value = '';
+            document.getElementById('auth-error').style.display = 'none';
+        }
+
+        // ==========================================
+        // LOGIC LÀM BÀI & CHẤM ĐIỂM
+        // ==========================================
         let currentExam = null;
         let totalTime = 0;
         let timerInterval = null;
         let isSubmitted = false;
+        let isReviewMode = false;
         let pendingAction = null; 
 
-        window.onload = () => {
-            renderHome();
-            const activeExam = localStorage.getItem('current_active_exam');
-            if (activeExam) {
-                startExam(activeExam); 
+        function showHome() {
+            document.getElementById('user-header-info').style.display = 'flex';
+            document.getElementById('home-screen').style.display = 'block';
+            
+            // Nếu có bài đang làm dở, tự bay vào luôn
+            const userData = usersDB[currentUser];
+            if (userData.activeExam) {
+                startExam(userData.activeExam);
+                return;
             }
-        };
+            renderHome();
+        }
 
         function renderHome() {
             const list = document.getElementById('exam-list');
             list.innerHTML = '';
+            const userData = usersDB[currentUser];
+
             EXAM_DATABASE.forEach(exam => {
-                const savedState = localStorage.getItem(`exam_progress_${exam.id}`);
-                const tagText = savedState ? "Đang làm dở..." : exam.tag;
-                const tagColor = savedState ? "background: #fef08a; color: #ca8a04;" : "";
+                const history = userData.history[exam.id];
+                const isCompleted = !!history;
+                
+                let tagText = exam.tag;
+                let tagColor = "";
+                let btnText = "Vào thi ngay";
+                let scoreHtml = "";
+
+                if (isCompleted) {
+                    tagText = "Đã hoàn thành";
+                    tagColor = "background: #d1fae5; color: #059669;";
+                    btnText = "Xem lại bài";
+                    scoreHtml = `<div class="score-badge">${history.score.toFixed(2)} đ</div>`;
+                }
 
                 list.innerHTML += `
-                    <div class="exam-card" onclick="startExam('${exam.id}')">
+                    <div class="exam-card" onclick="startExam('${exam.id}', ${isCompleted})">
+                        ${scoreHtml}
                         <span class="exam-tag" style="${tagColor}">${tagText}</span>
                         <div class="exam-title">${exam.title}</div>
                         <div class="exam-meta">
                             <span>🕒 ${exam.timeMinutes} phút</span>
                             <span>Môn Toán</span>
                         </div>
-                        <button class="start-btn">${savedState ? 'Tiếp tục làm bài' : 'Vào thi ngay'}</button>
+                        <button class="start-btn" style="${isCompleted ? 'background:#64748b;' : ''}">${btnText}</button>
                     </div>
                 `;
             });
         }
 
-        function startExam(examId) {
+        function startExam(examId, isCompleted = false) {
             currentExam = EXAM_DATABASE.find(e => e.id === examId);
-            isSubmitted = false;
+            isSubmitted = isCompleted;
+            isReviewMode = isCompleted;
             
-            localStorage.setItem('current_active_exam', examId);
+            if (!isReviewMode) {
+                usersDB[currentUser].activeExam = examId;
+                saveUsersDB();
+            }
 
             document.getElementById('home-screen').style.display = 'none';
+            document.getElementById('user-header-info').style.display = 'none';
             document.getElementById('exam-workspace').style.display = 'flex';
             document.getElementById('tab-container').style.display = 'flex';
             
-            // Hiện lại nút Thoát đề và Đồng hồ khi vào làm lại
             document.getElementById('header-controls').style.display = 'flex'; 
-            document.getElementById('header-timer').style.display = 'flex'; 
+            document.getElementById('header-timer').style.display = isReviewMode ? 'none' : 'flex'; 
             
-            document.getElementById('control-header').style.display = 'flex';
+            document.getElementById('control-header').style.display = isReviewMode ? 'none' : 'flex';
             document.getElementById('summary-screen').style.display = 'none';
 
             document.getElementById('pdf-frame').src = currentExam.pdfUrl + "#toolbar=0&navpanes=0&scrollbar=0&view=FitH";
@@ -288,24 +402,38 @@
             
             totalTime = currentExam.timeMinutes * 60;
             initAnswerSheets();
-            loadProgress();
-            startTimer();
+            
+            if (isReviewMode) {
+                // Khôi phục đáp án đã nộp và tự động chấm luôn ra kết quả
+                const savedAnswers = usersDB[currentUser].history[examId].answers;
+                fillAnswers(savedAnswers);
+                runGradingLogic(savedAnswers);
+            } else {
+                // Khôi phục bài làm dở
+                const state = usersDB[currentUser].activeState;
+                if (state && state.answers) {
+                    totalTime = state.timeLeft;
+                    fillAnswers(state.answers);
+                }
+                startTimer();
+            }
         }
 
         function goHome() {
             clearInterval(timerInterval);
-            saveProgress(); 
-            localStorage.removeItem('current_active_exam'); 
+            if (!isReviewMode) saveProgress(); 
+            
+            usersDB[currentUser].activeExam = null; 
+            saveUsersDB();
             
             document.getElementById('exam-workspace').style.display = 'none';
-            document.getElementById('home-screen').style.display = 'block';
             document.getElementById('tab-container').style.display = 'none';
             document.getElementById('header-controls').style.display = 'none'; 
-            renderHome();
+            showHome();
         }
 
         function openModal(action) {
-            if (action === 'exit' && isSubmitted) {
+            if (action === 'exit' && (isSubmitted || isReviewMode)) {
                 goHome();
                 return;
             }
@@ -317,7 +445,7 @@
 
             if (action === 'submit') {
                 title.innerText = "Nộp bài & Chấm điểm";
-                msg.innerText = "Em có chắc chắn muốn nộp toàn bộ bài thi? Sau khi nộp sẽ không thể sửa lại đáp án.";
+                msg.innerText = "Em có chắc chắn muốn nộp toàn bộ bài thi? Sau khi nộp sẽ không thể sửa lại đáp án và kết quả sẽ lưu vào lịch sử.";
                 confirmBtn.className = "btn-confirm";
                 confirmBtn.innerText = "Nộp bài ngay";
                 pendingAction = submitAndGrade;
@@ -366,18 +494,8 @@
                         qBody = `<table class="tf-grid"><tr><th>Ý</th><th>Đúng</th><th>Sai</th></tr>${['a', 'b', 'c', 'd'].map(opt => `
                             <tr>
                                 <td class="statement">Ý ${opt}</td>
-                                <td>
-                                    <label class="tf-label">
-                                        <input type="radio" name="ans_${sec.prefix}_${i}_${opt}" value="T" onchange="saveProgress()">
-                                        <span class="tf-box true-box">Đ</span>
-                                    </label>
-                                </td>
-                                <td>
-                                    <label class="tf-label">
-                                        <input type="radio" name="ans_${sec.prefix}_${i}_${opt}" value="F" onchange="saveProgress()">
-                                        <span class="tf-box false-box">S</span>
-                                    </label>
-                                </td>
+                                <td><label class="tf-label"><input type="radio" name="ans_${sec.prefix}_${i}_${opt}" value="T" onchange="saveProgress()"><span class="tf-box true-box">Đ</span></label></td>
+                                <td><label class="tf-label"><input type="radio" name="ans_${sec.prefix}_${i}_${opt}" value="F" onchange="saveProgress()"><span class="tf-box false-box">S</span></label></td>
                             </tr>`).join('')}</table>`;
                     } else if (sec.type === 'short') {
                         qBody = `<input type="text" class="short-answer-input" id="ans_${sec.prefix}_${i}" placeholder="Nhập số/đáp án..." oninput="saveProgress()">`;
@@ -397,48 +515,39 @@
             document.getElementById('summary-screen').style.display = 'none';
         }
 
-        function saveProgress() {
-            if (!currentExam || isSubmitted) return;
-            const state = { timeLeft: totalTime, answers: {} };
-            
-            document.querySelectorAll('input[type="radio"]:checked').forEach(el => {
-                state.answers[el.name] = el.value;
-            });
+        function getAllCurrentAnswers() {
+            const answers = {};
+            document.querySelectorAll('input[type="radio"]:checked').forEach(el => answers[el.name] = el.value);
             document.querySelectorAll('input[type="text"]').forEach(el => {
-                if (el.value.trim() !== '') state.answers[el.id] = el.value.trim();
+                if (el.value.trim() !== '') answers[el.id] = el.value.trim();
             });
-            
-            localStorage.setItem(`exam_progress_${currentExam.id}`, JSON.stringify(state));
+            return answers;
         }
 
-        function loadProgress() {
-            const saved = localStorage.getItem(`exam_progress_${currentExam.id}`);
-            if (saved) {
-                const state = JSON.parse(saved);
-                totalTime = state.timeLeft;
-                
-                for (const key in state.answers) {
-                    const val = state.answers[key];
-                    const radio = document.querySelector(`input[name="${key}"][value="${val}"]`);
-                    if (radio) radio.checked = true;
-                    const textInput = document.getElementById(key);
-                    if (textInput) textInput.value = val;
-                }
+        function fillAnswers(answers) {
+            for (const key in answers) {
+                const val = answers[key];
+                const radio = document.querySelector(`input[name="${key}"][value="${val}"]`);
+                if (radio) radio.checked = true;
+                const textInput = document.getElementById(key);
+                if (textInput) textInput.value = val;
             }
+        }
+
+        function saveProgress() {
+            if (!currentExam || isSubmitted || isReviewMode) return;
+            usersDB[currentUser].activeState = { timeLeft: totalTime, answers: getAllCurrentAnswers() };
+            saveUsersDB();
         }
 
         function startTimer() {
             clearInterval(timerInterval);
             timerInterval = setInterval(() => {
-                if (totalTime <= 0) {
-                    openModal('submit'); 
-                    return;
-                }
+                if (totalTime <= 0) { openModal('submit'); return; }
                 totalTime--;
                 const m = Math.floor(totalTime / 60).toString().padStart(2, '0');
                 const s = (totalTime % 60).toString().padStart(2, '0');
                 document.getElementById('global-timer').innerText = `${m}:${s}`;
-                
                 saveProgress();
             }, 1000);
         }
@@ -446,82 +555,82 @@
         function submitAndGrade() {
             clearInterval(timerInterval);
             isSubmitted = true;
-            document.getElementById('control-header').style.display = 'none';
             
-            // --- CHỖ NÀY ĐÃ SỬA: CHỈ ẨN ĐỒNG HỒ, GIỮ NÚT THOÁT ĐỀ ---
-            document.getElementById('header-timer').style.display = 'none'; 
+            // Xóa state làm dở
+            usersDB[currentUser].activeState = null;
+            usersDB[currentUser].activeExam = null;
 
-            localStorage.removeItem(`exam_progress_${currentExam.id}`);
-            localStorage.removeItem('current_active_exam');
+            const finalAnswers = getAllCurrentAnswers();
+            const score = runGradingLogic(finalAnswers);
+
+            // LƯU VÀO LỊCH SỬ TÀI KHOẢN
+            usersDB[currentUser].history[currentExam.id] = {
+                score: score,
+                answers: finalAnswers
+            };
+            saveUsersDB();
+        }
+
+        // Logic chấm điểm tách rời (dùng chung cho lúc Nộp bài và lúc Xem lại)
+        function runGradingLogic(userAnswers) {
+            document.getElementById('control-header').style.display = 'none';
+            document.getElementById('header-timer').style.display = 'none'; 
 
             let totalScore = 0;
             const key = currentExam.keys;
             
+            // P1
             let p1Correct = 0;
             for(let i=1; i<=12; i++) {
-                const checked = document.querySelector(`input[name="ans_P1_${i}"]:checked`);
-                const userAns = checked ? checked.value : null;
-                const correctAns = key.P1 ? key.P1[i] : null;
-                
+                const uAns = userAnswers[`ans_P1_${i}`];
+                const cAns = key.P1 ? key.P1[i] : null;
                 const block = document.getElementById(`block_P1_${i}`);
-                if (userAns === correctAns && correctAns) {
-                    p1Correct++;
-                    block.classList.add('correct-bg');
-                } else {
-                    block.classList.add('wrong-bg');
-                    document.getElementById(`feedback_P1_${i}`).innerHTML = `<span class="correct-text">🎯 Đáp án đúng: ${correctAns}</span>`;
-                }
+                if (uAns === cAns && cAns) { p1Correct++; block.classList.add('correct-bg'); } 
+                else { block.classList.add('wrong-bg'); document.getElementById(`feedback_P1_${i}`).innerHTML = `<span class="correct-text">🎯 Đáp án đúng: ${cAns}</span>`; }
             }
             totalScore += p1Correct * 0.25;
 
+            // P2
             let p2Score = 0;
             for(let i=1; i<=4; i++) {
-                let correctItems = 0;
+                let cItems = 0;
                 ['a','b','c','d'].forEach(opt => {
-                    const checked = document.querySelector(`input[name="ans_P2_${i}_${opt}"]:checked`);
-                    const userAns = checked ? checked.value : null;
-                    const correctAns = (key.P2 && key.P2[i]) ? key.P2[i][opt] : null;
-                    if (userAns === correctAns && correctAns) correctItems++;
+                    const uAns = userAnswers[`ans_P2_${i}_${opt}`];
+                    const cAns = (key.P2 && key.P2[i]) ? key.P2[i][opt] : null;
+                    if (uAns === cAns && cAns) cItems++;
                 });
 
-                let points = 0;
-                if (correctItems === 1) points = 0.1;
-                else if (correctItems === 2) points = 0.25;
-                else if (correctItems === 3) points = 0.5;
-                else if (correctItems === 4) points = 1.0;
-
-                p2Score += points;
+                let pts = 0;
+                if (cItems === 1) pts = 0.1; else if (cItems === 2) pts = 0.25; else if (cItems === 3) pts = 0.5; else if (cItems === 4) pts = 1.0;
+                p2Score += pts;
                 
                 const block = document.getElementById(`block_P2_${i}`);
-                if (correctItems === 4) block.classList.add('correct-bg');
+                if (cItems === 4) block.classList.add('correct-bg');
                 else {
                     block.classList.add('wrong-bg');
                     const k = key.P2[i];
-                    document.getElementById(`feedback_P2_${i}`).innerHTML = `<span class="correct-text">🎯 Đáp án đúng: a-${k.a}, b-${k.b}, c-${k.c}, d-${k.d} (Em đúng ${correctItems}/4 ý: +${points}đ)</span>`;
+                    document.getElementById(`feedback_P2_${i}`).innerHTML = `<span class="correct-text">🎯 Đáp án đúng: a-${k.a}, b-${k.b}, c-${k.c}, d-${k.d} (Em đúng ${cItems}/4 ý: +${pts}đ)</span>`;
                 }
             }
             totalScore += p2Score;
 
+            // P3
             let p3Correct = 0;
             for(let i=1; i<=6; i++) {
-                const input = document.getElementById(`ans_P3_${i}`);
-                const userAns = input ? input.value.trim() : ""; 
-                const correctAns = key.P3 ? String(key.P3[i]).trim() : null;
-
+                const uAns = userAnswers[`ans_P3_${i}`] || "";
+                const cAns = key.P3 ? String(key.P3[i]).trim() : null;
                 const block = document.getElementById(`block_P3_${i}`);
-                if (userAns === correctAns && correctAns) {
-                    p3Correct++;
-                    block.classList.add('correct-bg');
-                } else {
-                    block.classList.add('wrong-bg');
-                    document.getElementById(`feedback_P3_${i}`).innerHTML = `<span class="correct-text">🎯 Đáp án đúng: ${correctAns}</span>`;
-                }
+                if (uAns === cAns && cAns) { p3Correct++; block.classList.add('correct-bg'); } 
+                else { block.classList.add('wrong-bg'); document.getElementById(`feedback_P3_${i}`).innerHTML = `<span class="correct-text">🎯 Đáp án đúng: ${cAns}</span>`; }
             }
             totalScore += p3Correct * 0.5;
 
+            // Khóa toàn bộ input
             document.querySelectorAll('input').forEach(el => el.disabled = true);
-            document.getElementById('final-score-text').innerText = totalScore.toFixed(2);
             
+            // Hiện kết quả
+            document.getElementById('final-score-text').innerText = totalScore.toFixed(2);
+            document.getElementById('summary-desc').innerText = isReviewMode ? "Đây là kết quả bài làm cũ của em." : "Điểm thi tối đa là 10.0.";
             document.getElementById('summary-stats').innerHTML = `
                 <div class="stat-row"><span>Phần I (Trắc nghiệm)</span><b>${p1Correct}/12 câu (+${p1Correct * 0.25}đ)</b></div>
                 <div class="stat-row"><span>Phần II (Đúng/Sai)</span><b>(+${p2Score.toFixed(2)}đ)</b></div>
@@ -530,7 +639,10 @@
             
             document.querySelectorAll('.sheet-container').forEach(sheet => sheet.classList.remove('active'));
             document.getElementById('summary-screen').style.display = 'block';
+
+            return totalScore;
         }
     </script>
 </body>
 </html>
+ 
