@@ -345,12 +345,26 @@
             const savedUser = localStorage.getItem('thpt_current_user');
             if (savedUser && usersDB[savedUser]) {
                 currentUser = savedUser;
+                
+                // 1. Ẩn ngay bức màn đăng nhập đi
+                document.getElementById('auth-screen').style.display = 'none';
+                
+                // 2. Cập nhật lại tên hiển thị trên góc phải
+                document.getElementById('display-username').innerText = currentUser;
+                
                 showHome();
             } else {
                 document.getElementById('auth-screen').style.display = 'flex';
                 toggleAuth('login');
             }
         };
+
+        // BẮT SỰ KIỆN F5 HOẶC ĐÓNG TRÌNH DUYỆT: Lưu lại bài làm ngay lập tức!
+        window.addEventListener('beforeunload', () => {
+            if (currentUser && currentExam && !isSubmitted && !isReviewMode) {
+                saveProgress();
+            }
+        });
 
         function togglePassword(inputId, iconEl) {
             const input = document.getElementById(inputId);
