@@ -483,12 +483,11 @@
                     scoreHtml = `<div class="score-badge">${latestAttempt.score.toFixed(2)} đ</div>`;
                     
                     actionHtml = `
-                        <div class="action-buttons">
-                            <button class="btn-review" onclick="startExam('${exam.id}', 'review')" title="Xem bài làm gần nhất">Xem lại</button>
-                            ${attemptCount < 10 ? `<button class="btn-retake" onclick="startExam('${exam.id}', 'retake')" title="Làm lại từ đầu">Làm lại</button>` : ''}
-                            <button class="btn-history" onclick="showHistory('${exam.id}')" title="Xem điểm các lần làm">Lịch sử</button>
-                        </div>
-                    `;
+    <div class="action-buttons">
+        ${attemptCount < 10 ? `<button class="btn-retake" onclick="startExam('${exam.id}', 'retake')" title="Làm lại từ đầu">Làm lại</button>` : ''}
+        <button class="btn-history" onclick="showHistory('${exam.id}')" title="Xem điểm các lần làm">Lịch sử</button>
+    </div>
+`;
 
                 } else if (userData.activeExam === exam.id) {
                     tagText = "Đang làm dở...";
@@ -812,7 +811,7 @@
             }
             totalScore += p3Correct * 0.5;
 
-            document.querySelectorAll('input').forEach(el => el.disabled = true);
+            document.querySelectorAll('#sheets-container input').forEach(el => el.disabled = true);
             
             document.getElementById('final-score-text').innerText = totalScore.toFixed(2);
             
