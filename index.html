@@ -298,7 +298,6 @@
 
     <script>
         const EXAM_DATABASE = [
-
             {
                 id: "toan_de_ninhbinh",
                 title: "Khảo sát THPT Ninh Bình-Bạc Liêu - Mã 1111",
@@ -315,8 +314,7 @@
                     },
                     P3: { 1: "84", 2: "3646", 3: "32", 4: "92", 5: "30,1", 6: "14,5" }
                 }
-            }
-
+            }, // <--- DẤU PHẨY QUAN TRỌNG ANH VỪA THÊM VÀO ĐÂY NÀY!
             {
                 id: "toan_de_nghean-0101",
                 title: "Khảo sát Sở Nghệ An - Mã 0101",
@@ -439,15 +437,6 @@
 
         let currentExam = null, totalTime = 0, timerInterval = null, isSubmitted = false, isReviewMode = false, pendingAction = null; 
 
-        function showHome() {
-            document.getElementById('user-header-info').style.display = 'flex';
-            document.getElementById('home-screen').style.display = 'block';
-            
-            const userData = usersDB[currentUser];
-            if (userData.activeExam) { startExam(userData.activeExam, 'continue'); return; }
-            renderHome();
-        }
-
         function renderHome() {
             const list = document.getElementById('exam-list');
             list.innerHTML = '';
@@ -526,7 +515,7 @@
             }
         }
 
-function goHome() {
+        function goHome() {
             clearInterval(timerInterval);
             if (!isReviewMode) saveProgress(); 
             
@@ -552,6 +541,7 @@ function goHome() {
             
             renderHome();
         }
+
         function showHistory(examId) {
             const historyData = usersDB[currentUser].history[examId];
             const examInfo = EXAM_DATABASE.find(e => e.id === examId);
@@ -781,4 +771,3 @@ function goHome() {
     </script>
 </body>
 </html>
- 
