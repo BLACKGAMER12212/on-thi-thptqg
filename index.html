@@ -508,15 +508,13 @@
             }
         }
 
-        function goHome() {
-    clearInterval(timerInterval);
-    if (!isReviewMode) saveProgress(); 
+        function showHome() {
+    document.getElementById('user-header-info').style.display = 'flex';
+    document.getElementById('home-screen').style.display = 'block';
     
-    // Đã xóa dòng reset activeExam ở đây để hệ thống nhớ bài đang làm dở
+    // Đoạn check if (userData.activeExam) đã được xóa bỏ để không bị tự động ép vào phòng thi nữa
     
-    document.getElementById('exam-workspace').style.display = 'none';
-    document.getElementById('header-controls').style.display = 'none'; 
-    showHome();
+    renderHome();
 }
         function showHistory(examId) {
             const historyData = usersDB[currentUser].history[examId];
