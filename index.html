@@ -372,7 +372,7 @@
                         userDataCache = docSnap.data();
 
                         if (userDataCache.sessionId && currentSessionId && userDataCache.sessionId !== currentSessionId) {
-                            document.getElementById('global-loader').style.display = 'none'; // Ẩn loading
+                            document.getElementById('global-loader').style.display = 'none'; 
                             clearInterval(timerInterval);
                             openModal('kickout');
                             return;
@@ -380,12 +380,13 @@
 
                         if (isInitialLoad) {
                             isInitialLoad = false;
-                            document.getElementById('global-loader').style.display = 'none'; // Ẩn loading
+                            document.getElementById('global-loader').style.display = 'none'; 
                             document.getElementById('auth-screen').style.display = 'none';
                             document.getElementById('display-username').innerText = user.email.split('@')[0];
                             document.getElementById('user-header-info').style.display = 'flex';
 
-                            if (userDataCache.activeExam) {
+                            // GIẢI PHÁP Ở ĐÂY: Chỉ ném vào phòng thi nếu đang thi dở VÀ bấm F5 lúc đang trong phòng thi
+                            if (userDataCache.activeExam && sessionStorage.getItem('thpt_in_exam') === 'true') {
                                 startExam(userDataCache.activeExam, 'continue');
                             } else {
                                 showHome();
@@ -397,7 +398,7 @@
                             userDataCache = { history: {}, activeExam: null, activeState: null, sessionId: currentSessionId };
                             await setDoc(doc(db, "users", user.uid), userDataCache);
                             
-                            document.getElementById('global-loader').style.display = 'none'; // Ẩn loading
+                            document.getElementById('global-loader').style.display = 'none'; 
                             document.getElementById('auth-screen').style.display = 'none';
                             document.getElementById('display-username').innerText = user.email.split('@')[0];
                             document.getElementById('user-header-info').style.display = 'flex';
@@ -409,7 +410,7 @@
                 isInitialLoad = true;
                 currentUser = null;
                 if (unsubSnapshot) unsubSnapshot(); 
-                document.getElementById('global-loader').style.display = 'none'; // Ẩn loading
+                document.getElementById('global-loader').style.display = 'none'; 
                 document.getElementById('auth-screen').style.display = 'flex';
                 document.getElementById('user-header-info').style.display = 'none';
             }
@@ -480,8 +481,7 @@
         window.saveProgress = saveProgress;
 
         function showHome(forceHome = false) {
-            // Sửa lại thứ tự logic để tránh chớp màn hình khi F5
-            if (!forceHome && userDataCache.activeExam) { 
+            if (!forceHome && userDataCache.activeExam && sessionStorage.getItem('thpt_in_exam') === 'true') { 
                 startExam(userDataCache.activeExam, 'continue'); 
                 return; 
             }
@@ -512,6 +512,9 @@
         }
 
         async function startExam(examId, mode, attemptIndex = null) {
+            // Ghi nhớ cờ "Đang trong phòng thi" để F5 không bị văng
+            sessionStorage.setItem('thpt_in_exam', 'true'); 
+            
             currentExam = EXAM_DATABASE.find(e => e.id === examId);
             isReviewMode = (mode === 'review'); isSubmitted = isReviewMode;
             
@@ -543,7 +546,14 @@
         }
         window.startExam = startExam;
 
-        function goHome() { clearInterval(timerInterval); document.getElementById('exam-workspace').style.display = 'none'; document.getElementById('header-controls').style.display = 'none'; showHome(true); }
+        function goHome() { 
+            // Xóa cờ phòng thi, F5 sẽ ở yên màn Home
+            sessionStorage.removeItem('thpt_in_exam'); 
+            clearInterval(timerInterval); 
+            document.getElementById('exam-workspace').style.display = 'none'; 
+            document.getElementById('header-controls').style.display = 'none'; 
+            showHome(true); 
+        }
         window.goHome = goHome;
 
         function showHistory(examId) {
@@ -644,6 +654,9 @@
         }
 
         async function submitAndGrade() {
+            // Xóa cờ phòng thi vì đã nộp bài
+            sessionStorage.removeItem('thpt_in_exam'); 
+            
             clearInterval(timerInterval); isSubmitted = true;
             const finalAnswers = getAllCurrentAnswers(); const score = runGradingLogic(finalAnswers);
             
