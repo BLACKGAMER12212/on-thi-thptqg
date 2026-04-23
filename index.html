@@ -296,7 +296,32 @@
         </div>
     </div>
 
-    <script>
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import { getFirestore, doc, setDoc, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+        // ==========================================
+        // 1. DÁN ĐOẠN FIREBASE CONFIG CỦA EM VÀO ĐÂY
+        // ==========================================
+       const firebaseConfig = {
+  apiKey: "AIzaSyBC7rq22ZxFomEry31TtCKqNnO2g3gJUlU",
+  authDomain: "thptqg-2026.firebaseapp.com",
+  projectId: "thptqg-2026",
+  storageBucket: "thptqg-2026.firebasestorage.app",
+  messagingSenderId: "858999109520",
+  appId: "1:858999109520:web:634de94c0a8173a3ba2515",
+  measurementId: "G-5P5P6SSSGL"
+};
+
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        // ==========================================
+        // 2. GIỮ NGUYÊN ĐỀ THI CỦA EM Ở ĐÂY
+        // ==========================================
         const EXAM_DATABASE = [
             {
                 id: "toan_de_ninhbinh",
@@ -334,454 +359,258 @@
             }
         ];
 
-        let currentUser = null;
-        let usersDB = JSON.parse(localStorage.getItem('thpt_users_db')) || {};
+        // ==========================================
+        // 3. LOGIC XỬ LÝ ONLINE
+        // ==========================================
+        let currentUser = null, currentExam = null, totalTime = 0, timerInterval = null, isSubmitted = false, isReviewMode = false, pendingAction = null;
+        let userDataCache = { history: {}, activeExam: null, activeState: null }; // Lưu tạm dữ liệu user để hiển thị
 
-        function saveUsersDB() {
-            localStorage.setItem('thpt_users_db', JSON.stringify(usersDB));
-        }
-
-        window.onload = () => {
-            const savedUser = localStorage.getItem('thpt_current_user');
-            if (savedUser && usersDB[savedUser]) {
-                currentUser = savedUser;
-                
-                // 1. Ẩn ngay bức màn đăng nhập đi
+        // Tự động kiểm tra đăng nhập & F5
+    // Tự động kiểm tra đăng nhập & F5
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                currentUser = user;
                 document.getElementById('auth-screen').style.display = 'none';
+                document.getElementById('display-username').innerText = user.email.split('@')[0];
+                document.getElementById('user-header-info').style.display = 'flex';
                 
-                // 2. Cập nhật lại tên hiển thị trên góc phải
-                document.getElementById('display-username').innerText = currentUser;
-                
+                // Lấy dữ liệu bài làm dở từ Cloud Firestore
+                const userDoc = await getDoc(doc(db, "users", user.uid));
+                if (userDoc.exists()) {
+                    userDataCache = userDoc.data();
+                    if (userDataCache.activeExam) {
+                        startExam(userDataCache.activeExam, 'continue');
+                        return;
+                    }
+                } else {
+                    // FIX: Nếu là user mới tinh vừa đăng ký xong, hồ sơ chưa kịp tạo thì mình tạo luôn ở đây
+                    userDataCache = { history: {}, activeExam: null, activeState: null };
+                    await setDoc(doc(db, "users", user.uid), userDataCache);
+                }
                 showHome();
             } else {
                 document.getElementById('auth-screen').style.display = 'flex';
-                toggleAuth('login');
-            }
-        };
-
-        // BẮT SỰ KIỆN F5 HOẶC ĐÓNG TRÌNH DUYỆT: Lưu lại bài làm ngay lập tức!
-        window.addEventListener('beforeunload', () => {
-            if (currentUser && currentExam && !isSubmitted && !isReviewMode) {
-                saveProgress();
             }
         });
 
-        function togglePassword(inputId, iconEl) {
+        // Nút Mắt nhắm/Mắt mở mật khẩu
+        window.togglePassword = (inputId, iconEl) => {
             const input = document.getElementById(inputId);
-            if (input.type === "password") {
-                input.type = "text"; iconEl.innerText = "🙈"; 
-            } else {
-                input.type = "password"; iconEl.innerText = "👁️";
-            }
-        }
+            if (input.type === "password") { input.type = "text"; iconEl.innerText = "🙈"; } 
+            else { input.type = "password"; iconEl.innerText = "👁️"; }
+        };
 
-        function checkEnter(e, type) {
-            if (e.key === 'Enter') {
-                if (type === 'login') handleLogin();
-                else if (type === 'register') handleRegister();
-            }
-        }
+        window.checkEnter = (e, type) => {
+            if (e.key === 'Enter') { if (type === 'login') handleLogin(); else if (type === 'register') handleRegister(); }
+        };
 
-        function toggleAuth(type) {
-            document.getElementById('login-form').classList.remove('active');
-            document.getElementById('register-form').classList.remove('active');
-            document.getElementById('login-error').style.display = 'none';
-            document.getElementById('reg-error').style.display = 'none';
-            document.getElementById('reg-success').style.display = 'none';
-            
-            if(type === 'login') document.getElementById('login-form').classList.add('active');
-            else document.getElementById('register-form').classList.add('active');
-        }
+        window.toggleAuth = (type) => {
+            document.getElementById('login-form').classList.remove('active'); document.getElementById('register-form').classList.remove('active');
+            document.getElementById('login-error').style.display = 'none'; document.getElementById('reg-error').style.display = 'none'; document.getElementById('reg-success').style.display = 'none';
+            if(type === 'login') document.getElementById('login-form').classList.add('active'); else document.getElementById('register-form').classList.add('active');
+        };
 
-        function handleRegister() {
-            const user = document.getElementById('reg-user').value.trim();
-            const pass = document.getElementById('reg-pass').value.trim();
-            const confirm = document.getElementById('reg-pass-confirm').value.trim();
-            const error = document.getElementById('reg-error');
-            const success = document.getElementById('reg-success');
-            
+        window.handleRegister = async () => {
+            const user = document.getElementById('reg-user').value.trim(); const pass = document.getElementById('reg-pass').value; const confirm = document.getElementById('reg-pass-confirm').value;
+            const error = document.getElementById('reg-error'); const success = document.getElementById('reg-success');
             error.style.display = 'none'; success.style.display = 'none';
 
             if(!user || !pass || !confirm) { error.innerText = "Vui lòng nhập đầy đủ các ô!"; error.style.display = "block"; return; }
             if(pass !== confirm) { error.innerText = "Xác nhận mật khẩu không khớp!"; error.style.display = "block"; return; }
-            if(usersDB[user]) { error.innerText = "Tên đăng nhập đã có người sử dụng!"; error.style.display = "block"; return; }
-            
-            usersDB[user] = { password: pass, history: {}, activeExam: null, activeState: null };
-            saveUsersDB();
-            
-            success.innerText = "Đăng ký thành công! Đang chuyển sang Đăng nhập..."; success.style.display = "block";
-            document.getElementById('reg-user').value = ''; document.getElementById('reg-pass').value = ''; document.getElementById('reg-pass-confirm').value = '';
-            setTimeout(() => { toggleAuth('login'); }, 1500);
+
+            const email = user + "@thpt.com";
+            try {
+                const res = await createUserWithEmailAndPassword(auth, email, pass);
+                await setDoc(doc(db, "users", res.user.uid), { history: {}, activeExam: null, activeState: null });
+                success.innerText = "Đăng ký thành công! Đang vào hệ thống..."; success.style.display = "block";
+            } catch (err) { error.innerText = "Tên đăng nhập đã tồn tại hoặc mật khẩu quá ngắn!"; error.style.display = "block"; }
+        };
+
+        window.handleLogin = async () => {
+            const user = document.getElementById('login-user').value.trim(); const pass = document.getElementById('login-pass').value;
+            const error = document.getElementById('login-error'); error.style.display = 'none';
+            const email = user + "@thpt.com";
+            try { await signInWithEmailAndPassword(auth, email, pass); } 
+            catch (err) { error.innerText = "Tài khoản hoặc mật khẩu sai!"; error.style.display = "block"; }
+        };
+
+        window.handleLogout = () => { signOut(auth).then(() => location.reload()); };
+
+        window.saveProgress = async () => {
+            if (!currentUser || !currentExam || isSubmitted || isReviewMode) return;
+            userDataCache.activeState = { timeLeft: totalTime, answers: getAllCurrentAnswers() };
+            await updateDoc(doc(db, "users", currentUser.uid), { activeExam: currentExam.id, activeState: userDataCache.activeState });
+        };
+
+        // Giao diện
+        function showHome(forceHome = false) {
+            document.getElementById('user-header-info').style.display = 'flex'; document.getElementById('home-screen').style.display = 'block';
+            if (!forceHome && userDataCache.activeExam) { startExam(userDataCache.activeExam, 'continue'); return; }
+            renderHome();
         }
-
-        function handleLogin() {
-            const user = document.getElementById('login-user').value.trim();
-            const pass = document.getElementById('login-pass').value.trim();
-            const error = document.getElementById('login-error');
-            error.style.display = 'none';
-
-            if(!usersDB[user] || usersDB[user].password !== pass) {
-                error.innerText = "Tài khoản hoặc mật khẩu sai!"; error.style.display = "block";
-            } else {
-                doLogin(user);
-            }
-        }
-
-        function doLogin(username) {
-            currentUser = username;
-            localStorage.setItem('thpt_current_user', username); 
-            document.getElementById('auth-screen').style.display = 'none';
-            document.getElementById('display-username').innerText = username;
-            showHome();
-        }
-
-        function handleLogout() {
-            closeModal(); clearInterval(timerInterval);
-            currentUser = null; localStorage.removeItem('thpt_current_user'); 
-            
-            document.getElementById('exam-workspace').style.display = 'none';
-            document.getElementById('user-header-info').style.display = 'none';
-            document.getElementById('home-screen').style.display = 'none';
-            document.getElementById('header-controls').style.display = 'none'; 
-            
-            document.getElementById('auth-screen').style.display = 'flex';
-            toggleAuth('login');
-            document.getElementById('login-user').value = ''; document.getElementById('login-pass').value = '';
-        }
-
-        let currentExam = null, totalTime = 0, timerInterval = null, isSubmitted = false, isReviewMode = false, pendingAction = null; 
 
         function renderHome() {
-            const list = document.getElementById('exam-list');
-            list.innerHTML = '';
-            const userData = usersDB[currentUser];
-
+            const list = document.getElementById('exam-list'); list.innerHTML = '';
             EXAM_DATABASE.forEach(exam => {
-                let historyData = userData.history[exam.id];
-                if (historyData && !Array.isArray(historyData)) {
-                    userData.history[exam.id] = [historyData]; historyData = userData.history[exam.id]; saveUsersDB();
-                }
+                let historyData = userDataCache.history[exam.id] || [];
+                let tagText = exam.tag, tagColor = "", scoreHtml = "", actionHtml = `<button class="start-btn" onclick="startExam('${exam.id}', 'new')">Vào thi ngay</button>`;
 
-                let tagText = exam.tag, tagColor = "", scoreHtml = "";
-                let actionHtml = `<button class="start-btn" onclick="startExam('${exam.id}', 'new')">Vào thi ngay</button>`;
-
-                if (historyData && historyData.length > 0) {
-                    const attemptCount = historyData.length;
-                    const latestAttempt = historyData[attemptCount - 1];
+                if (historyData.length > 0) {
+                    const attemptCount = historyData.length; const latestAttempt = historyData[attemptCount - 1];
                     tagText = `Đã làm ${attemptCount}/10 lần`; tagColor = "background: #d1fae5; color: #059669;";
                     scoreHtml = `<div class="score-badge">${latestAttempt.score.toFixed(2)} đ</div>`;
-                    actionHtml = `
-                        <div class="action-buttons">
-                            ${attemptCount < 10 ? `<button class="btn-retake" onclick="startExam('${exam.id}', 'retake')" title="Làm lại từ đầu">Làm lại</button>` : ''}
-                            <button class="btn-history" onclick="showHistory('${exam.id}')" title="Xem điểm các lần làm">Lịch sử</button>
-                        </div>`;
-                } else if (userData.activeExam === exam.id) {
+                    actionHtml = `<div class="action-buttons">${attemptCount < 10 ? `<button class="btn-retake" onclick="startExam('${exam.id}', 'retake')">Làm lại</button>` : ''}<button class="btn-history" onclick="showHistory('${exam.id}')">Lịch sử</button></div>`;
+                } else if (userDataCache.activeExam === exam.id) {
                     tagText = "Đang làm dở..."; tagColor = "background: #fef08a; color: #ca8a04;";
                     actionHtml = `<button class="start-btn" style="background:#ca8a04" onclick="startExam('${exam.id}', 'continue')">Tiếp tục làm bài</button>`;
                 }
 
-                list.innerHTML += `
-                    <div class="exam-card">
-                        ${scoreHtml} <span class="exam-tag" style="${tagColor}">${tagText}</span>
-                        <div class="exam-title">${exam.title}</div>
-                        <div class="exam-meta"><span>🕒 ${exam.timeMinutes} phút</span><span>Môn Toán</span></div>
-                        ${actionHtml}
-                    </div>`;
+                list.innerHTML += `<div class="exam-card">${scoreHtml} <span class="exam-tag" style="${tagColor}">${tagText}</span><div class="exam-title">${exam.title}</div><div class="exam-meta"><span>🕒 ${exam.timeMinutes} phút</span><span>Môn Toán</span></div>${actionHtml}</div>`;
             });
         }
 
-        function startExam(examId, mode, attemptIndex = null) {
+        window.startExam = async (examId, mode, attemptIndex = null) => {
             currentExam = EXAM_DATABASE.find(e => e.id === examId);
             isReviewMode = (mode === 'review'); isSubmitted = isReviewMode;
             
-            if (mode === 'retake') usersDB[currentUser].activeState = null;
-            if (!isReviewMode) { usersDB[currentUser].activeExam = examId; saveUsersDB(); }
+            if (mode === 'retake') userDataCache.activeState = null;
+            if (!isReviewMode) { 
+                userDataCache.activeExam = examId; 
+                await updateDoc(doc(db, "users", currentUser.uid), { activeExam: examId }); 
+            }
 
-            document.getElementById('home-screen').style.display = 'none';
-            document.getElementById('user-header-info').style.display = 'none';
-            document.getElementById('exam-workspace').style.display = 'flex';
+            document.getElementById('home-screen').style.display = 'none'; document.getElementById('user-header-info').style.display = 'none';
+            document.getElementById('exam-workspace').style.display = 'flex'; document.getElementById('header-controls').style.display = 'flex'; 
+            document.getElementById('header-timer').style.display = isReviewMode ? 'none' : 'flex'; document.getElementById('control-header').style.display = isReviewMode ? 'none' : 'flex';
+            document.getElementById('summary-screen').style.display = 'none'; document.getElementById('sheets-container').style.display = 'block';
+            document.getElementById('pdf-frame').src = currentExam.pdfUrl + "#toolbar=0&navpanes=0&scrollbar=0&view=FitH"; document.getElementById('current-exam-name').innerText = currentExam.title;
             
-            document.getElementById('header-controls').style.display = 'flex'; 
-            document.getElementById('header-timer').style.display = isReviewMode ? 'none' : 'flex'; 
-            
-            document.getElementById('control-header').style.display = isReviewMode ? 'none' : 'flex';
-            document.getElementById('summary-screen').style.display = 'none';
-            document.getElementById('sheets-container').style.display = 'block';
-
-            document.getElementById('pdf-frame').src = currentExam.pdfUrl + "#toolbar=0&navpanes=0&scrollbar=0&view=FitH";
-            document.getElementById('current-exam-name').innerText = currentExam.title;
-            
-            totalTime = currentExam.timeMinutes * 60;
-            initAnswerSheets();
+            totalTime = currentExam.timeMinutes * 60; initAnswerSheets();
             
             if (isReviewMode) {
-                const historyData = usersDB[currentUser].history[examId];
+                const historyData = userDataCache.history[examId];
                 const indexToReview = (attemptIndex !== null) ? attemptIndex : (historyData.length - 1);
                 const savedAnswers = historyData[indexToReview].answers;
-                fillAnswers(savedAnswers);
-                runGradingLogic(savedAnswers, indexToReview + 1);
+                fillAnswers(savedAnswers); runGradingLogic(savedAnswers, indexToReview + 1);
             } else {
-                if (mode === 'continue') {
-                    const state = usersDB[currentUser].activeState;
-                    if (state && state.answers) { totalTime = state.timeLeft; fillAnswers(state.answers); }
+                if (mode === 'continue' && userDataCache.activeState && userDataCache.activeState.answers) { 
+                    totalTime = userDataCache.activeState.timeLeft; fillAnswers(userDataCache.activeState.answers); 
                 }
                 startTimer();
             }
-        }
+        };
 
-        function goHome() {
-            clearInterval(timerInterval);
-            if (!isReviewMode) saveProgress(); 
-            
-            // Ẩn giao diện làm bài
-            document.getElementById('exam-workspace').style.display = 'none';
-            document.getElementById('header-controls').style.display = 'none'; 
-            
-            // Tham số true có ý nghĩa: Ép hệ thống ở lại trang chủ, không tự động quay lại đề
-            showHome(true); 
-        }
+        window.goHome = () => { clearInterval(timerInterval); document.getElementById('exam-workspace').style.display = 'none'; document.getElementById('header-controls').style.display = 'none'; showHome(true); };
 
-        function showHome(forceHome = false) {
-            document.getElementById('user-header-info').style.display = 'flex';
-            document.getElementById('home-screen').style.display = 'block';
-            
-            const userData = usersDB[currentUser];
-            
-            // Nếu có bài đang làm dở VÀ KHÔNG PHẢI vừa bấm nút Thoát (forceHome) -> Tự động chui lại vào đề (Dành cho tính năng F5)
-            if (!forceHome && userData && userData.activeExam) { 
-                startExam(userData.activeExam, 'continue'); 
-                return; 
-            }
-            
-            renderHome();
-        }
-
-        function showHistory(examId) {
-            const historyData = usersDB[currentUser].history[examId];
-            const examInfo = EXAM_DATABASE.find(e => e.id === examId);
-            
-            const modal = document.getElementById('custom-modal');
-            document.getElementById('modal-title').innerText = `Lịch sử: ${examInfo.title}`;
-            document.getElementById('modal-message').style.display = 'none'; 
-            document.getElementById('modal-action-buttons').style.display = 'none'; 
-            
-            const listContainer = document.getElementById('modal-history-list');
-            listContainer.style.display = 'block'; listContainer.innerHTML = '';
-            
+        window.showHistory = (examId) => {
+            const historyData = userDataCache.history[examId] || []; const examInfo = EXAM_DATABASE.find(e => e.id === examId);
+            const modal = document.getElementById('custom-modal'); document.getElementById('modal-title').innerText = `Lịch sử: ${examInfo.title}`;
+            document.getElementById('modal-message').style.display = 'none'; document.getElementById('modal-action-buttons').style.display = 'none'; 
+            const listContainer = document.getElementById('modal-history-list'); listContainer.style.display = 'block'; listContainer.innerHTML = '';
             historyData.forEach((attempt, index) => {
                 const dateStr = attempt.date || "Không rõ ngày";
-                listContainer.innerHTML += `
-                    <div class="history-item">
-                        <div class="history-info"><span class="h-attempt">Lần thi thứ ${index + 1}</span><span class="h-date">${dateStr}</span></div>
-                        <div class="history-action"><span class="h-score">${attempt.score.toFixed(2)} đ</span><button class="btn-review-sm" onclick="closeModal(); startExam('${examId}', 'review', ${index})">Xem bài</button></div>
-                    </div>`;
+                listContainer.innerHTML += `<div class="history-item"><div class="history-info"><span class="h-attempt">Lần thi thứ ${index + 1}</span><span class="h-date">${dateStr}</span></div><div class="history-action"><span class="h-score">${attempt.score.toFixed(2)} đ</span><button class="btn-review-sm" onclick="closeModal(); startExam('${examId}', 'review', ${index})">Xem bài</button></div></div>`;
             });
-            listContainer.innerHTML += `<button class="btn-cancel" onclick="closeModal()" style="width: 100%; margin-top: 15px;">Đóng Lịch Sử</button>`;
+            listContainer.innerHTML += `<button class="btn-cancel" onclick="closeModal()" style="width: 100%; margin-top: 15px;">Đóng</button>`;
             modal.style.display = 'flex'; setTimeout(() => modal.classList.add('show'), 10);
-        }
+        };
 
-        function openModal(action) {
+        window.openModal = (action) => {
             if (action === 'exit' && (isSubmitted || isReviewMode)) { goHome(); return; }
-            const modal = document.getElementById('custom-modal');
-            const title = document.getElementById('modal-title'), msg = document.getElementById('modal-message'), confirmBtn = document.getElementById('modal-confirm-btn');
-            
+            const modal = document.getElementById('custom-modal'); const title = document.getElementById('modal-title'), msg = document.getElementById('modal-message'), confirmBtn = document.getElementById('modal-confirm-btn');
             document.getElementById('modal-history-list').style.display = 'none'; msg.style.display = 'block'; document.getElementById('modal-action-buttons').style.display = 'flex';
-
-            if (action === 'submit') {
-                title.innerText = "Nộp bài & Chấm điểm"; msg.innerText = "Em có chắc chắn muốn nộp toàn bộ bài thi? Sau khi nộp sẽ không thể sửa lại đáp án và kết quả sẽ lưu vào lịch sử.";
-                confirmBtn.className = "btn-confirm"; confirmBtn.innerText = "Nộp bài ngay"; pendingAction = submitAndGrade;
-            } else if (action === 'exit') {
-                title.innerText = "Thoát đề thi"; msg.innerText = "Dữ liệu làm bài của em sẽ được lưu lại tự động. Lần sau vào lại em có thể làm tiếp. Em có muốn thoát không?";
-                confirmBtn.className = "btn-confirm danger"; confirmBtn.innerText = "Thoát đề"; pendingAction = goHome;
-            }
+            if (action === 'submit') { title.innerText = "Nộp bài"; msg.innerText = "Bạn có chắc chắn nộp bài?"; confirmBtn.className = "btn-confirm"; confirmBtn.innerText = "Nộp"; pendingAction = submitAndGrade; } 
+            else if (action === 'exit') { title.innerText = "Thoát"; msg.innerText = "Trạng thái sẽ được tự động lưu. Đồng ý thoát?"; confirmBtn.className = "btn-confirm danger"; confirmBtn.innerText = "Thoát"; pendingAction = goHome; }
             modal.style.display = 'flex'; setTimeout(() => modal.classList.add('show'), 10);
-        }
+        };
 
-        function closeModal() {
-            const modal = document.getElementById('custom-modal'); modal.classList.remove('show');
-            setTimeout(() => modal.style.display = 'none', 300); pendingAction = null;
-        }
+        window.closeModal = () => { const modal = document.getElementById('custom-modal'); modal.classList.remove('show'); setTimeout(() => modal.style.display = 'none', 300); pendingAction = null; };
+        window.confirmAction = () => { if (pendingAction) pendingAction(); closeModal(); };
 
-        function confirmAction() { if (pendingAction) pendingAction(); closeModal(); }
-
-        // TẠO GIAO DIỆN PHIẾU LÀM BÀI MỚI (KIỂU CUỘN)
         function initAnswerSheets() {
-            const sheets = document.getElementById('sheets-container');
-            sheets.innerHTML = '';
-            let html = '';
-
-            // --- PHẦN I ---
-            html += `<div class="section-title">PHẦN I. Câu trắc nghiệm nhiều phương án</div>`;
-            html += `<div class="mcq-grid">`;
-            for(let i=1; i<=12; i++) {
-                html += `
-                <div class="q-compact-row" id="block_P1_${i}">
-                    <div class="q-compact-num">Câu ${i}</div>
-                    <div class="mcq-options compact">
-                        ${['A', 'B', 'C', 'D'].map(opt => `
-                            <label class="mcq-label">
-                                <input type="radio" name="ans_P1_${i}" value="${opt}" onchange="saveProgress()">
-                                <span class="mcq-box round">${opt}</span>
-                            </label>
-                        `).join('')}
-                    </div>
-                    <div class="result-feedback" id="feedback_P1_${i}"></div>
-                </div>`;
-            }
-            html += `</div>`;
-
-            // --- PHẦN II ---
-            html += `<div class="section-title" style="margin-top:25px;">PHẦN II. Câu trắc nghiệm đúng sai</div>`;
-            html += `<div class="tf-grid-compact">`;
+            const sheets = document.getElementById('sheets-container'); sheets.innerHTML = ''; let html = '';
+            html += `<div class="section-title">PHẦN I. Câu trắc nghiệm</div><div class="mcq-grid">`;
+            for(let i=1; i<=12; i++) html += `<div class="q-compact-row" id="block_P1_${i}"><div class="q-compact-num">Câu ${i}</div><div class="mcq-options compact">${['A','B','C','D'].map(opt => `<label class="mcq-label"><input type="radio" name="ans_P1_${i}" value="${opt}" onchange="saveProgress()"><span class="mcq-box round">${opt}</span></label>`).join('')}</div><div class="result-feedback" id="feedback_P1_${i}"></div></div>`;
+            html += `</div><div class="section-title" style="margin-top:25px;">PHẦN II. Đúng/Sai</div><div class="tf-grid-compact">`;
             for(let i=1; i<=4; i++) {
-                html += `
-                <div class="q-compact-row tf-block" id="block_P2_${i}">
-                    <div class="q-compact-num" style="width:100%; margin-bottom:8px;">Câu ${i}</div>
-                    <div class="tf-items">`;
-                ['a', 'b', 'c', 'd'].forEach(opt => {
-                    html += `
-                        <div class="tf-item-row">
-                            <span class="tf-item-label">${opt})</span>
-                            <div>
-                                <label class="tf-label"><input type="radio" name="ans_P2_${i}_${opt}" value="T" onchange="saveProgress()"><span class="tf-box small true-box">Đ</span></label>
-                                <label class="tf-label"><input type="radio" name="ans_P2_${i}_${opt}" value="F" onchange="saveProgress()"><span class="tf-box small false-box">S</span></label>
-                            </div>
-                        </div>
-                    `;
-                });
+                html += `<div class="q-compact-row tf-block" id="block_P2_${i}"><div class="q-compact-num" style="width:100%; margin-bottom:8px;">Câu ${i}</div><div class="tf-items">`;
+                ['a','b','c','d'].forEach(opt => { html += `<div class="tf-item-row"><span class="tf-item-label">${opt})</span><div><label class="tf-label"><input type="radio" name="ans_P2_${i}_${opt}" value="T" onchange="saveProgress()"><span class="tf-box small true-box">Đ</span></label><label class="tf-label"><input type="radio" name="ans_P2_${i}_${opt}" value="F" onchange="saveProgress()"><span class="tf-box small false-box">S</span></label></div></div>`; });
                 html += `</div><div class="result-feedback" id="feedback_P2_${i}"></div></div>`;
             }
-            html += `</div>`;
-
-            // --- PHẦN III ---
-            html += `<div class="section-title" style="margin-top:25px;">PHẦN III. Câu trả lời ngắn</div>`;
-            html += `<div class="short-grid">`;
-            for(let i=1; i<=6; i++) {
-                html += `
-                <div class="q-compact-row short-block" id="block_P3_${i}">
-                    <div class="q-compact-num">Câu ${i}</div>
-                    <input type="text" class="short-answer-input compact" id="ans_P3_${i}" placeholder="Đáp án..." oninput="saveProgress()">
-                    <div class="result-feedback" id="feedback_P3_${i}"></div>
-                </div>`;
-            }
-            html += `</div>`;
-
-            sheets.innerHTML = html;
+            html += `</div><div class="section-title" style="margin-top:25px;">PHẦN III. Trả lời ngắn</div><div class="short-grid">`;
+            for(let i=1; i<=6; i++) html += `<div class="q-compact-row short-block" id="block_P3_${i}"><div class="q-compact-num">Câu ${i}</div><input type="text" class="short-answer-input compact" id="ans_P3_${i}" oninput="saveProgress()"><div class="result-feedback" id="feedback_P3_${i}"></div></div>`;
+            html += `</div>`; sheets.innerHTML = html;
         }
 
         function getAllCurrentAnswers() {
-            const answers = {};
-            document.querySelectorAll('input[type="radio"]:checked').forEach(el => answers[el.name] = el.value);
-            document.querySelectorAll('input[type="text"]').forEach(el => { if (el.value.trim() !== '') answers[el.id] = el.value.trim(); });
-            return answers;
+            const answers = {}; document.querySelectorAll('input[type="radio"]:checked').forEach(el => answers[el.name] = el.value);
+            document.querySelectorAll('input[type="text"]').forEach(el => { if (el.value.trim() !== '') answers[el.id] = el.value.trim(); }); return answers;
         }
 
         function fillAnswers(answers) {
             for (const key in answers) {
-                const val = answers[key];
-                const radio = document.querySelector(`input[name="${key}"][value="${val}"]`);
-                if (radio) radio.checked = true;
-                const textInput = document.getElementById(key);
-                if (textInput) textInput.value = val;
+                const val = answers[key]; const radio = document.querySelector(`input[name="${key}"][value="${val}"]`); if (radio) radio.checked = true;
+                const textInput = document.getElementById(key); if (textInput) textInput.value = val;
             }
-        }
-
-        function saveProgress() {
-            if (!currentExam || isSubmitted || isReviewMode) return;
-            usersDB[currentUser].activeState = { timeLeft: totalTime, answers: getAllCurrentAnswers() };
-            saveUsersDB();
         }
 
         function startTimer() {
             clearInterval(timerInterval);
             timerInterval = setInterval(() => {
                 if (totalTime <= 0) { openModal('submit'); return; }
-                totalTime--;
-                const m = Math.floor(totalTime / 60).toString().padStart(2, '0');
-                const s = (totalTime % 60).toString().padStart(2, '0');
+                totalTime--; const m = Math.floor(totalTime / 60).toString().padStart(2, '0'), s = (totalTime % 60).toString().padStart(2, '0');
                 document.getElementById('global-timer').innerText = `${m}:${s}`;
-                saveProgress();
+                if(totalTime % 5 === 0) saveProgress(); // Tự lưu mỗi 5 giây
             }, 1000);
         }
 
-        function submitAndGrade() {
+        window.submitAndGrade = async () => {
             clearInterval(timerInterval); isSubmitted = true;
-            usersDB[currentUser].activeState = null; usersDB[currentUser].activeExam = null;
-
-            const finalAnswers = getAllCurrentAnswers();
-            const score = runGradingLogic(finalAnswers);
-
-            if (!usersDB[currentUser].history[currentExam.id]) usersDB[currentUser].history[currentExam.id] = [];
-            const now = new Date();
-            const dateStr = now.toLocaleDateString('vi-VN') + ' - ' + now.toLocaleTimeString('vi-VN', {hour: '2-digit', minute:'2-digit'});
-
-            usersDB[currentUser].history[currentExam.id].push({ score: score, answers: finalAnswers, date: dateStr });
-            saveUsersDB();
-        }
+            const finalAnswers = getAllCurrentAnswers(); const score = runGradingLogic(finalAnswers);
+            
+            // Cập nhật Database
+            if (!userDataCache.history[currentExam.id]) userDataCache.history[currentExam.id] = [];
+            const now = new Date(); const dateStr = now.toLocaleDateString('vi-VN') + ' - ' + now.toLocaleTimeString('vi-VN', {hour: '2-digit', minute:'2-digit'});
+            userDataCache.history[currentExam.id].push({ score: score, answers: finalAnswers, date: dateStr });
+            userDataCache.activeExam = null; userDataCache.activeState = null;
+            
+            await updateDoc(doc(db, "users", currentUser.uid), { history: userDataCache.history, activeExam: null, activeState: null });
+        };
 
         function runGradingLogic(userAnswers, attemptNum = null) {
-            document.getElementById('control-header').style.display = 'none';
-            document.getElementById('header-timer').style.display = 'none'; 
-
-            let totalScore = 0; const key = currentExam.keys;
+            document.getElementById('control-header').style.display = 'none'; document.getElementById('header-timer').style.display = 'none'; 
+            let totalScore = 0; const key = currentExam.keys; let p1Correct = 0, p2Score = 0, p3Correct = 0;
             
-            let p1Correct = 0;
             for(let i=1; i<=12; i++) {
-                const uAns = userAnswers[`ans_P1_${i}`]; const cAns = key.P1 ? key.P1[i] : null;
-                const block = document.getElementById(`block_P1_${i}`);
+                const uAns = userAnswers[`ans_P1_${i}`]; const cAns = key.P1 ? key.P1[i] : null; const block = document.getElementById(`block_P1_${i}`);
                 if (uAns === cAns && cAns) { p1Correct++; block.classList.add('correct-bg'); } 
-                else { block.classList.add('wrong-bg'); document.getElementById(`feedback_P1_${i}`).innerHTML = `<span class="correct-text">🎯 Đáp án đúng: ${cAns}</span>`; }
-            }
-            totalScore += p1Correct * 0.25;
+                else { block.classList.add('wrong-bg'); document.getElementById(`feedback_P1_${i}`).innerHTML = `<span class="correct-text">🎯 Đáp án: ${cAns}</span>`; }
+            } totalScore += p1Correct * 0.25;
 
-            let p2Score = 0;
             for(let i=1; i<=4; i++) {
                 let cItems = 0;
-                ['a','b','c','d'].forEach(opt => {
-                    const uAns = userAnswers[`ans_P2_${i}_${opt}`]; const cAns = (key.P2 && key.P2[i]) ? key.P2[i][opt] : null;
-                    if (uAns === cAns && cAns) cItems++;
-                });
-
-                let pts = 0;
-                if (cItems === 1) pts = 0.1; else if (cItems === 2) pts = 0.25; else if (cItems === 3) pts = 0.5; else if (cItems === 4) pts = 1.0;
-                p2Score += pts;
-                
-                const block = document.getElementById(`block_P2_${i}`);
+                ['a','b','c','d'].forEach(opt => { const uAns = userAnswers[`ans_P2_${i}_${opt}`]; const cAns = (key.P2 && key.P2[i]) ? key.P2[i][opt] : null; if (uAns === cAns && cAns) cItems++; });
+                let pts = 0; if (cItems === 1) pts = 0.1; else if (cItems === 2) pts = 0.25; else if (cItems === 3) pts = 0.5; else if (cItems === 4) pts = 1.0;
+                p2Score += pts; const block = document.getElementById(`block_P2_${i}`);
                 if (cItems === 4) block.classList.add('correct-bg');
-                else {
-                    block.classList.add('wrong-bg'); const k = key.P2[i];
-                    document.getElementById(`feedback_P2_${i}`).innerHTML = `<span class="correct-text">🎯 Đúng: a) ${k.a==='T'?'Đ':'S'}, b) ${k.b==='T'?'Đ':'S'}, c) ${k.c==='T'?'Đ':'S'}, d) ${k.d==='T'?'Đ':'S'} (+${pts}đ)</span>`;
-                }
-            }
-            totalScore += p2Score;
+                else { block.classList.add('wrong-bg'); const k = key.P2[i]; document.getElementById(`feedback_P2_${i}`).innerHTML = `<span class="correct-text">🎯 Đúng: a)${k.a==='T'?'Đ':'S'}, b)${k.b==='T'?'Đ':'S'}, c)${k.c==='T'?'Đ':'S'}, d)${k.d==='T'?'Đ':'S'} (+${pts}đ)</span>`; }
+            } totalScore += p2Score;
 
-            let p3Correct = 0;
             for(let i=1; i<=6; i++) {
-                const uAns = userAnswers[`ans_P3_${i}`] || ""; const cAns = key.P3 ? String(key.P3[i]).trim() : null;
-                const block = document.getElementById(`block_P3_${i}`);
+                const uAns = userAnswers[`ans_P3_${i}`] || ""; const cAns = key.P3 ? String(key.P3[i]).trim() : null; const block = document.getElementById(`block_P3_${i}`);
                 if (uAns === cAns && cAns) { p3Correct++; block.classList.add('correct-bg'); } 
-                else { block.classList.add('wrong-bg'); document.getElementById(`feedback_P3_${i}`).innerHTML = `<span class="correct-text">🎯 Đáp án đúng: ${cAns}</span>`; }
-            }
-            totalScore += p3Correct * 0.5;
+                else { block.classList.add('wrong-bg'); document.getElementById(`feedback_P3_${i}`).innerHTML = `<span class="correct-text">🎯 Đáp án: ${cAns}</span>`; }
+            } totalScore += p3Correct * 0.5;
 
             document.querySelectorAll('#sheets-container input').forEach(el => el.disabled = true);
             document.getElementById('final-score-text').innerText = totalScore.toFixed(2);
-            
-            let descText = "Điểm thi tối đa là 10.0.";
-            if (isReviewMode) descText = attemptNum ? `Đây là kết quả Lần thi thứ ${attemptNum} của em.` : "Đây là kết quả bài làm gần nhất của em.";
-            document.getElementById('summary-desc').innerText = descText;
-
-            document.getElementById('summary-stats').innerHTML = `
-                <div class="stat-row"><span>Phần I (Trắc nghiệm)</span><b>${p1Correct}/12 câu (+${p1Correct * 0.25}đ)</b></div>
-                <div class="stat-row"><span>Phần II (Đúng/Sai)</span><b>(+${p2Score.toFixed(2)}đ)</b></div>
-                <div class="stat-row"><span>Phần III (Trả lời ngắn)</span><b>${p3Correct}/6 câu (+${p3Correct * 0.5}đ)</b></div>
-            `;
-            
-            document.getElementById('sheets-container').style.display = 'none';
-            document.getElementById('summary-screen').style.display = 'block';
-
+            document.getElementById('summary-desc').innerText = (isReviewMode && attemptNum) ? `Kết quả Lần thi thứ ${attemptNum}.` : (isReviewMode ? "Kết quả bài làm gần nhất." : "Điểm thi tối đa là 10.0.");
+            document.getElementById('summary-stats').innerHTML = `<div class="stat-row"><span>Phần I (Trắc nghiệm)</span><b>${p1Correct}/12 câu (+${p1Correct * 0.25}đ)</b></div><div class="stat-row"><span>Phần II (Đúng/Sai)</span><b>(+${p2Score.toFixed(2)}đ)</b></div><div class="stat-row"><span>Phần III (Trả lời ngắn)</span><b>${p3Correct}/6 câu (+${p3Correct * 0.5}đ)</b></div>`;
+            document.getElementById('sheets-container').style.display = 'none'; document.getElementById('summary-screen').style.display = 'block';
             return totalScore;
         }
+
+        window.addEventListener('beforeunload', () => { if (currentUser && currentExam && !isSubmitted && !isReviewMode) saveProgress(); });
     </script>
 </body>
 </html>
