@@ -20,7 +20,7 @@
         .fade-in { animation: fadeIn 0.3s ease-in-out; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* Auth Screen (Màn hình đăng nhập/đăng ký MỚI) */
+        /* Auth Screen */
         #auth-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--bg-color); display: flex; justify-content: center; align-items: center; z-index: 10000; }
         .auth-card { background: white; padding: 40px; border-radius: 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.08); width: 380px; text-align: center; border: 1px solid var(--border-color); display: none;}
         .auth-card.active { display: block; animation: fadeIn 0.4s ease-out; }
@@ -29,8 +29,16 @@
         
         .input-group { text-align: left; margin-bottom: 15px; }
         .input-group label { display: block; font-size: 13px; font-weight: bold; color: var(--thpt-dark); margin-bottom: 5px;}
+        
+        /* Cải tiến UI Mật khẩu */
+        .password-wrapper { position: relative; display: flex; align-items: center; }
         .auth-input { width: 100%; padding: 12px 15px; border: 2px solid var(--border-color); border-radius: 8px; outline: none; font-size: 15px; transition: 0.2s; background: #f8fafc;}
+        .password-wrapper .auth-input { padding-right: 40px; }
         .auth-input:focus { border-color: var(--thpt-main); background: white;}
+        .toggle-password { position: absolute; right: 12px; cursor: pointer; font-size: 18px; user-select: none; opacity: 0.5; transition: 0.2s; }
+        .toggle-password:hover { opacity: 1; }
+        /* Ẩn con mắt mặc định của Edge/Chrome */
+        input[type="password"]::-ms-reveal, input[type="password"]::-ms-clear { display: none; }
         
         .auth-btn { width: 100%; padding: 14px; border: none; border-radius: 8px; font-weight: bold; font-size: 16px; cursor: pointer; transition: 0.2s; margin-top: 10px;}
         .btn-primary { background: var(--thpt-main); color: white; box-shadow: 0 4px 6px rgba(2, 132, 199, 0.2);}
@@ -71,9 +79,21 @@
         .exam-card:hover { transform: translateY(-5px); box-shadow: 0 10px 15px rgba(0,0,0,0.1); border-color: var(--thpt-main);}
         .exam-tag { background: #e0f2fe; color: var(--thpt-main); padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: bold; align-self: flex-start; margin-bottom: 15px;}
         .exam-title { font-size: 18px; font-weight: bold; color: var(--thpt-dark); margin-bottom: 15px; line-height: 1.4;}
-        .exam-meta { font-size: 14px; color: #64748b; margin-bottom: 20px; display: flex; justify-content: space-between;}
-        .start-btn { background: var(--thpt-main); color: white; border: none; padding: 10px; border-radius: 6px; font-weight: bold; width: 100%; transition: 0.2s;}
+        .exam-meta { font-size: 14px; color: #64748b; margin-bottom: 15px; display: flex; justify-content: space-between;}
         
+        .start-btn { background: var(--thpt-main); color: white; border: none; padding: 10px; border-radius: 6px; font-weight: bold; width: 100%; transition: 0.2s; font-size: 15px;}
+        .start-btn:hover { filter: brightness(1.1); }
+        
+        /* Nhóm nút chức năng mới */
+        .action-buttons { display: flex; gap: 8px; width: 100%; }
+        .action-buttons button { flex: 1; padding: 10px 5px; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; transition: 0.2s; font-size: 13px;}
+        .btn-review { background: #e0f2fe; color: var(--thpt-main); }
+        .btn-retake { background: #fef08a; color: #ca8a04; }
+        .btn-history { background: #f1f5f9; color: #475569; }
+        .btn-review:hover { background: #bae6fd; }
+        .btn-retake:hover { background: #fde047; }
+        .btn-history:hover { background: #e2e8f0; }
+
         .score-badge { position: absolute; top: 20px; right: 20px; background: var(--thpt-success); color: white; padding: 5px 10px; border-radius: 8px; font-weight: bold; font-size: 18px; box-shadow: 0 2px 4px rgba(16,185,129,0.3);}
 
         /* Main Workspace */
@@ -127,7 +147,7 @@
         .wrong-bg { background-color: #fef2f2 !important; border-color: #fca5a5 !important; }
         .correct-bg { background-color: #f0fdf4 !important; border-color: #86efac !important; }
 
-        /* Modal */
+        /* Modals */
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.6); z-index: 99999; display: none; justify-content: center; align-items: center; opacity: 0; transition: opacity 0.3s ease; }
         .modal-overlay.show { display: flex; opacity: 1; }
         .custom-modal-content { background: white; padding: 35px 30px; border-radius: 16px; width: 420px; text-align: center; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25); transform: scale(0.9); transition: transform 0.3s ease;}
@@ -141,6 +161,15 @@
         .btn-confirm { background: var(--thpt-main); color: white; }
         .btn-confirm.danger { background: var(--thpt-danger); }
         .btn-confirm:hover { filter: brightness(1.1); transform: translateY(-1px);}
+
+        /* History Modal Elements */
+        .history-list { max-height: 250px; overflow-y: auto; text-align: left; margin-bottom: 20px; padding-right: 5px; }
+        .history-item { display: flex; justify-content: space-between; align-items: center; padding: 12px; border-bottom: 1px solid var(--border-color); }
+        .history-item:last-child { border-bottom: none; }
+        .history-info { display: flex; flex-direction: column; gap: 4px; }
+        .h-attempt { font-weight: bold; color: var(--thpt-dark); font-size: 15px; }
+        .h-date { font-size: 12px; color: #64748b; }
+        .h-score { font-size: 18px; font-weight: 900; color: var(--thpt-success); }
 
         #user-header-info { display: none; }
     </style>
@@ -156,11 +185,14 @@
             
             <div class="input-group">
                 <label>TÀI KHOẢN</label>
-                <input type="text" id="login-user" class="auth-input" placeholder="Nhập tên đăng nhập" autocomplete="off">
+                <input type="text" id="login-user" class="auth-input" placeholder="Nhập tên đăng nhập" autocomplete="off" onkeypress="checkEnter(event, 'login')">
             </div>
             <div class="input-group">
                 <label>MẬT KHẨU</label>
-                <input type="password" id="login-pass" class="auth-input" placeholder="Nhập mật khẩu">
+                <div class="password-wrapper">
+                    <input type="password" id="login-pass" class="auth-input" placeholder="Nhập mật khẩu" onkeypress="checkEnter(event, 'login')">
+                    <span class="toggle-password" onclick="togglePassword('login-pass', this)">👁️</span>
+                </div>
             </div>
             
             <button class="auth-btn btn-primary" onclick="handleLogin()">ĐĂNG NHẬP</button>
@@ -175,15 +207,21 @@
             
             <div class="input-group">
                 <label>TÀI KHOẢN</label>
-                <input type="text" id="reg-user" class="auth-input" placeholder="Tên đăng nhập (viết liền, không dấu)" autocomplete="off">
+                <input type="text" id="reg-user" class="auth-input" placeholder="Tên đăng nhập (viết liền, không dấu)" autocomplete="off" onkeypress="checkEnter(event, 'register')">
             </div>
             <div class="input-group">
                 <label>MẬT KHẨU</label>
-                <input type="password" id="reg-pass" class="auth-input" placeholder="Nhập mật khẩu">
+                <div class="password-wrapper">
+                    <input type="password" id="reg-pass" class="auth-input" placeholder="Nhập mật khẩu" onkeypress="checkEnter(event, 'register')">
+                    <span class="toggle-password" onclick="togglePassword('reg-pass', this)">👁️</span>
+                </div>
             </div>
             <div class="input-group">
                 <label>XÁC NHẬN MẬT KHẨU</label>
-                <input type="password" id="reg-pass-confirm" class="auth-input" placeholder="Nhập lại mật khẩu">
+                <div class="password-wrapper">
+                    <input type="password" id="reg-pass-confirm" class="auth-input" placeholder="Nhập lại mật khẩu" onkeypress="checkEnter(event, 'register')">
+                    <span class="toggle-password" onclick="togglePassword('reg-pass-confirm', this)">👁️</span>
+                </div>
             </div>
             
             <button class="auth-btn btn-primary" onclick="handleRegister()">ĐĂNG KÝ</button>
@@ -248,7 +286,9 @@
         <div class="custom-modal-content">
             <div class="modal-title" id="modal-title">Xác nhận</div>
             <div class="modal-msg" id="modal-message">Nội dung...</div>
-            <div class="modal-actions">
+            <div class="history-list" id="modal-history-list" style="display: none;"></div>
+            
+            <div class="modal-actions" id="modal-action-buttons">
                 <button class="btn-cancel" onclick="closeModal()">Quay lại</button>
                 <button class="btn-confirm" id="modal-confirm-btn" onclick="confirmAction()">Đồng ý</button>
             </div>
@@ -286,7 +326,7 @@
         ];
 
         // ==========================================
-        // HỆ THỐNG TÀI KHOẢN ĐƯỢC LÀM LẠI HOÀN TOÀN
+        // HỆ THỐNG TÀI KHOẢN (LOCAL STORAGE)
         // ==========================================
         let currentUser = null;
         let usersDB = JSON.parse(localStorage.getItem('thpt_users_db')) || {};
@@ -305,6 +345,26 @@
                 toggleAuth('login');
             }
         };
+
+        // --- TÍNH NĂNG MỚI: BẬT/TẮT MẬT KHẨU ---
+        function togglePassword(inputId, iconEl) {
+            const input = document.getElementById(inputId);
+            if (input.type === "password") {
+                input.type = "text";
+                iconEl.innerText = "🙈"; 
+            } else {
+                input.type = "password";
+                iconEl.innerText = "👁️";
+            }
+        }
+
+        // --- TÍNH NĂNG MỚI: BẤM ENTER ĐỂ SUBMIT ---
+        function checkEnter(e, type) {
+            if (e.key === 'Enter') {
+                if (type === 'login') handleLogin();
+                else if (type === 'register') handleRegister();
+            }
+        }
 
         function toggleAuth(type) {
             document.getElementById('login-form').classList.remove('active');
@@ -334,19 +394,17 @@
             if(pass !== confirm) { error.innerText = "Xác nhận mật khẩu không khớp!"; error.style.display = "block"; return; }
             if(usersDB[user]) { error.innerText = "Tên đăng nhập đã có người sử dụng!"; error.style.display = "block"; return; }
             
-            // Khởi tạo Database cho người dùng mới
+            // Khởi tạo History là một MẢNG (Array) để lưu nhiều lần thi
             usersDB[user] = { password: pass, history: {}, activeExam: null, activeState: null };
             saveUsersDB();
             
             success.innerText = "Đăng ký thành công! Đang chuyển sang Đăng nhập...";
             success.style.display = "block";
             
-            // Xoá trắng ô nhập
             document.getElementById('reg-user').value = '';
             document.getElementById('reg-pass').value = '';
             document.getElementById('reg-pass-confirm').value = '';
 
-            // Tự động nhảy sang form đăng nhập sau 1.5 giây
             setTimeout(() => { toggleAuth('login'); }, 1500);
         }
 
@@ -366,28 +424,24 @@
 
         function doLogin(username) {
             currentUser = username;
-            localStorage.setItem('thpt_current_user', username); // Lệnh này giúp trình duyệt nhớ vĩnh viễn
-            
-            // Ẩn bảng đăng nhập, hiện trang chủ
+            localStorage.setItem('thpt_current_user', username); 
             document.getElementById('auth-screen').style.display = 'none';
             document.getElementById('display-username').innerText = username;
             showHome();
         }
 
         function handleLogout() {
-            // Sửa lỗi đơ màn hình: Ẩn cẩn thận toàn bộ các khung trước khi đăng xuất
             closeModal();
             clearInterval(timerInterval);
             
             currentUser = null;
-            localStorage.removeItem('thpt_current_user'); // Xoá lệnh nhớ của trình duyệt
+            localStorage.removeItem('thpt_current_user'); 
             
             document.getElementById('exam-workspace').style.display = 'none';
             document.getElementById('user-header-info').style.display = 'none';
             document.getElementById('home-screen').style.display = 'none';
             document.getElementById('header-controls').style.display = 'none'; 
             
-            // Hiện lại màn hình Auth và xoá trắng dữ liệu cũ
             document.getElementById('auth-screen').style.display = 'flex';
             toggleAuth('login');
             document.getElementById('login-user').value = '';
@@ -410,7 +464,7 @@
             
             const userData = usersDB[currentUser];
             if (userData.activeExam) {
-                startExam(userData.activeExam);
+                startExam(userData.activeExam, 'continue');
                 return;
             }
             renderHome();
@@ -422,27 +476,47 @@
             const userData = usersDB[currentUser];
 
             EXAM_DATABASE.forEach(exam => {
-                const history = userData.history[exam.id];
-                const isCompleted = !!history;
+                let historyData = userData.history[exam.id];
                 
+                // Nâng cấp dữ liệu cũ (Dạng Object) thành dạng Mảng (Array) để không bị lỗi
+                if (historyData && !Array.isArray(historyData)) {
+                    userData.history[exam.id] = [historyData];
+                    historyData = userData.history[exam.id];
+                    saveUsersDB();
+                }
+
                 let tagText = exam.tag;
                 let tagColor = "";
-                let btnText = "Vào thi ngay";
                 let scoreHtml = "";
+                let actionHtml = `<button class="start-btn" onclick="startExam('${exam.id}', 'new')">Vào thi ngay</button>`;
 
-                if (isCompleted) {
-                    tagText = "Đã hoàn thành";
+                if (historyData && historyData.length > 0) {
+                    // Đã làm ít nhất 1 lần
+                    const attemptCount = historyData.length;
+                    const latestAttempt = historyData[attemptCount - 1];
+                    
+                    tagText = `Đã làm ${attemptCount}/10 lần`;
                     tagColor = "background: #d1fae5; color: #059669;";
-                    btnText = "Xem lại bài";
-                    scoreHtml = `<div class="score-badge">${history.score.toFixed(2)} đ</div>`;
+                    scoreHtml = `<div class="score-badge">${latestAttempt.score.toFixed(2)} đ</div>`;
+                    
+                    // UI Nhóm 3 nút
+                    actionHtml = `
+                        <div class="action-buttons">
+                            <button class="btn-review" onclick="startExam('${exam.id}', 'review')" title="Xem bài làm gần nhất">Xem lại</button>
+                            ${attemptCount < 10 ? `<button class="btn-retake" onclick="startExam('${exam.id}', 'retake')" title="Làm lại từ đầu">Làm lại</button>` : ''}
+                            <button class="btn-history" onclick="showHistory('${exam.id}')" title="Xem điểm các lần làm">Lịch sử</button>
+                        </div>
+                    `;
+
                 } else if (userData.activeExam === exam.id) {
+                    // Đang làm dở
                     tagText = "Đang làm dở...";
                     tagColor = "background: #fef08a; color: #ca8a04;";
-                    btnText = "Tiếp tục làm bài";
+                    actionHtml = `<button class="start-btn" style="background:#ca8a04" onclick="startExam('${exam.id}', 'continue')">Tiếp tục làm bài</button>`;
                 }
 
                 list.innerHTML += `
-                    <div class="exam-card" onclick="startExam('${exam.id}', ${isCompleted})">
+                    <div class="exam-card">
                         ${scoreHtml}
                         <span class="exam-tag" style="${tagColor}">${tagText}</span>
                         <div class="exam-title">${exam.title}</div>
@@ -450,17 +524,23 @@
                             <span>🕒 ${exam.timeMinutes} phút</span>
                             <span>Môn Toán</span>
                         </div>
-                        <button class="start-btn" style="${isCompleted ? 'background:#64748b;' : ''}">${btnText}</button>
+                        ${actionHtml}
                     </div>
                 `;
             });
         }
 
-        function startExam(examId, isCompleted = false) {
+        // Mode: 'new', 'continue', 'review', 'retake'
+        function startExam(examId, mode) {
             currentExam = EXAM_DATABASE.find(e => e.id === examId);
-            isSubmitted = isCompleted;
-            isReviewMode = isCompleted;
+            isReviewMode = (mode === 'review');
+            isSubmitted = isReviewMode;
             
+            // Xóa state nếu làm lại
+            if (mode === 'retake') {
+                usersDB[currentUser].activeState = null;
+            }
+
             if (!isReviewMode) {
                 usersDB[currentUser].activeExam = examId;
                 saveUsersDB();
@@ -484,14 +564,18 @@
             initAnswerSheets();
             
             if (isReviewMode) {
-                const savedAnswers = usersDB[currentUser].history[examId].answers;
+                // Lấy bài làm GẦN NHẤT
+                const historyData = usersDB[currentUser].history[examId];
+                const savedAnswers = historyData[historyData.length - 1].answers;
                 fillAnswers(savedAnswers);
                 runGradingLogic(savedAnswers);
             } else {
-                const state = usersDB[currentUser].activeState;
-                if (state && state.answers) {
-                    totalTime = state.timeLeft;
-                    fillAnswers(state.answers);
+                if (mode === 'continue') {
+                    const state = usersDB[currentUser].activeState;
+                    if (state && state.answers) {
+                        totalTime = state.timeLeft;
+                        fillAnswers(state.answers);
+                    }
                 }
                 startTimer();
             }
@@ -510,16 +594,52 @@
             showHome();
         }
 
+        function showHistory(examId) {
+            const historyData = usersDB[currentUser].history[examId];
+            const examInfo = EXAM_DATABASE.find(e => e.id === examId);
+            
+            const modal = document.getElementById('custom-modal');
+            document.getElementById('modal-title').innerText = `Lịch sử: ${examInfo.title}`;
+            document.getElementById('modal-message').style.display = 'none'; // Ẩn chữ đi
+            document.getElementById('modal-action-buttons').style.display = 'none'; // Ẩn nút đồng ý/hủy
+            
+            const listContainer = document.getElementById('modal-history-list');
+            listContainer.style.display = 'block';
+            listContainer.innerHTML = '';
+            
+            // In danh sách điểm
+            historyData.forEach((attempt, index) => {
+                const dateStr = attempt.date || "Không rõ ngày";
+                listContainer.innerHTML += `
+                    <div class="history-item">
+                        <div class="history-info">
+                            <span class="h-attempt">Lần thi thứ ${index + 1}</span>
+                            <span class="h-date">${dateStr}</span>
+                        </div>
+                        <div class="h-score">${attempt.score.toFixed(2)} đ</div>
+                    </div>
+                `;
+            });
+            
+            // Thêm nút Đóng bự
+            listContainer.innerHTML += `<button class="btn-cancel" onclick="closeModal()" style="width: 100%; margin-top: 15px;">Đóng Lịch Sử</button>`;
+
+            modal.style.display = 'flex';
+            setTimeout(() => modal.classList.add('show'), 10);
+        }
+
         function openModal(action) {
-            if (action === 'exit' && (isSubmitted || isReviewMode)) {
-                goHome();
-                return;
-            }
+            if (action === 'exit' && (isSubmitted || isReviewMode)) { goHome(); return; }
 
             const modal = document.getElementById('custom-modal');
             const title = document.getElementById('modal-title');
             const msg = document.getElementById('modal-message');
             const confirmBtn = document.getElementById('modal-confirm-btn');
+            
+            // Đảm bảo Reset giao diện Modal về chuẩn Cảnh báo
+            document.getElementById('modal-history-list').style.display = 'none';
+            msg.style.display = 'block';
+            document.getElementById('modal-action-buttons').style.display = 'flex';
 
             if (action === 'submit') {
                 title.innerText = "Nộp bài & Chấm điểm";
@@ -640,10 +760,22 @@
             const finalAnswers = getAllCurrentAnswers();
             const score = runGradingLogic(finalAnswers);
 
-            usersDB[currentUser].history[currentExam.id] = {
+            // THÊM ĐIỂM VÀO MẢNG LỊCH SỬ
+            if (!usersDB[currentUser].history[currentExam.id]) {
+                usersDB[currentUser].history[currentExam.id] = [];
+            }
+            const attemptsArr = usersDB[currentUser].history[currentExam.id];
+            
+            // Lấy giờ hiện tại
+            const now = new Date();
+            const dateStr = now.toLocaleDateString('vi-VN') + ' - ' + now.toLocaleTimeString('vi-VN', {hour: '2-digit', minute:'2-digit'});
+
+            attemptsArr.push({
                 score: score,
-                answers: finalAnswers
-            };
+                answers: finalAnswers,
+                date: dateStr
+            });
+
             saveUsersDB();
         }
 
@@ -700,7 +832,7 @@
             document.querySelectorAll('input').forEach(el => el.disabled = true);
             
             document.getElementById('final-score-text').innerText = totalScore.toFixed(2);
-            document.getElementById('summary-desc').innerText = isReviewMode ? "Đây là kết quả bài làm cũ của em." : "Điểm thi tối đa là 10.0.";
+            document.getElementById('summary-desc').innerText = isReviewMode ? "Đây là kết quả bài làm gần nhất của em." : "Điểm thi tối đa là 10.0.";
             document.getElementById('summary-stats').innerHTML = `
                 <div class="stat-row"><span>Phần I (Trắc nghiệm)</span><b>${p1Correct}/12 câu (+${p1Correct * 0.25}đ)</b></div>
                 <div class="stat-row"><span>Phần II (Đúng/Sai)</span><b>(+${p2Score.toFixed(2)}đ)</b></div>
