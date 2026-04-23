@@ -295,7 +295,7 @@
         </div>
     </div>
 
-    <script type="module">
+   <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
         import { getFirestore, doc, setDoc, getDoc, updateDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
@@ -385,10 +385,17 @@
                             document.getElementById('display-username').innerText = user.email.split('@')[0];
                             document.getElementById('user-header-info').style.display = 'flex';
 
-                            // GIẢI PHÁP Ở ĐÂY: Chỉ ném vào phòng thi nếu đang thi dở VÀ bấm F5 lúc đang trong phòng thi
-                            if (userDataCache.activeExam && sessionStorage.getItem('thpt_in_exam') === 'true') {
+                            // Kiểm tra xem có đang ở trạng thái Xem điểm/Lịch sử không
+                            const reviewState = JSON.parse(sessionStorage.getItem('thpt_review_state') || 'null');
+
+                            if (reviewState && userDataCache.history[reviewState.id]) {
+                                // Ưu tiên 1: Đang xem kết quả bài thi
+                                startExam(reviewState.id, 'review', reviewState.idx);
+                            } else if (userDataCache.activeExam && sessionStorage.getItem('thpt_in_exam') === 'true') {
+                                // Ưu tiên 2: Đang làm bài dở
                                 startExam(userDataCache.activeExam, 'continue');
                             } else {
+                                // Ưu tiên 3: Hiển thị Home
                                 showHome();
                             }
                         }
@@ -512,8 +519,15 @@
         }
 
         async function startExam(examId, mode, attemptIndex = null) {
-            // Ghi nhớ cờ "Đang trong phòng thi" để F5 không bị văng
-            sessionStorage.setItem('thpt_in_exam', 'true'); 
+            // Quản lý trí nhớ (Memory Tags) cho quá trình F5
+            if (mode === 'review') {
+                const idxToSave = (attemptIndex !== null) ? attemptIndex : (userDataCache.history[examId].length - 1);
+                sessionStorage.setItem('thpt_review_state', JSON.stringify({ id: examId, idx: idxToSave }));
+                sessionStorage.removeItem('thpt_in_exam');
+            } else {
+                sessionStorage.setItem('thpt_in_exam', 'true'); 
+                sessionStorage.removeItem('thpt_review_state');
+            }
             
             currentExam = EXAM_DATABASE.find(e => e.id === examId);
             isReviewMode = (mode === 'review'); isSubmitted = isReviewMode;
@@ -547,8 +561,10 @@
         window.startExam = startExam;
 
         function goHome() { 
-            // Xóa cờ phòng thi, F5 sẽ ở yên màn Home
+            // Xóa sạch trí nhớ trạng thái khi cố tình ra ngoài
             sessionStorage.removeItem('thpt_in_exam'); 
+            sessionStorage.removeItem('thpt_review_state');
+
             clearInterval(timerInterval); 
             document.getElementById('exam-workspace').style.display = 'none'; 
             document.getElementById('header-controls').style.display = 'none'; 
@@ -654,7 +670,7 @@
         }
 
         async function submitAndGrade() {
-            // Xóa cờ phòng thi vì đã nộp bài
+            // Xóa trạng thái đang thi
             sessionStorage.removeItem('thpt_in_exam'); 
             
             clearInterval(timerInterval); isSubmitted = true;
@@ -663,6 +679,11 @@
             if (!userDataCache.history[currentExam.id]) userDataCache.history[currentExam.id] = [];
             const now = new Date(); const dateStr = now.toLocaleDateString('vi-VN') + ' - ' + now.toLocaleTimeString('vi-VN', {hour: '2-digit', minute:'2-digit'});
             userDataCache.history[currentExam.id].push({ score: score, answers: finalAnswers, date: dateStr });
+            
+            // Ghi nhớ trạng thái Xem Kết Quả để F5 không mất
+            const newAttemptIndex = userDataCache.history[currentExam.id].length - 1;
+            sessionStorage.setItem('thpt_review_state', JSON.stringify({ id: currentExam.id, idx: newAttemptIndex }));
+            
             userDataCache.activeExam = null; userDataCache.activeState = null;
             
             await updateDoc(doc(db, "users", currentUser.uid), { history: userDataCache.history, activeExam: null, activeState: null });
