@@ -26,7 +26,7 @@
         header h1 { font-size: 26px; color: var(--thpt-main); font-weight: 900; letter-spacing: -1px;}
         .home-btn { background: #f1f5f9; border: none; padding: 8px 15px; border-radius: 6px; font-weight: bold; color: var(--thpt-dark); cursor: pointer;}
         
-        .tabs { display: flex; gap: 8px; margin-top: 25px; display: none; } /* Ẩn ở Home */
+        .tabs { display: flex; gap: 8px; margin-top: 25px; display: none; }
         .tab-btn { padding: 10px 18px; border: none; background: #f1f5f9; cursor: pointer; border-radius: 8px 8px 0 0; font-weight: 600; color: #64748b; border: 1px solid var(--border-color); border-bottom: none; transition: 0.3s; }
         .tab-btn.active { background: var(--thpt-main); color: white; border-color: var(--thpt-main); }
 
@@ -41,7 +41,7 @@
         .exam-meta { font-size: 14px; color: #64748b; margin-bottom: 20px; display: flex; justify-content: space-between;}
         .start-btn { background: var(--thpt-main); color: white; border: none; padding: 10px; border-radius: 6px; font-weight: bold; width: 100%; transition: 0.2s;}
         
-        /* Main Workspace (Khu vực làm bài) */
+        /* Main Workspace */
         #exam-workspace { display: none; flex: 1; overflow: hidden; }
         .left-panel { flex: 5; background: #525659; display: flex; flex-direction: column; border-right: 2px solid #ccc; }
         #pdf-frame { width: 100%; height: 100%; border: none; }
@@ -79,7 +79,6 @@
         .final-score { font-size: 60px; font-weight: 900; color: var(--thpt-danger); line-height: 1; margin: 20px 0;}
         .stat-row { display: flex; justify-content: space-between; padding: 16px; border-bottom: 1px solid #f1f5f9; font-size: 16px;}
         
-        /* Hiển thị Đáp án sau khi nộp */
         .correct-text { color: var(--thpt-success); font-weight: bold; font-size: 14px; margin-top: 10px; display: block;}
         .wrong-bg { background-color: #fee2e2 !important; border-color: #fca5a5 !important; }
         .correct-bg { background-color: #d1fae5 !important; border-color: #6ee7b7 !important; }
@@ -124,7 +123,6 @@
                     <div class="final-score" id="final-score-text">0.00</div>
                     <p style="margin-bottom: 20px; color: #64748b;">Điểm thi tối đa là 10.0.</p>
                     <div id="summary-stats"></div>
-                    
                     <button class="submit-btn" style="background: var(--thpt-main); margin-top: 25px; width: 100%;" onclick="switchTab(0)">
                         Xem lại đáp án chi tiết
                     </button>
@@ -134,15 +132,12 @@
     </div>
 
     <script>
-        // ==========================================
-        // 1. "DATABASE" ĐỀ THI VÀ ĐÁP ÁN CỦA EM
-        // ==========================================
         const EXAM_DATABASE = [
             {
                 id: "toan_hanoi_2026",
                 title: "Đề Khảo Tinh Tú - Thầy ĐVĐ",
                 tag: "Mới nhất",
-                pdfUrl: "exams/de-05-dvd.pdf", // Link chuẩn em đã cài
+                pdfUrl: "exams/de-05-dvd.pdf",
                 timeMinutes: 90,
                 keys: {
                     P1: { 1: "A", 2: "B", 3: "C", 4: "D", 5: "A", 6: "B", 7: "C", 8: "D", 9: "A", 10: "B", 11: "C", 12: "D" },
@@ -154,20 +149,9 @@
                     },
                     P3: { 1: "15", 2: "-3", 3: "0.5", 4: "100", 5: "2", 6: "7" }
                 }
-            },
-            {
-                id: "toan_thanhhoa_2026",
-                title: "Đề thi thử Toán - Chuyên Lam Sơn",
-                tag: "Đề chuyên",
-                pdfUrl: "link_file_pdf_cua_em.pdf",
-                timeMinutes: 90,
-                keys: { /* Nhập đáp án tương tự ở trên */ }
             }
         ];
 
-        // ==========================================
-        // 2. LOGIC HỆ THỐNG
-        // ==========================================
         const mathConfig = [
             { id: 'phan1', name: 'Phần I', type: 'mcq', qCount: 12, prefix: 'P1' },
             { id: 'phan2', name: 'Phần II', type: 'tf', qCount: 4, prefix: 'P2' },
@@ -185,15 +169,20 @@
             const list = document.getElementById('exam-list');
             list.innerHTML = '';
             EXAM_DATABASE.forEach(exam => {
+                // Kiểm tra xem đề này đang làm dở không
+                const savedState = localStorage.getItem(`exam_progress_${exam.id}`);
+                const tagText = savedState ? "Đang làm dở..." : exam.tag;
+                const tagColor = savedState ? "background: #fef08a; color: #ca8a04;" : "";
+
                 list.innerHTML += `
                     <div class="exam-card" onclick="startExam('${exam.id}')">
-                        <span class="exam-tag">${exam.tag}</span>
+                        <span class="exam-tag" style="${tagColor}">${tagText}</span>
                         <div class="exam-title">${exam.title}</div>
                         <div class="exam-meta">
                             <span>🕒 ${exam.timeMinutes} phút</span>
                             <span>Môn Toán</span>
                         </div>
-                        <button class="start-btn">Vào thi ngay</button>
+                        <button class="start-btn">${savedState ? 'Tiếp tục làm bài' : 'Vào thi ngay'}</button>
                     </div>
                 `;
             });
@@ -210,21 +199,26 @@
             document.getElementById('control-header').style.display = 'flex';
             document.getElementById('summary-screen').style.display = 'none';
 
-            // CODE ĐÃ CẬP NHẬT ẨN THANH CÔNG CỤ PDF
             document.getElementById('pdf-frame').src = currentExam.pdfUrl + "#toolbar=0&navpanes=0&scrollbar=0&view=FitH";
             document.getElementById('current-exam-name').innerText = currentExam.title;
             
             totalTime = currentExam.timeMinutes * 60;
             initAnswerSheets();
+            
+            // KHÔI PHỤC DỮ LIỆU TỪ LOCAL STORAGE (NẾU CÓ)
+            loadProgress();
+            
             startTimer();
         }
 
         function goHome() {
             clearInterval(timerInterval);
+            saveProgress(); // Lưu lại trước khi thoát ra Home
             document.getElementById('exam-workspace').style.display = 'none';
             document.getElementById('home-screen').style.display = 'block';
             document.getElementById('tab-container').style.display = 'none';
             document.getElementById('btn-exit').style.display = 'none';
+            renderHome(); // Load lại Home để cập nhật chữ "Đang làm dở..."
         }
 
         function initAnswerSheets() {
@@ -239,11 +233,11 @@
                 for (let i = 1; i <= sec.qCount; i++) {
                     let qBody = '';
                     if (sec.type === 'mcq') {
-                        qBody = `<div class="mcq-options">${['A', 'B', 'C', 'D'].map(opt => `<label class="mcq-label"><input type="radio" name="ans_${sec.prefix}_${i}" value="${opt}"> ${opt}</label>`).join('')}</div>`;
+                        qBody = `<div class="mcq-options">${['A', 'B', 'C', 'D'].map(opt => `<label class="mcq-label"><input type="radio" name="ans_${sec.prefix}_${i}" value="${opt}" onchange="saveProgress()"> ${opt}</label>`).join('')}</div>`;
                     } else if (sec.type === 'tf') {
-                        qBody = `<table class="tf-grid"><tr><th>Ý</th><th>Đúng</th><th>Sai</th></tr>${['a', 'b', 'c', 'd'].map(opt => `<tr><td class="statement">Ý ${opt}</td><td><input type="radio" name="ans_${sec.prefix}_${i}_${opt}" value="T"></td><td><input type="radio" name="ans_${sec.prefix}_${i}_${opt}" value="F"></td></tr>`).join('')}</table>`;
+                        qBody = `<table class="tf-grid"><tr><th>Ý</th><th>Đúng</th><th>Sai</th></tr>${['a', 'b', 'c', 'd'].map(opt => `<tr><td class="statement">Ý ${opt}</td><td><input type="radio" name="ans_${sec.prefix}_${i}_${opt}" value="T" onchange="saveProgress()"></td><td><input type="radio" name="ans_${sec.prefix}_${i}_${opt}" value="F" onchange="saveProgress()"></td></tr>`).join('')}</table>`;
                     } else if (sec.type === 'short') {
-                        qBody = `<input type="text" class="short-answer-input" id="ans_${sec.prefix}_${i}" placeholder="Nhập đáp án...">`;
+                        qBody = `<input type="text" class="short-answer-input" id="ans_${sec.prefix}_${i}" placeholder="Nhập đáp án..." oninput="saveProgress()">`;
                     }
                     html += `<div class="question-block" id="block_${sec.prefix}_${i}"><div class="q-header"><div class="q-num">Câu ${i}</div></div><div class="q-body">${qBody}</div><div class="result-feedback" id="feedback_${sec.prefix}_${i}"></div></div>`;
                 }
@@ -252,15 +246,51 @@
             });
         }
 
-        // CODE ĐÃ CẬP NHẬT HÀM SWITCH TAB
         function switchTab(index) {
             document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
             document.querySelectorAll('.sheet-container').forEach(sheet => sheet.classList.remove('active'));
             document.getElementById(`tab-btn-${index}`).classList.add('active');
             document.getElementById(`sheet-${mathConfig[index].id}`).classList.add('active', 'fade-in');
-            
-            // Ẩn bảng điểm khi người dùng bấm quay lại xem đáp án
             document.getElementById('summary-screen').style.display = 'none';
+        }
+
+        // ==========================================
+        // TÍNH NĂNG LƯU VÀ KHÔI PHỤC TRẠNG THÁI
+        // ==========================================
+        function saveProgress() {
+            if (!currentExam || isSubmitted) return;
+            const state = { timeLeft: totalTime, answers: {} };
+            
+            // Gom tất cả các câu đã tick
+            document.querySelectorAll('input[type="radio"]:checked').forEach(el => {
+                state.answers[el.name] = el.value;
+            });
+            // Gom tất cả các câu điền số
+            document.querySelectorAll('input[type="text"]').forEach(el => {
+                if (el.value.trim() !== '') state.answers[el.id] = el.value.trim();
+            });
+            
+            // Lưu vào bộ nhớ trình duyệt
+            localStorage.setItem(`exam_progress_${currentExam.id}`, JSON.stringify(state));
+        }
+
+        function loadProgress() {
+            const saved = localStorage.getItem(`exam_progress_${currentExam.id}`);
+            if (saved) {
+                const state = JSON.parse(saved);
+                totalTime = state.timeLeft; // Phục hồi thời gian
+                
+                // Phục hồi đáp án
+                for (const key in state.answers) {
+                    const val = state.answers[key];
+                    // Phục hồi radio (trắc nghiệm)
+                    const radio = document.querySelector(`input[name="${key}"][value="${val}"]`);
+                    if (radio) radio.checked = true;
+                    // Phục hồi text (điền số)
+                    const textInput = document.getElementById(key);
+                    if (textInput) textInput.value = val;
+                }
+            }
         }
 
         function startTimer() {
@@ -274,22 +304,24 @@
                 const m = Math.floor(totalTime / 60).toString().padStart(2, '0');
                 const s = (totalTime % 60).toString().padStart(2, '0');
                 document.getElementById('global-timer').innerText = `${m}:${s}`;
+                
+                // Lưu lại tiến độ đếm ngược mỗi giây
+                saveProgress();
             }, 1000);
         }
 
-        // ==========================================
-        // 3. THUẬT TOÁN CHẤM ĐIỂM TOÁN THPT 2025
-        // ==========================================
         function submitAndGrade() {
             if (!confirm("Em có chắc chắn muốn nộp bài và tính điểm?")) return;
             clearInterval(timerInterval);
             isSubmitted = true;
             document.getElementById('control-header').style.display = 'none';
 
+            // XOÁ DỮ LIỆU ĐÃ LƯU SAU KHI NỘP BÀI THÀNH CÔNG
+            localStorage.removeItem(`exam_progress_${currentExam.id}`);
+
             let totalScore = 0;
             const key = currentExam.keys;
             
-            // Chấm Phần I (0.25 điểm / câu)
             let p1Correct = 0;
             for(let i=1; i<=12; i++) {
                 const checked = document.querySelector(`input[name="ans_P1_${i}"]:checked`);
@@ -307,7 +339,6 @@
             }
             totalScore += p1Correct * 0.25;
 
-            // Chấm Phần II (4 câu. Đúng 1 ý: 0.1đ | 2 ý: 0.25đ | 3 ý: 0.5đ | 4 ý: 1.0đ)
             let p2Score = 0;
             for(let i=1; i<=4; i++) {
                 let correctItems = 0;
@@ -336,7 +367,6 @@
             }
             totalScore += p2Score;
 
-            // Chấm Phần III (0.5 điểm / câu)
             let p3Correct = 0;
             for(let i=1; i<=6; i++) {
                 const input = document.getElementById(`ans_P3_${i}`);
@@ -354,7 +384,6 @@
             }
             totalScore += p3Correct * 0.5;
 
-            // Hiển thị kết quả
             document.querySelectorAll('input').forEach(el => el.disabled = true);
             document.getElementById('final-score-text').innerText = totalScore.toFixed(2);
             
