@@ -30,14 +30,12 @@
         .input-group { text-align: left; margin-bottom: 15px; }
         .input-group label { display: block; font-size: 13px; font-weight: bold; color: var(--thpt-dark); margin-bottom: 5px;}
         
-        /* Cải tiến UI Mật khẩu */
         .password-wrapper { position: relative; display: flex; align-items: center; }
         .auth-input { width: 100%; padding: 12px 15px; border: 2px solid var(--border-color); border-radius: 8px; outline: none; font-size: 15px; transition: 0.2s; background: #f8fafc;}
         .password-wrapper .auth-input { padding-right: 40px; }
         .auth-input:focus { border-color: var(--thpt-main); background: white;}
         .toggle-password { position: absolute; right: 12px; cursor: pointer; font-size: 18px; user-select: none; opacity: 0.5; transition: 0.2s; }
         .toggle-password:hover { opacity: 1; }
-        /* Ẩn con mắt mặc định của Edge/Chrome */
         input[type="password"]::-ms-reveal, input[type="password"]::-ms-clear { display: none; }
         
         .auth-btn { width: 100%; padding: 14px; border: none; border-radius: 8px; font-weight: bold; font-size: 16px; cursor: pointer; transition: 0.2s; margin-top: 10px;}
@@ -84,7 +82,6 @@
         .start-btn { background: var(--thpt-main); color: white; border: none; padding: 10px; border-radius: 6px; font-weight: bold; width: 100%; transition: 0.2s; font-size: 15px;}
         .start-btn:hover { filter: brightness(1.1); }
         
-        /* Nhóm nút chức năng mới */
         .action-buttons { display: flex; gap: 8px; width: 100%; }
         .action-buttons button { flex: 1; padding: 10px 5px; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; transition: 0.2s; font-size: 13px;}
         .btn-review { background: #e0f2fe; color: var(--thpt-main); }
@@ -150,7 +147,7 @@
         /* Modals */
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.6); z-index: 99999; display: none; justify-content: center; align-items: center; opacity: 0; transition: opacity 0.3s ease; }
         .modal-overlay.show { display: flex; opacity: 1; }
-        .custom-modal-content { background: white; padding: 35px 30px; border-radius: 16px; width: 420px; text-align: center; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25); transform: scale(0.9); transition: transform 0.3s ease;}
+        .custom-modal-content { background: white; padding: 35px 30px; border-radius: 16px; width: 440px; text-align: center; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25); transform: scale(0.9); transition: transform 0.3s ease;}
         .modal-overlay.show .custom-modal-content { transform: scale(1); }
         .modal-title { font-size: 22px; font-weight: 900; color: var(--thpt-dark); margin-bottom: 15px; }
         .modal-msg { font-size: 15px; color: #64748b; line-height: 1.5; margin-bottom: 25px; }
@@ -163,13 +160,17 @@
         .btn-confirm:hover { filter: brightness(1.1); transform: translateY(-1px);}
 
         /* History Modal Elements */
-        .history-list { max-height: 250px; overflow-y: auto; text-align: left; margin-bottom: 20px; padding-right: 5px; }
-        .history-item { display: flex; justify-content: space-between; align-items: center; padding: 12px; border-bottom: 1px solid var(--border-color); }
+        .history-list { max-height: 280px; overflow-y: auto; text-align: left; margin-bottom: 20px; padding-right: 5px; }
+        .history-item { display: flex; justify-content: space-between; align-items: center; padding: 15px 10px; border-bottom: 1px solid var(--border-color); }
         .history-item:last-child { border-bottom: none; }
         .history-info { display: flex; flex-direction: column; gap: 4px; }
         .h-attempt { font-weight: bold; color: var(--thpt-dark); font-size: 15px; }
         .h-date { font-size: 12px; color: #64748b; }
+        
+        .history-action { display: flex; align-items: center; gap: 15px; }
         .h-score { font-size: 18px; font-weight: 900; color: var(--thpt-success); }
+        .btn-review-sm { background: #e0f2fe; color: var(--thpt-main); border: none; padding: 8px 12px; border-radius: 6px; font-weight: bold; cursor: pointer; transition: 0.2s; font-size: 13px; }
+        .btn-review-sm:hover { background: #bae6fd; transform: translateY(-1px); }
 
         #user-header-info { display: none; }
     </style>
@@ -177,7 +178,6 @@
 <body>
 
     <div id="auth-screen">
-        
         <div class="auth-card active" id="login-form">
             <h1>THPTQG 2026</h1>
             <p>Hệ thống tự động lưu trữ dữ liệu thi</p>
@@ -233,9 +233,7 @@
         <div class="logo-area" onclick="openModal('exit')">
             <h1>THPTQG 2026</h1>
         </div>
-        
         <div class="tabs" id="tab-container"></div>
-        
         <div class="header-controls" id="header-controls">
             <div class="header-timer" id="header-timer">
                 <span style="font-size: 12px; color: #64748b; font-weight: bold; text-transform: uppercase;">Thời gian</span>
@@ -243,7 +241,6 @@
             </div>
             <button class="home-btn exit-btn" onclick="openModal('exit')">Thoát Đề</button>
         </div>
-
         <div class="user-info" id="user-header-info">
             Xin chào, <span id="display-username" style="color: var(--thpt-main);">User</span>!
             <button class="logout-btn" onclick="handleLogout()">Đăng xuất</button>
@@ -296,9 +293,6 @@
     </div>
 
     <script>
-        // ==========================================
-        // DATABASE ĐỀ THI
-        // ==========================================
         const EXAM_DATABASE = [
             {
                 id: "toan_hanoi_2026",
@@ -325,9 +319,6 @@
             { id: 'phan3', name: 'Phần III', type: 'short', qCount: 6, prefix: 'P3' }
         ];
 
-        // ==========================================
-        // HỆ THỐNG TÀI KHOẢN (LOCAL STORAGE)
-        // ==========================================
         let currentUser = null;
         let usersDB = JSON.parse(localStorage.getItem('thpt_users_db')) || {};
 
@@ -346,7 +337,6 @@
             }
         };
 
-        // --- TÍNH NĂNG MỚI: BẬT/TẮT MẬT KHẨU ---
         function togglePassword(inputId, iconEl) {
             const input = document.getElementById(inputId);
             if (input.type === "password") {
@@ -358,7 +348,6 @@
             }
         }
 
-        // --- TÍNH NĂNG MỚI: BẤM ENTER ĐỂ SUBMIT ---
         function checkEnter(e, type) {
             if (e.key === 'Enter') {
                 if (type === 'login') handleLogin();
@@ -394,7 +383,6 @@
             if(pass !== confirm) { error.innerText = "Xác nhận mật khẩu không khớp!"; error.style.display = "block"; return; }
             if(usersDB[user]) { error.innerText = "Tên đăng nhập đã có người sử dụng!"; error.style.display = "block"; return; }
             
-            // Khởi tạo History là một MẢNG (Array) để lưu nhiều lần thi
             usersDB[user] = { password: pass, history: {}, activeExam: null, activeState: null };
             saveUsersDB();
             
@@ -448,9 +436,6 @@
             document.getElementById('login-pass').value = '';
         }
 
-        // ==========================================
-        // LOGIC LÀM BÀI & CHẤM ĐIỂM
-        // ==========================================
         let currentExam = null;
         let totalTime = 0;
         let timerInterval = null;
@@ -478,7 +463,6 @@
             EXAM_DATABASE.forEach(exam => {
                 let historyData = userData.history[exam.id];
                 
-                // Nâng cấp dữ liệu cũ (Dạng Object) thành dạng Mảng (Array) để không bị lỗi
                 if (historyData && !Array.isArray(historyData)) {
                     userData.history[exam.id] = [historyData];
                     historyData = userData.history[exam.id];
@@ -491,7 +475,6 @@
                 let actionHtml = `<button class="start-btn" onclick="startExam('${exam.id}', 'new')">Vào thi ngay</button>`;
 
                 if (historyData && historyData.length > 0) {
-                    // Đã làm ít nhất 1 lần
                     const attemptCount = historyData.length;
                     const latestAttempt = historyData[attemptCount - 1];
                     
@@ -499,7 +482,6 @@
                     tagColor = "background: #d1fae5; color: #059669;";
                     scoreHtml = `<div class="score-badge">${latestAttempt.score.toFixed(2)} đ</div>`;
                     
-                    // UI Nhóm 3 nút
                     actionHtml = `
                         <div class="action-buttons">
                             <button class="btn-review" onclick="startExam('${exam.id}', 'review')" title="Xem bài làm gần nhất">Xem lại</button>
@@ -509,7 +491,6 @@
                     `;
 
                 } else if (userData.activeExam === exam.id) {
-                    // Đang làm dở
                     tagText = "Đang làm dở...";
                     tagColor = "background: #fef08a; color: #ca8a04;";
                     actionHtml = `<button class="start-btn" style="background:#ca8a04" onclick="startExam('${exam.id}', 'continue')">Tiếp tục làm bài</button>`;
@@ -530,13 +511,12 @@
             });
         }
 
-        // Mode: 'new', 'continue', 'review', 'retake'
-        function startExam(examId, mode) {
+        // TÍNH NĂNG MỚI: Thêm thông số attemptIndex để biết đang mở lần thi thứ mấy
+        function startExam(examId, mode, attemptIndex = null) {
             currentExam = EXAM_DATABASE.find(e => e.id === examId);
             isReviewMode = (mode === 'review');
             isSubmitted = isReviewMode;
             
-            // Xóa state nếu làm lại
             if (mode === 'retake') {
                 usersDB[currentUser].activeState = null;
             }
@@ -564,11 +544,15 @@
             initAnswerSheets();
             
             if (isReviewMode) {
-                // Lấy bài làm GẦN NHẤT
                 const historyData = usersDB[currentUser].history[examId];
-                const savedAnswers = historyData[historyData.length - 1].answers;
+                // Nếu gọi qua nút "Xem lại" ở ngoài (attemptIndex = null) -> Lấy lần làm cuối cùng
+                const indexToReview = (attemptIndex !== null) ? attemptIndex : (historyData.length - 1);
+                
+                const savedAnswers = historyData[indexToReview].answers;
                 fillAnswers(savedAnswers);
-                runGradingLogic(savedAnswers);
+                
+                // Truyền indexToReview + 1 để UI biết đó là lần thi số mấy
+                runGradingLogic(savedAnswers, indexToReview + 1);
             } else {
                 if (mode === 'continue') {
                     const state = usersDB[currentUser].activeState;
@@ -594,20 +578,20 @@
             showHome();
         }
 
+        // TÍNH NĂNG MỚI: Modal Lịch Sử đã được chèn nút "Xem bài"
         function showHistory(examId) {
             const historyData = usersDB[currentUser].history[examId];
             const examInfo = EXAM_DATABASE.find(e => e.id === examId);
             
             const modal = document.getElementById('custom-modal');
             document.getElementById('modal-title').innerText = `Lịch sử: ${examInfo.title}`;
-            document.getElementById('modal-message').style.display = 'none'; // Ẩn chữ đi
-            document.getElementById('modal-action-buttons').style.display = 'none'; // Ẩn nút đồng ý/hủy
+            document.getElementById('modal-message').style.display = 'none'; 
+            document.getElementById('modal-action-buttons').style.display = 'none'; 
             
             const listContainer = document.getElementById('modal-history-list');
             listContainer.style.display = 'block';
             listContainer.innerHTML = '';
             
-            // In danh sách điểm
             historyData.forEach((attempt, index) => {
                 const dateStr = attempt.date || "Không rõ ngày";
                 listContainer.innerHTML += `
@@ -616,12 +600,14 @@
                             <span class="h-attempt">Lần thi thứ ${index + 1}</span>
                             <span class="h-date">${dateStr}</span>
                         </div>
-                        <div class="h-score">${attempt.score.toFixed(2)} đ</div>
+                        <div class="history-action">
+                            <span class="h-score">${attempt.score.toFixed(2)} đ</span>
+                            <button class="btn-review-sm" onclick="closeModal(); startExam('${examId}', 'review', ${index})">Xem bài</button>
+                        </div>
                     </div>
                 `;
             });
             
-            // Thêm nút Đóng bự
             listContainer.innerHTML += `<button class="btn-cancel" onclick="closeModal()" style="width: 100%; margin-top: 15px;">Đóng Lịch Sử</button>`;
 
             modal.style.display = 'flex';
@@ -636,7 +622,6 @@
             const msg = document.getElementById('modal-message');
             const confirmBtn = document.getElementById('modal-confirm-btn');
             
-            // Đảm bảo Reset giao diện Modal về chuẩn Cảnh báo
             document.getElementById('modal-history-list').style.display = 'none';
             msg.style.display = 'block';
             document.getElementById('modal-action-buttons').style.display = 'flex';
@@ -760,13 +745,11 @@
             const finalAnswers = getAllCurrentAnswers();
             const score = runGradingLogic(finalAnswers);
 
-            // THÊM ĐIỂM VÀO MẢNG LỊCH SỬ
             if (!usersDB[currentUser].history[currentExam.id]) {
                 usersDB[currentUser].history[currentExam.id] = [];
             }
             const attemptsArr = usersDB[currentUser].history[currentExam.id];
             
-            // Lấy giờ hiện tại
             const now = new Date();
             const dateStr = now.toLocaleDateString('vi-VN') + ' - ' + now.toLocaleTimeString('vi-VN', {hour: '2-digit', minute:'2-digit'});
 
@@ -779,7 +762,7 @@
             saveUsersDB();
         }
 
-        function runGradingLogic(userAnswers) {
+        function runGradingLogic(userAnswers, attemptNum = null) {
             document.getElementById('control-header').style.display = 'none';
             document.getElementById('header-timer').style.display = 'none'; 
 
@@ -832,7 +815,14 @@
             document.querySelectorAll('input').forEach(el => el.disabled = true);
             
             document.getElementById('final-score-text').innerText = totalScore.toFixed(2);
-            document.getElementById('summary-desc').innerText = isReviewMode ? "Đây là kết quả bài làm gần nhất của em." : "Điểm thi tối đa là 10.0.";
+            
+            // TÍNH NĂNG MỚI: Dòng chữ miêu tả thay đổi dựa trên trạng thái
+            let descText = "Điểm thi tối đa là 10.0.";
+            if (isReviewMode) {
+                descText = attemptNum ? `Đây là kết quả Lần thi thứ ${attemptNum} của em.` : "Đây là kết quả bài làm gần nhất của em.";
+            }
+            document.getElementById('summary-desc').innerText = descText;
+
             document.getElementById('summary-stats').innerHTML = `
                 <div class="stat-row"><span>Phần I (Trắc nghiệm)</span><b>${p1Correct}/12 câu (+${p1Correct * 0.25}đ)</b></div>
                 <div class="stat-row"><span>Phần II (Đúng/Sai)</span><b>(+${p2Score.toFixed(2)}đ)</b></div>
@@ -847,4 +837,3 @@
     </script>
 </body>
 </html>
- 
