@@ -84,10 +84,8 @@
         
         .action-buttons { display: flex; gap: 8px; width: 100%; }
         .action-buttons button { flex: 1; padding: 10px 5px; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; transition: 0.2s; font-size: 13px;}
-        .btn-review { background: #e0f2fe; color: var(--thpt-main); }
         .btn-retake { background: #fef08a; color: #ca8a04; }
         .btn-history { background: #f1f5f9; color: #475569; }
-        .btn-review:hover { background: #bae6fd; }
         .btn-retake:hover { background: #fde047; }
         .btn-history:hover { background: #e2e8f0; }
 
@@ -118,6 +116,7 @@
         .mcq-label input:checked + .mcq-box { background: var(--thpt-main); border-color: var(--thpt-main); color: white; transform: none; box-shadow: none;}
         .mcq-label input:disabled + .mcq-box { cursor: not-allowed; opacity: 0.7; }
 
+        /* UI Đúng sai đã sửa lại gọn gàng */
         .tf-grid { width: 100%; border-collapse: separate; border-spacing: 0 10px; }
         .tf-grid th, .tf-grid td { padding: 10px; text-align: center; border-bottom: 1px solid #f1f5f9; }
         .tf-grid th { background: transparent; font-size: 15px; width: 90px; color: #64748b;}
@@ -293,22 +292,25 @@
     </div>
 
     <script>
+        // ==========================================
+        // CẬP NHẬT ĐÁP ÁN CHUẨN ĐỀ HÀ NỘI 101
+        // ==========================================
         const EXAM_DATABASE = [
             {
                 id: "toan_hanoi_2026",
-                title: "Đề Khảo Tinh Tú - Thầy ĐVĐ",
+                title: "Khảo sát Sở Hà Nội Môn Toán - Mã 101",
                 tag: "Mới nhất",
                 pdfUrl: "exams/de-05-dvd.pdf",
                 timeMinutes: 90,
                 keys: {
-                    P1: { 1: "A", 2: "B", 3: "C", 4: "D", 5: "A", 6: "B", 7: "C", 8: "D", 9: "A", 10: "B", 11: "C", 12: "D" },
+                    P1: { 1: "B", 2: "D", 3: "B", 4: "A", 5: "A", 6: "C", 7: "C", 8: "B", 9: "A", 10: "D", 11: "B", 12: "C" },
                     P2: { 
-                        1: { a: "T", b: "F", c: "T", d: "F" },
-                        2: { a: "F", b: "F", c: "T", d: "T" },
-                        3: { a: "T", b: "T", c: "T", d: "F" },
-                        4: { a: "F", b: "T", c: "F", d: "T" }
+                        1: { a: "T", b: "F", c: "T", d: "T" },
+                        2: { a: "T", b: "T", c: "T", d: "T" },
+                        3: { a: "T", b: "F", c: "T", d: "T" },
+                        4: { a: "T", b: "T", c: "F", d: "T" }
                     },
-                    P3: { 1: "15", 2: "-3", 3: "0.5", 4: "100", 5: "2", 6: "7" }
+                    P3: { 1: "16", 2: "4", 3: "3", 4: "41", 5: "0", 6: "32" }
                 }
             }
         ];
@@ -482,12 +484,13 @@
                     tagColor = "background: #d1fae5; color: #059669;";
                     scoreHtml = `<div class="score-badge">${latestAttempt.score.toFixed(2)} đ</div>`;
                     
+                    // NÚT XEM LẠI ĐÃ ĐƯỢC ẨN ĐI ĐỂ GIAO DIỆN GỌN HƠN
                     actionHtml = `
-    <div class="action-buttons">
-        ${attemptCount < 10 ? `<button class="btn-retake" onclick="startExam('${exam.id}', 'retake')" title="Làm lại từ đầu">Làm lại</button>` : ''}
-        <button class="btn-history" onclick="showHistory('${exam.id}')" title="Xem điểm các lần làm">Lịch sử</button>
-    </div>
-`;
+                        <div class="action-buttons">
+                            ${attemptCount < 10 ? `<button class="btn-retake" onclick="startExam('${exam.id}', 'retake')" title="Làm lại từ đầu">Làm lại</button>` : ''}
+                            <button class="btn-history" onclick="showHistory('${exam.id}')" title="Xem điểm các lần làm">Lịch sử</button>
+                        </div>
+                    `;
 
                 } else if (userData.activeExam === exam.id) {
                     tagText = "Đang làm dở...";
@@ -510,7 +513,6 @@
             });
         }
 
-        // TÍNH NĂNG MỚI: Thêm thông số attemptIndex để biết đang mở lần thi thứ mấy
         function startExam(examId, mode, attemptIndex = null) {
             currentExam = EXAM_DATABASE.find(e => e.id === examId);
             isReviewMode = (mode === 'review');
@@ -544,13 +546,10 @@
             
             if (isReviewMode) {
                 const historyData = usersDB[currentUser].history[examId];
-                // Nếu gọi qua nút "Xem lại" ở ngoài (attemptIndex = null) -> Lấy lần làm cuối cùng
                 const indexToReview = (attemptIndex !== null) ? attemptIndex : (historyData.length - 1);
-                
                 const savedAnswers = historyData[indexToReview].answers;
-                fillAnswers(savedAnswers);
                 
-                // Truyền indexToReview + 1 để UI biết đó là lần thi số mấy
+                fillAnswers(savedAnswers);
                 runGradingLogic(savedAnswers, indexToReview + 1);
             } else {
                 if (mode === 'continue') {
@@ -577,7 +576,6 @@
             showHome();
         }
 
-        // TÍNH NĂNG MỚI: Modal Lịch Sử đã được chèn nút "Xem bài"
         function showHistory(examId) {
             const historyData = usersDB[currentUser].history[examId];
             const examInfo = EXAM_DATABASE.find(e => e.id === examId);
@@ -673,9 +671,10 @@
                                 <span class="mcq-box">${opt}</span>
                             </label>`).join('')}</div>`;
                     } else if (sec.type === 'tf') {
+                        // SỬA GIAO DIỆN PHẦN ĐÚNG/SAI (Chữ "Ý" ở cột, và "a)" thay vì "Ý a")
                         qBody = `<table class="tf-grid"><tr><th>Ý</th><th>Đúng</th><th>Sai</th></tr>${['a', 'b', 'c', 'd'].map(opt => `
                             <tr>
-                                <td class="statement">Ý ${opt}</td>
+                                <td class="statement">${opt})</td>
                                 <td><label class="tf-label"><input type="radio" name="ans_${sec.prefix}_${i}_${opt}" value="T" onchange="saveProgress()"><span class="tf-box true-box">Đ</span></label></td>
                                 <td><label class="tf-label"><input type="radio" name="ans_${sec.prefix}_${i}_${opt}" value="F" onchange="saveProgress()"><span class="tf-box false-box">S</span></label></td>
                             </tr>`).join('')}</table>`;
@@ -796,7 +795,14 @@
                 else {
                     block.classList.add('wrong-bg');
                     const k = key.P2[i];
-                    document.getElementById(`feedback_P2_${i}`).innerHTML = `<span class="correct-text">🎯 Đáp án đúng: a-${k.a}, b-${k.b}, c-${k.c}, d-${k.d} (Em đúng ${cItems}/4 ý: +${pts}đ)</span>`;
+                    
+                    // SỬA NGÔN NGỮ ĐÁP ÁN: a-T, b-F -> a) Đúng, b) Sai
+                    const textA = k.a === 'T' ? 'Đúng' : 'Sai';
+                    const textB = k.b === 'T' ? 'Đúng' : 'Sai';
+                    const textC = k.c === 'T' ? 'Đúng' : 'Sai';
+                    const textD = k.d === 'T' ? 'Đúng' : 'Sai';
+                    
+                    document.getElementById(`feedback_P2_${i}`).innerHTML = `<span class="correct-text">🎯 Đáp án đúng: a) ${textA}, b) ${textB}, c) ${textC}, d) ${textD} (Em đúng ${cItems}/4 ý: +${pts}đ)</span>`;
                 }
             }
             totalScore += p2Score;
@@ -811,11 +817,11 @@
             }
             totalScore += p3Correct * 0.5;
 
+            // ĐÃ FIX LỖI "Global Scope" KHÓA INPUT CẢ MÀN HÌNH ĐĂNG NHẬP
             document.querySelectorAll('#sheets-container input').forEach(el => el.disabled = true);
             
             document.getElementById('final-score-text').innerText = totalScore.toFixed(2);
             
-            // TÍNH NĂNG MỚI: Dòng chữ miêu tả thay đổi dựa trên trạng thái
             let descText = "Điểm thi tối đa là 10.0.";
             if (isReviewMode) {
                 descText = attemptNum ? `Đây là kết quả Lần thi thứ ${attemptNum} của em.` : "Đây là kết quả bài làm gần nhất của em.";
