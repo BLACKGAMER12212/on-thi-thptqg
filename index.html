@@ -122,8 +122,12 @@
                 <div class="summary-card">
                     <h2 style="color: var(--thpt-dark);">KẾT QUẢ BÀI THI</h2>
                     <div class="final-score" id="final-score-text">0.00</div>
-                    <p style="margin-bottom: 20px; color: #64748b;">Điểm thi tối đa là 10.0. Em có thể bấm vào các Tab phía trên để xem đáp án chi tiết.</p>
+                    <p style="margin-bottom: 20px; color: #64748b;">Điểm thi tối đa là 10.0.</p>
                     <div id="summary-stats"></div>
+                    
+                    <button class="submit-btn" style="background: var(--thpt-main); margin-top: 25px; width: 100%;" onclick="switchTab(0)">
+                        Xem lại đáp án chi tiết
+                    </button>
                 </div>
             </div>
         </div>
@@ -132,16 +136,14 @@
     <script>
         // ==========================================
         // 1. "DATABASE" ĐỀ THI VÀ ĐÁP ÁN CỦA EM
-        // Mẫu nhập liệu: Em chỉ cần copy block {} để thêm đề mới.
         // ==========================================
-    const EXAM_DATABASE = [
-    {
-        id: "toan_hanoi_2026",
-        title: "Đề Khảo Tinh Tú - Thầy ĐVĐ",
-        tag: "Mới nhất",
-        pdfUrl: "exams/de-05-dvd.pdf", // <-- ĐÃ SỬA Ở ĐÂY
-        timeMinutes: 90,
-        // KHOÁ ĐÁP ÁN CHUẨN THPT
+        const EXAM_DATABASE = [
+            {
+                id: "toan_hanoi_2026",
+                title: "Đề Khảo Tinh Tú - Thầy ĐVĐ",
+                tag: "Mới nhất",
+                pdfUrl: "exams/de-05-dvd.pdf", // Link chuẩn em đã cài
+                timeMinutes: 90,
                 keys: {
                     P1: { 1: "A", 2: "B", 3: "C", 4: "D", 5: "A", 6: "B", 7: "C", 8: "D", 9: "A", 10: "B", 11: "C", 12: "D" },
                     P2: { 
@@ -179,7 +181,6 @@
 
         window.onload = renderHome;
 
-        // Render danh sách đề ra trang chủ
         function renderHome() {
             const list = document.getElementById('exam-list');
             list.innerHTML = '';
@@ -198,12 +199,10 @@
             });
         }
 
-        // Bắt đầu làm 1 đề cụ thể
         function startExam(examId) {
             currentExam = EXAM_DATABASE.find(e => e.id === examId);
             isSubmitted = false;
             
-            // Chuyển UI
             document.getElementById('home-screen').style.display = 'none';
             document.getElementById('exam-workspace').style.display = 'flex';
             document.getElementById('tab-container').style.display = 'flex';
@@ -211,9 +210,8 @@
             document.getElementById('control-header').style.display = 'flex';
             document.getElementById('summary-screen').style.display = 'none';
 
-            // Load Data
-          // Thêm đoạn mã ẩn thanh công cụ và tự động phóng to vừa khung hình
-document.getElementById('pdf-frame').src = currentExam.pdfUrl + "#toolbar=0&navpanes=0&scrollbar=0&view=FitH";
+            // CODE ĐÃ CẬP NHẬT ẨN THANH CÔNG CỤ PDF
+            document.getElementById('pdf-frame').src = currentExam.pdfUrl + "#toolbar=0&navpanes=0&scrollbar=0&view=FitH";
             document.getElementById('current-exam-name').innerText = currentExam.title;
             
             totalTime = currentExam.timeMinutes * 60;
@@ -229,7 +227,6 @@ document.getElementById('pdf-frame').src = currentExam.pdfUrl + "#toolbar=0&navp
             document.getElementById('btn-exit').style.display = 'none';
         }
 
-        // Tạo khung điền đáp án
         function initAnswerSheets() {
             const tabs = document.getElementById('tab-container');
             const sheets = document.getElementById('sheets-container');
@@ -255,11 +252,15 @@ document.getElementById('pdf-frame').src = currentExam.pdfUrl + "#toolbar=0&navp
             });
         }
 
+        // CODE ĐÃ CẬP NHẬT HÀM SWITCH TAB
         function switchTab(index) {
             document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
             document.querySelectorAll('.sheet-container').forEach(sheet => sheet.classList.remove('active'));
             document.getElementById(`tab-btn-${index}`).classList.add('active');
             document.getElementById(`sheet-${mathConfig[index].id}`).classList.add('active', 'fade-in');
+            
+            // Ẩn bảng điểm khi người dùng bấm quay lại xem đáp án
+            document.getElementById('summary-screen').style.display = 'none';
         }
 
         function startTimer() {
@@ -339,7 +340,6 @@ document.getElementById('pdf-frame').src = currentExam.pdfUrl + "#toolbar=0&navp
             let p3Correct = 0;
             for(let i=1; i<=6; i++) {
                 const input = document.getElementById(`ans_P3_${i}`);
-                // Chuyển về string, bỏ khoảng trắng để so sánh chuẩn
                 const userAns = input ? input.value.trim() : ""; 
                 const correctAns = key.P3 ? String(key.P3[i]).trim() : null;
 
