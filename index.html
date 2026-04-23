@@ -212,7 +212,8 @@
             document.getElementById('summary-screen').style.display = 'none';
 
             // Load Data
-            document.getElementById('pdf-frame').src = currentExam.pdfUrl;
+          // Thêm đoạn mã ẩn thanh công cụ và tự động phóng to vừa khung hình
+document.getElementById('pdf-frame').src = currentExam.pdfUrl + "#toolbar=0&navpanes=0&scrollbar=0&view=FitH";
             document.getElementById('current-exam-name').innerText = currentExam.title;
             
             totalTime = currentExam.timeMinutes * 60;
