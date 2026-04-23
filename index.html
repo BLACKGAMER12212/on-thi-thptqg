@@ -163,13 +163,20 @@
         let timerInterval = null;
         let isSubmitted = false;
 
-        window.onload = renderHome;
+        // --- NÂNG CẤP: KIỂM TRA XEM CÓ ĐANG LÀM DỞ ĐỀ NÀO KHÔNG KHI VỪA VÀO WEB ---
+        window.onload = () => {
+            renderHome();
+            const activeExam = localStorage.getItem('current_active_exam');
+            if (activeExam) {
+                // Nếu đang có đề làm dở, tự động mở thẳng vào đề đó luôn
+                startExam(activeExam); 
+            }
+        };
 
         function renderHome() {
             const list = document.getElementById('exam-list');
             list.innerHTML = '';
             EXAM_DATABASE.forEach(exam => {
-                // Kiểm tra xem đề này đang làm dở không
                 const savedState = localStorage.getItem(`exam_progress_${exam.id}`);
                 const tagText = savedState ? "Đang làm dở..." : exam.tag;
                 const tagColor = savedState ? "background: #fef08a; color: #ca8a04;" : "";
@@ -192,6 +199,9 @@
             currentExam = EXAM_DATABASE.find(e => e.id === examId);
             isSubmitted = false;
             
+            // Ghi nhớ lại là "Tôi đang mở đề này" để lỡ F5 còn biết đường quay lại
+            localStorage.setItem('current_active_exam', examId);
+
             document.getElementById('home-screen').style.display = 'none';
             document.getElementById('exam-workspace').style.display = 'flex';
             document.getElementById('tab-container').style.display = 'flex';
@@ -204,21 +214,21 @@
             
             totalTime = currentExam.timeMinutes * 60;
             initAnswerSheets();
-            
-            // KHÔI PHỤC DỮ LIỆU TỪ LOCAL STORAGE (NẾU CÓ)
             loadProgress();
-            
             startTimer();
         }
 
         function goHome() {
             clearInterval(timerInterval);
-            saveProgress(); // Lưu lại trước khi thoát ra Home
+            saveProgress(); 
+            // Xóa trí nhớ "đang mở đề" vì mình đã chủ động bấm nút Thoát
+            localStorage.removeItem('current_active_exam'); 
+            
             document.getElementById('exam-workspace').style.display = 'none';
             document.getElementById('home-screen').style.display = 'block';
             document.getElementById('tab-container').style.display = 'none';
             document.getElementById('btn-exit').style.display = 'none';
-            renderHome(); // Load lại Home để cập nhật chữ "Đang làm dở..."
+            renderHome();
         }
 
         function initAnswerSheets() {
@@ -254,23 +264,17 @@
             document.getElementById('summary-screen').style.display = 'none';
         }
 
-        // ==========================================
-        // TÍNH NĂNG LƯU VÀ KHÔI PHỤC TRẠNG THÁI
-        // ==========================================
         function saveProgress() {
             if (!currentExam || isSubmitted) return;
             const state = { timeLeft: totalTime, answers: {} };
             
-            // Gom tất cả các câu đã tick
             document.querySelectorAll('input[type="radio"]:checked').forEach(el => {
                 state.answers[el.name] = el.value;
             });
-            // Gom tất cả các câu điền số
             document.querySelectorAll('input[type="text"]').forEach(el => {
                 if (el.value.trim() !== '') state.answers[el.id] = el.value.trim();
             });
             
-            // Lưu vào bộ nhớ trình duyệt
             localStorage.setItem(`exam_progress_${currentExam.id}`, JSON.stringify(state));
         }
 
@@ -278,15 +282,12 @@
             const saved = localStorage.getItem(`exam_progress_${currentExam.id}`);
             if (saved) {
                 const state = JSON.parse(saved);
-                totalTime = state.timeLeft; // Phục hồi thời gian
+                totalTime = state.timeLeft;
                 
-                // Phục hồi đáp án
                 for (const key in state.answers) {
                     const val = state.answers[key];
-                    // Phục hồi radio (trắc nghiệm)
                     const radio = document.querySelector(`input[name="${key}"][value="${val}"]`);
                     if (radio) radio.checked = true;
-                    // Phục hồi text (điền số)
                     const textInput = document.getElementById(key);
                     if (textInput) textInput.value = val;
                 }
@@ -305,7 +306,6 @@
                 const s = (totalTime % 60).toString().padStart(2, '0');
                 document.getElementById('global-timer').innerText = `${m}:${s}`;
                 
-                // Lưu lại tiến độ đếm ngược mỗi giây
                 saveProgress();
             }, 1000);
         }
@@ -316,8 +316,9 @@
             isSubmitted = true;
             document.getElementById('control-header').style.display = 'none';
 
-            // XOÁ DỮ LIỆU ĐÃ LƯU SAU KHI NỘP BÀI THÀNH CÔNG
+            // Xóa sạch trí nhớ sau khi nộp bài
             localStorage.removeItem(`exam_progress_${currentExam.id}`);
+            localStorage.removeItem('current_active_exam');
 
             let totalScore = 0;
             const key = currentExam.keys;
