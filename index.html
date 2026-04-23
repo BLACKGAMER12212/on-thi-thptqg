@@ -509,14 +509,15 @@
         }
 
         function goHome() {
-            clearInterval(timerInterval);
-            if (!isReviewMode) saveProgress(); 
-            usersDB[currentUser].activeExam = null; saveUsersDB();
-            document.getElementById('exam-workspace').style.display = 'none';
-            document.getElementById('header-controls').style.display = 'none'; 
-            showHome();
-        }
-
+    clearInterval(timerInterval);
+    if (!isReviewMode) saveProgress(); 
+    
+    // Đã xóa dòng reset activeExam ở đây để hệ thống nhớ bài đang làm dở
+    
+    document.getElementById('exam-workspace').style.display = 'none';
+    document.getElementById('header-controls').style.display = 'none'; 
+    showHome();
+}
         function showHistory(examId) {
             const historyData = usersDB[currentUser].history[examId];
             const examInfo = EXAM_DATABASE.find(e => e.id === examId);
