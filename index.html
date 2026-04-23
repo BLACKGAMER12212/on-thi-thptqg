@@ -316,6 +316,24 @@
                     P3: { 1: "84", 2: "3646", 3: "32", 4: "92", 5: "30,1", 6: "14,5" }
                 }
             }
+
+            {
+                id: "toan_de_nghean-0101",
+                title: "Khảo sát Sở Nghệ An - Mã 0101",
+                tag: "Mới nhất",
+                pdfUrl: "exams/thpt_nghean-0101.pdf",
+                timeMinutes: 90,
+                keys: {
+                    P1: { 1: "C", 2: "B", 3: "D", 4: "D", 5: "D", 6: "B", 7: "B", 8: "B", 9: "B", 10: "C", 11: "B", 12: "A" },
+                    P2: { 
+                        1: { a: "F", b: "T", c: "T", d: "F" },
+                        2: { a: "T", b: "F", c: "T", d: "T" },
+                        3: { a: "T", b: "T", c: "T", d: "T" },
+                        4: { a: "T", b: "T", c: "F", d: "F" }
+                    },
+                    P3: { 1: "52,1", 2: "97,7", 3: "9", 4: "4446", 5: "0,29", 6: "1200" }
+                }
+            }
         ];
 
         let currentUser = null;
@@ -508,14 +526,32 @@
             }
         }
 
-        function showHome() {
-    document.getElementById('user-header-info').style.display = 'flex';
-    document.getElementById('home-screen').style.display = 'block';
-    
-    // Đoạn check if (userData.activeExam) đã được xóa bỏ để không bị tự động ép vào phòng thi nữa
-    
-    renderHome();
-}
+function goHome() {
+            clearInterval(timerInterval);
+            if (!isReviewMode) saveProgress(); 
+            
+            // Ẩn giao diện làm bài
+            document.getElementById('exam-workspace').style.display = 'none';
+            document.getElementById('header-controls').style.display = 'none'; 
+            
+            // Tham số true có ý nghĩa: Ép hệ thống ở lại trang chủ, không tự động quay lại đề
+            showHome(true); 
+        }
+
+        function showHome(forceHome = false) {
+            document.getElementById('user-header-info').style.display = 'flex';
+            document.getElementById('home-screen').style.display = 'block';
+            
+            const userData = usersDB[currentUser];
+            
+            // Nếu có bài đang làm dở VÀ KHÔNG PHẢI vừa bấm nút Thoát (forceHome) -> Tự động chui lại vào đề (Dành cho tính năng F5)
+            if (!forceHome && userData && userData.activeExam) { 
+                startExam(userData.activeExam, 'continue'); 
+                return; 
+            }
+            
+            renderHome();
+        }
         function showHistory(examId) {
             const historyData = usersDB[currentUser].history[examId];
             const examInfo = EXAM_DATABASE.find(e => e.id === examId);
