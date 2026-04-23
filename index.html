@@ -69,7 +69,7 @@
         /* Nâng cấp UI trắc nghiệm (MCQ) */
         .mcq-options { display: flex; gap: 20px; flex-wrap: wrap; }
         .mcq-label { cursor: pointer; display: inline-block; }
-        .mcq-label input { display: none; } /* Ẩn radio mặc định */
+        .mcq-label input { display: none; } 
         .mcq-box { 
             display: flex; align-items: center; justify-content: center;
             width: 55px; height: 55px; border: 2px solid var(--border-color); border-radius: 12px;
@@ -151,7 +151,7 @@
         <div class="tabs" id="tab-container"></div>
         
         <div class="header-controls" id="header-controls">
-            <div class="header-timer">
+            <div class="header-timer" id="header-timer">
                 <span style="font-size: 12px; color: #64748b; font-weight: bold; text-transform: uppercase;">Thời gian</span>
                 <span class="time-left" id="global-timer">--:--</span>
             </div>
@@ -234,7 +234,7 @@
         let totalTime = 0;
         let timerInterval = null;
         let isSubmitted = false;
-        let pendingAction = null; // Dùng cho Modal
+        let pendingAction = null; 
 
         window.onload = () => {
             renderHome();
@@ -275,7 +275,11 @@
             document.getElementById('home-screen').style.display = 'none';
             document.getElementById('exam-workspace').style.display = 'flex';
             document.getElementById('tab-container').style.display = 'flex';
-            document.getElementById('header-controls').style.display = 'flex'; // Hiện nhóm đồng hồ
+            
+            // Hiện lại nút Thoát đề và Đồng hồ khi vào làm lại
+            document.getElementById('header-controls').style.display = 'flex'; 
+            document.getElementById('header-timer').style.display = 'flex'; 
+            
             document.getElementById('control-header').style.display = 'flex';
             document.getElementById('summary-screen').style.display = 'none';
 
@@ -296,13 +300,11 @@
             document.getElementById('exam-workspace').style.display = 'none';
             document.getElementById('home-screen').style.display = 'block';
             document.getElementById('tab-container').style.display = 'none';
-            document.getElementById('header-controls').style.display = 'none'; // Ẩn nhóm đồng hồ
+            document.getElementById('header-controls').style.display = 'none'; 
             renderHome();
         }
 
-        // --- HỆ THỐNG MODAL ---
         function openModal(action) {
-            // Nếu đã nộp bài rồi mà bấm logo để về home thì về luôn không cần hỏi
             if (action === 'exit' && isSubmitted) {
                 goHome();
                 return;
@@ -342,7 +344,6 @@
             if (pendingAction) pendingAction();
             closeModal();
         }
-        // ----------------------
 
         function initAnswerSheets() {
             const tabs = document.getElementById('tab-container');
@@ -356,14 +357,12 @@
                 for (let i = 1; i <= sec.qCount; i++) {
                     let qBody = '';
                     if (sec.type === 'mcq') {
-                        // Áp dụng UI Box mới
                         qBody = `<div class="mcq-options">${['A', 'B', 'C', 'D'].map(opt => `
                             <label class="mcq-label">
                                 <input type="radio" name="ans_${sec.prefix}_${i}" value="${opt}" onchange="saveProgress()">
                                 <span class="mcq-box">${opt}</span>
                             </label>`).join('')}</div>`;
                     } else if (sec.type === 'tf') {
-                        // Áp dụng UI Đúng/Sai mới
                         qBody = `<table class="tf-grid"><tr><th>Ý</th><th>Đúng</th><th>Sai</th></tr>${['a', 'b', 'c', 'd'].map(opt => `
                             <tr>
                                 <td class="statement">Ý ${opt}</td>
@@ -432,7 +431,7 @@
             clearInterval(timerInterval);
             timerInterval = setInterval(() => {
                 if (totalTime <= 0) {
-                    openModal('submit'); // Tự động mở bảng nộp khi hết giờ
+                    openModal('submit'); 
                     return;
                 }
                 totalTime--;
@@ -448,7 +447,9 @@
             clearInterval(timerInterval);
             isSubmitted = true;
             document.getElementById('control-header').style.display = 'none';
-            document.getElementById('header-controls').style.display = 'none'; // Giấu đồng hồ khi nộp xong
+            
+            // --- CHỖ NÀY ĐÃ SỬA: CHỈ ẨN ĐỒNG HỒ, GIỮ NÚT THOÁT ĐỀ ---
+            document.getElementById('header-timer').style.display = 'none'; 
 
             localStorage.removeItem(`exam_progress_${currentExam.id}`);
             localStorage.removeItem('current_active_exam');
