@@ -347,7 +347,44 @@
                     },
                     P3: { 1: "52,1", 2: "97,7", 3: "9", 4: "4446", 5: "0,29", 6: "1200" }
                 }
-            }
+            },
+
+             {
+                id: "toan_de_thainguyen",
+                title: "Khảo sát Sở Thái Nguyên - Mã 0119",
+                tag: "Mới nhất",
+                pdfUrl: "exams/thpt-thainguyen-0119.pdf",
+                timeMinutes: 90,
+                keys: {
+                    P1: { 1: "C", 2: "A", 3: "A", 4: "B", 5: "B", 6: "A", 7: "B", 8: "B", 9: "B", 10: "D", 11: "A", 12: "D" },
+                    P2: { 
+                        1: { a: "F", b: "F", c: "T", d: "F" }, // SSĐS
+                        2: { a: "F", b: "F", c: "F", d: "T" }, // SSSĐ
+                        3: { a: "T", b: "F", c: "T", d: "T" }, // ĐSĐĐ
+                        4: { a: "T", b: "T", c: "T", d: "F" }  // ĐĐĐS
+                    },
+                    P3: { 1: "5,3", 2: "1201", 3: "1664", 4: "257", 5: "-49", 6: "1403" }
+                }
+            },
+
+              {
+                id: "toan_de_danang",
+                title: "Khảo sát Sở Đà Nẵng - Mã 1001",
+                tag: "Mới nhất",
+                pdfUrl: "exams/thpt-toan-danang-1001.pdf",
+                timeMinutes: 90,
+                keys: {
+                    P1: { 1: "B", 2: "A", 3: "A", 4: "C", 5: "D", 6: "B", 7: "A", 8: "C", 9: "A", 10: "B", 11: "A", 12: "C" },
+                    P2: { 
+                        1: { a: "T", b: "F", c: "T", d: "F" },
+                        2: { a: "T", b: "F", c: "T", d: "T" },
+                        3: { a: "T", b: "T", c: "F", d: "T" },
+                        4: { a: "T", b: "T", c: "F", d: "T" }
+                    },
+                    P3: { 1: "26,1", 2: "0,03", 3: "4050", 4: "2", 5: "25", 6: "409" }
+                }
+            },
+            
         ];
 
         let currentUser = null, currentExam = null, totalTime = 0, timerInterval = null, isSubmitted = false, isReviewMode = false, pendingAction = null;
