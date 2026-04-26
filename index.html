@@ -127,23 +127,23 @@
         .btn-clear { color: var(--thpt-danger); border-color: transparent;}
 
         /* ============================================================
-           KIẾN TRÚC HIỂN THỊ PDF HOÀN TOÀN MỚI
-           Tự do vuốt 360 độ, tự động căn giữa bằng JS
+           KIẾN TRÚC HIỂN THỊ PDF ĐÃ ĐƯỢC FIX LỖI KẸT LỀ TRÁI 100%
            ============================================================ */
         #pdf-render-wrapper {
             flex: 1; overflow: auto; position: relative; padding: 20px; 
             background: #e2e8f0; overscroll-behavior: none; -webkit-overflow-scrolling: touch;
+            /* Đã xóa lệnh text-align: center gây lỗi cắt viền */
         }
         
         #pdf-zoom-container {
+            display: block; /* Ép về dạng block */
             position: relative;
-            /* width, height và margin-left sẽ được điều khiển bằng Javascript để Scroll chuẩn nhất */
+            margin: 0 auto; /* Đây là chìa khóa: Căn giữa an toàn khi nhỏ, mở khóa lề khi to */
         }
 
         #pdf-scroll-content {
             position: absolute; top: 0; left: 0;
             transform-origin: top left;
-            /* transform scale sẽ được áp dụng vào đây */
         }
 
         .pdf-page-canvas { 
@@ -156,13 +156,13 @@
         #static-layer { z-index: 4; pointer-events: none; } 
         #draw-layer { z-index: 5; touch-action: none; pointer-events: auto; } 
 
-        /* NÚT FLOAT GỌI BẢNG TRẢ LỜI */
+        /* NÚT FLOAT ĐIỀN ĐÁP ÁN: ĐÃ THÊM CHỮ & THIẾT KẾ DẠNG VIÊN THUỐC */
         .mobile-fab {
             display: none; position: fixed; bottom: 25px; right: 25px;
-            width: 60px; height: 60px; background: var(--thpt-main); color: white;
-            border-radius: 50%; align-items: center; justify-content: center;
-            font-size: 24px; box-shadow: 0 4px 15px rgba(2, 132, 199, 0.4);
-            border: none; cursor: pointer; z-index: 99; transition: 0.2s;
+            height: 56px; padding: 0 20px; background: var(--thpt-main); color: white;
+            border-radius: 28px; align-items: center; justify-content: center; gap: 8px;
+            font-size: 15px; font-weight: bold; box-shadow: 0 4px 15px rgba(2, 132, 199, 0.4);
+            border: none; cursor: pointer; z-index: 99; transition: 0.2s; white-space: nowrap;
         }
         .mobile-fab:active { transform: scale(0.95); }
 
@@ -375,7 +375,7 @@
                 <button class="zoom-btn" onclick="changeZoom(0.1)">+</button>
             </div>
             
-            <button class="mobile-fab" id="mobile-toggle-sheet" onclick="toggleMobileSheet()">📝</button>
+            <button class="mobile-fab" id="mobile-toggle-sheet" onclick="toggleMobileSheet()">📝 Điền đáp án</button>
         </div>
 
         <div id="drawer-backdrop" class="drawer-backdrop" onclick="toggleMobileSheet()"></div>
@@ -662,8 +662,7 @@
         let currentZoom = 1;
         
         // ==========================================
-        // TÍNH TOÁN CĂN LỀ & KÍCH THƯỚC ĐỘNG BẰNG JAVASCRIPT
-        // Giúp loại bỏ hoàn toàn viền chết bên trái của CSS
+        // THUẬT TOÁN CĂN LỀ & KÍCH THƯỚC: MỞ KHÓA LỀ TRÁI!
         // ==========================================
         window.changeZoom = (amount, isAbsolute = false) => {
             if(!originalPdfWidth) return;
@@ -674,29 +673,20 @@
             content.style.transform = `scale(${currentZoom})`;
             
             const container = document.getElementById('pdf-zoom-container');
-            const wrapper = document.getElementById('pdf-render-wrapper');
-            
             const scaledWidth = originalPdfWidth * currentZoom;
             const scaledHeight = originalPdfHeight * currentZoom;
             
             container.style.width = scaledWidth + 'px';
             container.style.height = scaledHeight + 'px';
             
-            // Căn giữa tự động nếu màn hình lớn hơn tờ PDF, ngược lại thì đẩy sát viền trái
-            if (scaledWidth < wrapper.clientWidth) {
-                container.style.marginLeft = (wrapper.clientWidth - scaledWidth) / 2 + 'px';
-            } else {
-                container.style.marginLeft = '0px';
-            }
-            
             const zoomText = document.getElementById('zoom-text');
             if(zoomText) zoomText.innerText = Math.round(currentZoom * 100) + '%';
         };
         
-        // Cập nhật lại khung nhìn khi xoay dọc/ngang điện thoại hoặc kéo cửa sổ máy tính
+        // Cập nhật lại khung nhìn khi xoay điện thoại
         window.addEventListener('resize', () => {
             if(document.getElementById('exam-workspace').style.display === 'flex' && originalPdfWidth) {
-                 changeZoom(0); // Không đổi zoom, chỉ tính lại margin
+                 changeZoom(0); 
                  document.getElementById('hamburger-btn').style.display = window.innerWidth <= 767 ? 'block' : 'none';
             }
         });
@@ -706,15 +696,21 @@
         });
 
         // ==========================================
-        // CÔNG NGHỆ PINCH-TO-ZOOM TỐI ƯU
+        // CÔNG NGHỆ PINCH-TO-ZOOM TỐI ƯU CHO MOBILE
         // ==========================================
         const pdfWrapper = document.getElementById('pdf-render-wrapper');
-        let initDist = 0; let initZoom = 1;
+        let initDist = 0; let initZoom = 1; let pinchCenter = null;
 
         pdfWrapper.addEventListener('touchstart', (e) => {
             if (e.touches.length === 2) {
                 initDist = Math.hypot(e.touches[0].pageX - e.touches[1].pageX, e.touches[0].pageY - e.touches[1].pageY);
                 initZoom = currentZoom;
+                
+                const rect = pdfWrapper.getBoundingClientRect();
+                pinchCenter = {
+                    x: (e.touches[0].clientX + e.touches[1].clientX) / 2 - rect.left,
+                    y: (e.touches[0].clientY + e.touches[1].clientY) / 2 - rect.top
+                };
             }
         }, {passive: true});
 
@@ -724,28 +720,16 @@
                 const dist = Math.hypot(e.touches[0].pageX - e.touches[1].pageX, e.touches[0].pageY - e.touches[1].pageY);
                 const scale = dist / initDist;
                 
-                const centerX = (e.touches[0].clientX + e.touches[1].clientX) / 2;
-                const centerY = (e.touches[0].clientY + e.touches[1].clientY) / 2;
-                
                 const prevZoom = currentZoom;
                 let newZoom = initZoom * scale;
                 if (newZoom < 0.2) newZoom = 0.2; if (newZoom > 5.0) newZoom = 5.0;
                 
                 if(prevZoom !== newZoom) {
                     const ratio = newZoom / prevZoom;
-                    const rect = pdfWrapper.getBoundingClientRect();
-                    
-                    const pointerX = centerX - rect.left;
-                    const pointerY = centerY - rect.top;
-                    
-                    const scrollX = pdfWrapper.scrollLeft;
-                    const scrollY = pdfWrapper.scrollTop;
-                    
                     changeZoom(newZoom, true);
                     
-                    // Cập nhật thanh cuộn để giữ nguyên ngón tay tại điểm chạm
-                    pdfWrapper.scrollLeft = (scrollX + pointerX) * ratio - pointerX;
-                    pdfWrapper.scrollTop = (scrollY + pointerY) * ratio - pointerY;
+                    pdfWrapper.scrollLeft = (pdfWrapper.scrollLeft + pinchCenter.x) * ratio - pinchCenter.x;
+                    pdfWrapper.scrollTop = (pdfWrapper.scrollTop + pinchCenter.y) * ratio - pinchCenter.y;
                 }
             }
         }, {passive: false});
