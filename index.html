@@ -2,9 +2,8 @@
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Hệ thống thi thử THPTQG</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
     <style>
         :root {
             --thpt-main: #0284C7;
@@ -15,26 +14,27 @@
             --bg-color: #F8FAFC;
             --border-color: #E2E8F0;
         }
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; -webkit-tap-highlight-color: transparent;}
-        
-        body { background-color: var(--bg-color); height: 100vh; display: flex; flex-direction: column; overflow: hidden; overscroll-behavior: none; }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        body { background-color: var(--bg-color); height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
 
         .fade-in { animation: fadeIn 0.3s ease-in-out; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* Loading Screen */
+        /* Loading Screen Mới */
         #global-loader { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--bg-color); display: flex; justify-content: center; align-items: center; z-index: 99999; font-size: 16px; font-weight: bold; color: var(--thpt-main); flex-direction: column; gap: 15px;}
         .spinner { width: 45px; height: 45px; border: 4px solid #e0f2fe; border-top: 4px solid var(--thpt-main); border-radius: 50%; animation: spin 1s linear infinite; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
-        /* Auth Screen */
-        #auth-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--bg-color); display: none; justify-content: center; align-items: center; z-index: 10000; padding: 20px;}
-        .auth-card { background: white; padding: 40px; border-radius: 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.08); width: 100%; max-width: 380px; text-align: center; border: 1px solid var(--border-color); display: none;}
+        /* Auth Screen (Đã ẩn mặc định để tránh chớp màn hình) */
+        #auth-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--bg-color); display: none; justify-content: center; align-items: center; z-index: 10000; }
+        .auth-card { background: white; padding: 40px; border-radius: 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.08); width: 380px; text-align: center; border: 1px solid var(--border-color); display: none;}
         .auth-card.active { display: block; animation: fadeIn 0.4s ease-out; }
         .auth-card h1 { color: var(--thpt-main); font-weight: 900; margin-bottom: 5px; font-size: 28px;}
         .auth-card p { color: #64748b; margin-bottom: 25px; font-size: 15px; }
+        
         .input-group { text-align: left; margin-bottom: 15px; }
         .input-group label { display: block; font-size: 13px; font-weight: bold; color: var(--thpt-dark); margin-bottom: 5px;}
+        
         .password-wrapper { position: relative; display: flex; align-items: center; }
         .auth-input { width: 100%; padding: 12px 15px; border: 2px solid var(--border-color); border-radius: 8px; outline: none; font-size: 15px; transition: 0.2s; background: #f8fafc;}
         .password-wrapper .auth-input { padding-right: 40px; }
@@ -42,357 +42,241 @@
         .toggle-password { position: absolute; right: 12px; cursor: pointer; font-size: 18px; user-select: none; opacity: 0.5; transition: 0.2s; }
         .toggle-password:hover { opacity: 1; }
         input[type="password"]::-ms-reveal, input[type="password"]::-ms-clear { display: none; }
+        
         .auth-btn { width: 100%; padding: 14px; border: none; border-radius: 8px; font-weight: bold; font-size: 16px; cursor: pointer; transition: 0.2s; margin-top: 10px;}
         .btn-primary { background: var(--thpt-main); color: white; box-shadow: 0 4px 6px rgba(2, 132, 199, 0.2);}
         .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 6px 12px rgba(2, 132, 199, 0.3); }
+        
         .auth-error { color: var(--thpt-danger); font-size: 14px; margin-bottom: 15px; display: none; font-weight: bold; background: #fef2f2; padding: 10px; border-radius: 8px; border: 1px solid #fca5a5;}
         .auth-success { color: var(--thpt-success); font-size: 14px; margin-bottom: 15px; display: none; font-weight: bold; background: #ecfdf5; padding: 10px; border-radius: 8px; border: 1px solid #86efac;}
         .auth-switch { margin-top: 20px; font-size: 14px; color: #64748b;}
         .auth-switch span { color: var(--thpt-main); font-weight: bold; cursor: pointer; transition: 0.2s;}
         .auth-switch span:hover { text-decoration: underline; }
 
-        /* ================= Header & Menu Mobile ================= */
-        header { background: white; padding: 0 20px; display: flex; align-items: center; border-bottom: 2px solid var(--border-color); height: 60px; justify-content: space-between; z-index: 100;}
+        /* Header */
+        header { background: white; padding: 0 20px; display: flex; align-items: center; border-bottom: 2px solid var(--border-color); height: 60px; justify-content: space-between;}
         .logo-area { display: flex; align-items: center; cursor: pointer; }
-        header h1 { font-size: 24px; color: var(--thpt-main); font-weight: 900; letter-spacing: -1px;}
+        header h1 { font-size: 26px; color: var(--thpt-main); font-weight: 900; letter-spacing: -1px;}
         
-        .header-center { display: none; align-items: center; background: #f1f5f9; padding: 6px 12px; border-radius: 8px; border: 1px solid var(--border-color); }
-        .time-left { font-size: 18px; font-weight: bold; color: var(--thpt-main); font-variant-numeric: tabular-nums; }
+        .header-controls { display: none; align-items: center; gap: 15px; }
+        .header-timer { background: #f1f5f9; padding: 6px 15px; border-radius: 8px; border: 1px solid var(--border-color); display: flex; align-items: center; gap: 10px; }
+        .header-timer .time-left { font-size: 20px; font-weight: bold; color: var(--thpt-main); font-variant-numeric: tabular-nums; }
         
-        .header-controls { display: flex; align-items: center; gap: 15px; }
-        .home-btn { border: none; padding: 8px 12px; border-radius: 6px; font-weight: bold; cursor: pointer; transition: 0.2s; font-size: 13px;}
+        .home-btn { border: none; padding: 8px 15px; border-radius: 6px; font-weight: bold; cursor: pointer; transition: 0.2s;}
         .exit-btn { background: #fef2f2; color: var(--thpt-danger); border: 1px solid #fca5a5; }
         .exit-btn:hover { background: var(--thpt-danger); color: white; }
-        
+
         .user-info { font-weight: bold; color: var(--thpt-dark); display: flex; align-items: center; gap: 15px;}
         .logout-btn { background: #f1f5f9; color: #64748b; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: bold; transition: 0.2s;}
         .logout-btn:hover { background: #fee2e2; color: var(--thpt-danger); }
 
-        .hamburger-btn { display: none; background: none; border: none; font-size: 26px; color: var(--thpt-dark); cursor: pointer; padding: 5px; }
-        
-        .mobile-dropdown { 
-            display: none; position: fixed; top: 60px; right: 20px; background: white; 
-            padding: 20px; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.15); 
-            border: 1px solid var(--border-color); z-index: 1001; flex-direction: column; width: 200px;
-        }
-        .mobile-dropdown.show { display: flex; animation: fadeIn 0.2s ease-out; }
-        .user-name-mobile { font-weight: bold; margin-bottom: 15px; text-align: center; padding-bottom: 15px; border-bottom: 1px solid #e2e8f0; font-size: 15px;}
-
         /* Giao diện HOME */
-        #home-screen { display: none; flex: 1; padding: 40px 20px; overflow-y: auto; background: var(--bg-color); touch-action: auto;}
-        .page-title { text-align: center; color: var(--thpt-dark); margin-bottom: 30px; font-size: 28px;}
-        .exam-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; max-width: 1200px; margin: 0 auto; }
-        .exam-card { background: white; border-radius: 12px; padding: 20px; border: 1px solid var(--border-color); box-shadow: 0 4px 6px rgba(0,0,0,0.05); transition: 0.3s; cursor: pointer; display: flex; flex-direction: column; position: relative;}
+        #home-screen { display: none; flex: 1; padding: 40px; overflow-y: auto; background: var(--bg-color); }
+        .page-title { text-align: center; color: var(--thpt-dark); margin-bottom: 30px; font-size: 32px;}
+        .exam-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; max-width: 1200px; margin: 0 auto; }
+        .exam-card { background: white; border-radius: 12px; padding: 25px; border: 1px solid var(--border-color); box-shadow: 0 4px 6px rgba(0,0,0,0.05); transition: 0.3s; cursor: pointer; display: flex; flex-direction: column; position: relative;}
         .exam-card:hover { transform: translateY(-5px); box-shadow: 0 10px 15px rgba(0,0,0,0.1); border-color: var(--thpt-main);}
         .exam-tag { background: #e0f2fe; color: var(--thpt-main); padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: bold; align-self: flex-start; margin-bottom: 15px;}
-        .exam-title { font-size: 16px; font-weight: bold; color: var(--thpt-dark); margin-bottom: 15px; line-height: 1.4;}
-        .exam-meta { font-size: 13px; color: #64748b; margin-bottom: 15px; display: flex; justify-content: space-between;}
-        .start-btn { background: var(--thpt-main); color: white; border: none; padding: 10px; border-radius: 6px; font-weight: bold; width: 100%; transition: 0.2s; font-size: 14px;}
+        .exam-title { font-size: 18px; font-weight: bold; color: var(--thpt-dark); margin-bottom: 15px; line-height: 1.4;}
+        .exam-meta { font-size: 14px; color: #64748b; margin-bottom: 15px; display: flex; justify-content: space-between;}
+        
+        .start-btn { background: var(--thpt-main); color: white; border: none; padding: 10px; border-radius: 6px; font-weight: bold; width: 100%; transition: 0.2s; font-size: 15px;}
         .start-btn:hover { filter: brightness(1.1); }
+        
         .action-buttons { display: flex; gap: 8px; width: 100%; }
         .action-buttons button { flex: 1; padding: 10px 5px; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; transition: 0.2s; font-size: 13px;}
         .btn-retake { background: #fef08a; color: #ca8a04; }
         .btn-history { background: #f1f5f9; color: #475569; }
-        .score-badge { position: absolute; top: 20px; right: 20px; background: var(--thpt-success); color: white; padding: 5px 10px; border-radius: 8px; font-weight: bold; font-size: 16px; box-shadow: 0 2px 4px rgba(16,185,129,0.3);}
+        .btn-retake:hover { background: #fde047; }
+        .btn-history:hover { background: #e2e8f0; }
+        .score-badge { position: absolute; top: 20px; right: 20px; background: var(--thpt-success); color: white; padding: 5px 10px; border-radius: 8px; font-weight: bold; font-size: 18px; box-shadow: 0 2px 4px rgba(16,185,129,0.3);}
 
         /* Main Workspace */
-        #exam-workspace { display: none; flex: 1; overflow: hidden; background: #e2e8f0; position: relative;}
-        .left-panel { flex: 1; display: flex; flex-direction: column; position: relative; background: #e2e8f0;}
+        #exam-workspace { display: none; flex: 1; overflow: hidden; background: #e2e8f0;}
+        .left-panel { flex: 1; display: flex; flex-direction: column; }
+        #pdf-frame { width: 100%; height: 100%; border: none; }
+        .right-panel { width: 480px; flex-shrink: 0; display: flex; flex-direction: column; background: white; border-left: 2px solid var(--border-color); z-index: 10;}
         
-        /* CÔNG CỤ VẼ TRỰC TIẾP */
-        .pdf-toolbar {
-            display: flex; align-items: center; gap: 10px; padding: 10px 15px;
-            background: white; border-bottom: 1px solid var(--border-color); box-shadow: 0 2px 4px rgba(0,0,0,0.05); z-index: 20;
-            overflow-x: auto; white-space: nowrap; 
-        }
-        .pdf-toolbar::-webkit-scrollbar { display: none; }
-        
-        .tool-btn { 
-            padding: 6px 12px; border: 1px solid transparent; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 13px; transition: 0.2s; background: white; color: #475569; display: flex; align-items: center; gap: 5px; flex-shrink: 0;
-        }
-        .tool-btn:hover { background: #f1f5f9; }
-        .tool-btn.active { background: #e0f2fe; color: var(--thpt-main); border-color: var(--thpt-accent); }
-        .tool-btn.eraser-active { background: #fee2e2; color: var(--thpt-danger); border-color: #fca5a5; }
-
-        .tool-group { display: flex; align-items: center; gap: 8px; flex-shrink: 0;}
-        .color-swatch { width: 22px; height: 22px; border-radius: 50%; cursor: pointer; border: 2px solid transparent; transition: 0.2s; flex-shrink: 0;}
-        .color-swatch.active { transform: scale(1.2); border-color: #94a3b8; box-shadow: 0 0 0 2px white inset;}
-        
-        .brush-controls { display: flex; align-items: center; gap: 6px; flex-shrink: 0;}
-        #brush-size { width: 80px; cursor: pointer; accent-color: var(--thpt-main);}
-        
-        .btn-action-sm { padding: 6px 10px; border: 1px solid #e2e8f0; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 13px; transition: 0.2s; background: white; color: #475569; flex-shrink: 0;}
-        .btn-action-sm:hover { background: #f8fafc; }
-        .btn-undo { display: flex; align-items: center; gap: 5px; margin-left: auto;}
-        .btn-clear { color: var(--thpt-danger); border-color: transparent;}
-
-        /* ============================================================
-           KIẾN TRÚC HIỂN THỊ PDF ĐÃ ĐƯỢC FIX LỖI KẸT LỀ TRÁI 100%
-           ============================================================ */
-        #pdf-render-wrapper {
-            flex: 1; overflow: auto; position: relative; padding: 20px; 
-            background: #e2e8f0; overscroll-behavior: none; -webkit-overflow-scrolling: touch;
-            /* Đã xóa lệnh text-align: center gây lỗi cắt viền */
-        }
-        
-        #pdf-zoom-container {
-            display: block; /* Ép về dạng block */
-            position: relative;
-            margin: 0 auto; /* Đây là chìa khóa: Căn giữa an toàn khi nhỏ, mở khóa lề khi to */
-        }
-
-        #pdf-scroll-content {
-            position: absolute; top: 0; left: 0;
-            transform-origin: top left;
-        }
-
-        .pdf-page-canvas { 
-            display: block; background: white; box-shadow: 0 10px 25px rgba(0,0,0,0.1); 
-            margin-bottom: 15px; pointer-events: none; 
-        }
-
-        /* Lớp kính cảm ứng 2 layer */
-        .pdf-canvas-layer { position: absolute; top: 0; left: 0; mix-blend-mode: multiply; }
-        #static-layer { z-index: 4; pointer-events: none; } 
-        #draw-layer { z-index: 5; touch-action: none; pointer-events: auto; } 
-
-        /* NÚT FLOAT ĐIỀN ĐÁP ÁN: ĐÃ THÊM CHỮ & THIẾT KẾ DẠNG VIÊN THUỐC */
-        .mobile-fab {
-            display: none; position: fixed; bottom: 25px; right: 25px;
-            height: 56px; padding: 0 20px; background: var(--thpt-main); color: white;
-            border-radius: 28px; align-items: center; justify-content: center; gap: 8px;
-            font-size: 15px; font-weight: bold; box-shadow: 0 4px 15px rgba(2, 132, 199, 0.4);
-            border: none; cursor: pointer; z-index: 99; transition: 0.2s; white-space: nowrap;
-        }
-        .mobile-fab:active { transform: scale(0.95); }
-
-        .zoom-controls {
-            position: fixed; bottom: 25px; left: 20px; background: rgba(255, 255, 255, 0.95); padding: 8px 12px; border-radius: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.15); display: flex; align-items: center; gap: 10px; z-index: 20; border: 1px solid var(--border-color); backdrop-filter: blur(5px);
-        }
-        .zoom-btn { background: #f1f5f9; border: none; width: 28px; height: 28px; border-radius: 6px; font-weight: bold; cursor: pointer; color: var(--thpt-dark); transition: 0.2s;}
-        .zoom-btn:hover { background: #e2e8f0; }
-        #zoom-text { font-size: 13px; font-weight: bold; color: var(--thpt-dark); width: 45px; text-align: center; user-select: none;}
-
-        /* MÀNG CHẮN BẢNG ĐÁP ÁN ĐỂ CHẠM VÀO LÀ ĐÓNG */
-        .drawer-backdrop {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(15, 23, 42, 0.5); z-index: 998; 
-            display: none; opacity: 0; transition: opacity 0.3s ease;
-            backdrop-filter: blur(2px);
-        }
-        .drawer-backdrop.show { display: block; opacity: 1; }
-
-        /* RIGHT PANEL: BẢNG TRẢ LỜI ĐÁP ÁN */
-        .right-panel { width: 450px; flex-shrink: 0; display: flex; flex-direction: column; background: white; border-left: 2px solid var(--border-color); z-index: 1000;}
         .timer-header { display: flex; justify-content: space-between; align-items: center; background: white; padding: 15px 20px; border-bottom: 1px solid var(--border-color); box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); z-index: 11;}
-        .submit-btn { background: var(--thpt-success); color: white; border: none; padding: 10px 15px; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 14px; transition: 0.2s; box-shadow: 0 4px 6px rgba(16, 185, 129, 0.2); white-space: nowrap;}
-        
-        .btn-close-panel { display: none; background: #f1f5f9; border: none; padding: 8px 12px; border-radius: 6px; font-weight: bold; color: #475569; cursor: pointer; font-size: 13px;}
+        .submit-btn { background: var(--thpt-success); color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 15px; transition: 0.2s; box-shadow: 0 4px 6px rgba(16, 185, 129, 0.2); white-space: nowrap;}
+        .submit-btn:hover { filter: brightness(1.1); transform: translateY(-1px);}
 
-        #sheets-container { flex: 1; overflow-y: auto; padding: 20px; background: #f8fafc; touch-action: auto;}
-        .section-title { font-weight: 900; color: var(--thpt-main); padding: 15px 0 10px; border-bottom: 2px solid #cbd5e1; margin-bottom: 15px; font-size: 14px; text-transform: uppercase; letter-spacing: 0.5px;}
+        /* BẢNG PHIẾU TRẢ LỜI */
+        #sheets-container { flex: 1; overflow-y: auto; padding: 20px; background: #f8fafc; }
+        .section-title { font-weight: 900; color: var(--thpt-main); padding: 15px 0 10px; border-bottom: 2px solid #cbd5e1; margin-bottom: 15px; font-size: 15px; text-transform: uppercase; letter-spacing: 0.5px;}
         .section-title:first-child { padding-top: 0; }
-        .mcq-grid, .tf-grid-compact, .short-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .mcq-grid, .tf-grid-compact, .short-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
         .q-compact-row { background: white; border: 1px solid var(--border-color); border-radius: 8px; padding: 10px; display: flex; align-items: center; flex-wrap: wrap; box-shadow: 0 1px 2px rgba(0,0,0,0.02);}
-        .q-compact-num { font-weight: bold; color: var(--thpt-dark); font-size: 13px; width: 50px; }
-        .mcq-options.compact { display: flex; gap: 4px; flex: 1; justify-content: flex-end;}
+        .q-compact-num { font-weight: bold; color: var(--thpt-dark); font-size: 14px; width: 55px; }
+
+        .mcq-options.compact { display: flex; gap: 6px; flex: 1; justify-content: flex-end;}
         .mcq-label { cursor: pointer; display: inline-block; }
         .mcq-label input { display: none; } 
-        .mcq-box.round { display: flex; align-items: center; justify-content: center; width: 26px; height: 26px; border: 1px solid #cbd5e1; border-radius: 50%; font-size: 12px; font-weight: bold; transition: all 0.2s ease; color: #475569; background: white;}
+        .mcq-box.round { display: flex; align-items: center; justify-content: center; width: 28px; height: 28px; border: 1px solid #cbd5e1; border-radius: 50%; font-size: 13px; font-weight: bold; transition: all 0.2s ease; color: #475569; background: white;}
         .mcq-label:hover .mcq-box { border-color: var(--thpt-main); color: var(--thpt-main); background: #f0f9ff;}
         .mcq-label input:checked + .mcq-box { background: var(--thpt-main); border-color: var(--thpt-main); color: white; }
+        .mcq-label input:disabled + .mcq-box { cursor: not-allowed; opacity: 0.7; }
+
         .tf-block { flex-direction: column; align-items: flex-start; }
         .tf-items { display: flex; flex-direction: column; gap: 8px; width: 100%; }
         .tf-item-row { display: flex; align-items: center; justify-content: space-between; width: 100%; background: #f8fafc; padding: 4px 8px; border-radius: 6px; border: 1px solid #f1f5f9;}
-        .tf-item-label { font-weight: bold; font-size: 13px; color: #475569;}
+        .tf-item-label { font-weight: bold; font-size: 14px; color: #475569;}
         .tf-label { cursor: pointer; display: inline-block; }
         .tf-label input { display: none; }
-        .tf-box.small { display: inline-flex; align-items: center; justify-content: center; width: 32px; height: 26px; border: 1px solid #cbd5e1; border-radius: 6px; font-weight: bold; font-size: 12px; color: #64748b; background: white; margin-left: 5px;}
+        .tf-box.small { display: inline-flex; align-items: center; justify-content: center; width: 35px; height: 28px; border: 1px solid #cbd5e1; border-radius: 6px; font-weight: bold; font-size: 13px; color: #64748b; background: white; transition: 0.2s; margin-left: 5px;}
+        .tf-label:hover .true-box { border-color: var(--thpt-success); color: var(--thpt-success); background: #ecfdf5;}
+        .tf-label:hover .false-box { border-color: var(--thpt-danger); color: var(--thpt-danger); background: #fef2f2;}
         .tf-label input:checked + .true-box { background: var(--thpt-success); border-color: var(--thpt-success); color: white; }
         .tf-label input:checked + .false-box { background: var(--thpt-danger); border-color: var(--thpt-danger); color: white; }
-        .short-block { flex-direction: column; align-items: flex-start; }
-        .short-answer-input.compact { width: 100%; padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 14px; outline: none; font-weight: bold; margin-top: 5px;}
 
-        #summary-screen { display: none; padding: 20px; text-align: center; overflow-y: auto;}
-        .summary-card { background: white; border: 1px solid var(--border-color); border-radius: 12px; padding: 30px 20px; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.05); }
-        .final-score { font-size: 60px; font-weight: 900; color: var(--thpt-danger); line-height: 1; margin: 15px 0;}
-        .stat-row { display: flex; justify-content: space-between; padding: 12px; border-bottom: 1px solid #f1f5f9; font-size: 14px;}
+        .short-block { flex-direction: column; align-items: flex-start; }
+        .short-answer-input.compact { width: 100%; padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 15px; outline: none; transition: 0.2s; font-weight: bold; color: var(--thpt-dark); margin-top: 5px;}
+        .short-answer-input.compact:focus { border-color: var(--thpt-main); box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.1);}
+
+        /* Màn hình tổng kết điểm */
+        #summary-screen { display: none; padding: 20px; text-align: center; }
+        .summary-card { background: white; border: 1px solid var(--border-color); border-radius: 12px; padding: 40px; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.05); }
+        .final-score { font-size: 70px; font-weight: 900; color: var(--thpt-danger); line-height: 1; margin: 20px 0;}
+        .stat-row { display: flex; justify-content: space-between; padding: 16px; border-bottom: 1px solid #f1f5f9; font-size: 16px;}
+        
         .result-feedback { width: 100%; margin-top: 8px; }
-        .correct-text { color: var(--thpt-success); font-weight: bold; font-size: 12px; display: block; background: #ecfdf5; padding: 6px; border-radius: 6px; border: 1px solid #a7f3d0;}
+        .correct-text { color: var(--thpt-success); font-weight: bold; font-size: 13px; display: block; background: #ecfdf5; padding: 6px 10px; border-radius: 6px; border: 1px solid #a7f3d0;}
         .wrong-bg { background-color: #fef2f2 !important; border-color: #fca5a5 !important; }
         .correct-bg { background-color: #f0fdf4 !important; border-color: #86efac !important; }
 
         /* Modals */
-        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.6); z-index: 99999; display: none; justify-content: center; align-items: center; opacity: 0; transition: opacity 0.3s ease; padding: 20px;}
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.6); z-index: 99999; display: none; justify-content: center; align-items: center; opacity: 0; transition: opacity 0.3s ease; }
         .modal-overlay.show { display: flex; opacity: 1; }
-        .custom-modal-content { background: white; padding: 30px 25px; border-radius: 16px; width: 100%; max-width: 400px; text-align: center; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25); transform: scale(0.9); transition: transform 0.3s ease;}
+        .custom-modal-content { background: white; padding: 35px 30px; border-radius: 16px; width: 440px; text-align: center; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25); transform: scale(0.9); transition: transform 0.3s ease;}
         .modal-overlay.show .custom-modal-content { transform: scale(1); }
-        .modal-title { font-size: 20px; font-weight: 900; color: var(--thpt-dark); margin-bottom: 15px; }
-        .modal-msg { font-size: 14px; color: #64748b; line-height: 1.5; margin-bottom: 25px; }
-        .modal-actions { display: flex; gap: 10px; justify-content: center; }
-        .btn-cancel, .btn-confirm { padding: 10px 15px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 14px; flex: 1;}
+        .modal-title { font-size: 22px; font-weight: 900; color: var(--thpt-dark); margin-bottom: 15px; }
+        .modal-msg { font-size: 15px; color: #64748b; line-height: 1.5; margin-bottom: 25px; }
+        .modal-actions { display: flex; gap: 15px; justify-content: center; }
+        .btn-cancel, .btn-confirm { padding: 12px 20px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 15px; flex: 1; transition: 0.2s; }
         .btn-cancel { background: #f1f5f9; color: #475569; }
+        .btn-cancel:hover { background: #e2e8f0; }
         .btn-confirm { background: var(--thpt-main); color: white; }
         .btn-confirm.danger { background: var(--thpt-danger); }
-        .history-list { max-height: 250px; overflow-y: auto; text-align: left; margin-bottom: 20px; padding-right: 5px; }
-        .history-item { display: flex; justify-content: space-between; align-items: center; padding: 12px 5px; border-bottom: 1px solid var(--border-color); }
-        .history-info { display: flex; flex-direction: column; gap: 2px; }
-        .h-attempt { font-weight: bold; color: var(--thpt-dark); font-size: 14px; }
-        .h-date { font-size: 11px; color: #64748b; }
-        .h-score { font-size: 16px; font-weight: 900; color: var(--thpt-success); }
-        .btn-review-sm { background: #e0f2fe; color: var(--thpt-main); border: none; padding: 6px 10px; border-radius: 6px; font-weight: bold; font-size: 12px; }
+        .btn-confirm:hover { filter: brightness(1.1); transform: translateY(-1px);}
 
-        /* =========================================
-           RESPONSIVE: TABLET & IPAD
-           ========================================= */
-        @media (max-width: 1024px) {
-            .right-panel {
-                position: fixed; top: 0; right: -100%; width: 400px; max-width: 90%; height: 100%;
-                transition: right 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-                box-shadow: -5px 0 25px rgba(0,0,0,0.2); z-index: 1000;
-            }
-            .right-panel.open { right: 0; }
-            .btn-close-panel { display: block; } 
-            .mobile-fab { display: flex; } 
-            .mcq-grid, .tf-grid-compact, .short-grid { grid-template-columns: 1fr; }
-        }
+        /* History Modal Elements */
+        .history-list { max-height: 280px; overflow-y: auto; text-align: left; margin-bottom: 20px; padding-right: 5px; }
+        .history-item { display: flex; justify-content: space-between; align-items: center; padding: 15px 10px; border-bottom: 1px solid var(--border-color); }
+        .history-item:last-child { border-bottom: none; }
+        .history-info { display: flex; flex-direction: column; gap: 4px; }
+        .h-attempt { font-weight: bold; color: var(--thpt-dark); font-size: 15px; }
+        .h-date { font-size: 12px; color: #64748b; }
+        .history-action { display: flex; align-items: center; gap: 15px; }
+        .h-score { font-size: 18px; font-weight: 900; color: var(--thpt-success); }
+        .btn-review-sm { background: #e0f2fe; color: var(--thpt-main); border: none; padding: 8px 12px; border-radius: 6px; font-weight: bold; cursor: pointer; transition: 0.2s; font-size: 13px; }
+        .btn-review-sm:hover { background: #bae6fd; transform: translateY(-1px); }
 
-        /* =========================================
-           RESPONSIVE: ĐIỆN THOẠI 
-           ========================================= */
-        @media (max-width: 767px) {
-            .header-controls { display: none !important; }
-            .hamburger-btn { display: block; }
-            #custom-toolbar { display: none !important; }
-            .pdf-canvas-layer { pointer-events: none !important; } 
-            #pdf-render-wrapper { padding: 10px; }
-            .zoom-controls { display: none !important; }
-            header h1 { font-size: 20px; }
-        }
+        #user-header-info { display: none; }
     </style>
 </head>
 <body>
 
-    <div id="global-loader"><div class="spinner"></div><div id="loader-text">Đang kết nối hệ thống...</div></div>
+    <div id="global-loader">
+        <div class="spinner"></div>
+        <div>Đang kết nối hệ thống...</div>
+    </div>
 
     <div id="auth-screen">
         <div class="auth-card active" id="login-form">
-            <h1>THPTQG 2026</h1><p>Hệ thống tự động lưu trữ dữ liệu thi</p>
+            <h1>THPTQG 2026</h1>
+            <p>Hệ thống tự động lưu trữ dữ liệu thi</p>
             <div class="auth-error" id="login-error"></div>
-            <div class="input-group"><label>TÀI KHOẢN</label><input type="text" id="login-user" class="auth-input" autocomplete="off" onkeypress="checkEnter(event, 'login')"></div>
+            
+            <div class="input-group">
+                <label>TÀI KHOẢN</label>
+                <input type="text" id="login-user" class="auth-input" placeholder="Nhập tên đăng nhập" autocomplete="off" onkeypress="checkEnter(event, 'login')">
+            </div>
             <div class="input-group">
                 <label>MẬT KHẨU</label>
-                <div class="password-wrapper"><input type="password" id="login-pass" class="auth-input" onkeypress="checkEnter(event, 'login')"><span class="toggle-password" onclick="togglePassword('login-pass', this)">👁️</span></div>
+                <div class="password-wrapper">
+                    <input type="password" id="login-pass" class="auth-input" placeholder="Nhập mật khẩu" onkeypress="checkEnter(event, 'login')">
+                    <span class="toggle-password" onclick="togglePassword('login-pass', this)">👁️</span>
+                </div>
             </div>
+            
             <button class="auth-btn btn-primary" onclick="handleLogin()">ĐĂNG NHẬP</button>
             <div class="auth-switch">Chưa có tài khoản? <span onclick="toggleAuth('register')">Đăng ký ngay</span></div>
         </div>
+
         <div class="auth-card" id="register-form">
-            <h1>TẠO TÀI KHOẢN</h1><p>Tạo mới để bắt đầu lưu điểm số</p>
-            <div class="auth-error" id="reg-error"></div><div class="auth-success" id="reg-success"></div>
-            <div class="input-group"><label>TÀI KHOẢN</label><input type="text" id="reg-user" class="auth-input" autocomplete="off" onkeypress="checkEnter(event, 'register')"></div>
+            <h1>TẠO TÀI KHOẢN</h1>
+            <p>Tạo mới để bắt đầu lưu điểm số</p>
+            <div class="auth-error" id="reg-error"></div>
+            <div class="auth-success" id="reg-success"></div>
+            
+            <div class="input-group">
+                <label>TÀI KHOẢN</label>
+                <input type="text" id="reg-user" class="auth-input" placeholder="Tên đăng nhập (viết liền, không dấu)" autocomplete="off" onkeypress="checkEnter(event, 'register')">
+            </div>
             <div class="input-group">
                 <label>MẬT KHẨU</label>
-                <div class="password-wrapper"><input type="password" id="reg-pass" class="auth-input" onkeypress="checkEnter(event, 'register')"><span class="toggle-password" onclick="togglePassword('reg-pass', this)">👁️</span></div>
+                <div class="password-wrapper">
+                    <input type="password" id="reg-pass" class="auth-input" placeholder="Nhập mật khẩu" onkeypress="checkEnter(event, 'register')">
+                    <span class="toggle-password" onclick="togglePassword('reg-pass', this)">👁️</span>
+                </div>
             </div>
             <div class="input-group">
                 <label>XÁC NHẬN MẬT KHẨU</label>
-                <div class="password-wrapper"><input type="password" id="reg-pass-confirm" class="auth-input" onkeypress="checkEnter(event, 'register')"><span class="toggle-password" onclick="togglePassword('reg-pass-confirm', this)">👁️</span></div>
+                <div class="password-wrapper">
+                    <input type="password" id="reg-pass-confirm" class="auth-input" placeholder="Nhập lại mật khẩu" onkeypress="checkEnter(event, 'register')">
+                    <span class="toggle-password" onclick="togglePassword('reg-pass-confirm', this)">👁️</span>
+                </div>
             </div>
+            
             <button class="auth-btn btn-primary" onclick="handleRegister()">ĐĂNG KÝ</button>
             <div class="auth-switch">Đã có tài khoản? <span onclick="toggleAuth('login')">Đăng nhập</span></div>
         </div>
     </div>
 
     <header>
-        <div class="logo-area" onclick="handleLogoClick()"><h1>THPTQG 2026</h1></div>
-        
-        <div class="header-center" id="header-timer">
-            <span style="font-size: 11px; color: #64748b; font-weight: bold; text-transform: uppercase; margin-right: 5px;">Time</span>
-            <span class="time-left" id="global-timer">--:--</span>
+        <div class="logo-area" onclick="openModal('exit')">
+            <h1>THPTQG 2026</h1>
         </div>
-        
-        <div class="header-controls" id="desktop-controls" style="display: none;">
-            <button class="home-btn exit-btn" id="btn-desktop-exit" onclick="openModal('exit')" style="display:none;">Thoát Đề</button>
-            <div class="user-info">
-                Chào, <span id="display-username" style="color: var(--thpt-main);">User</span>
-                <button class="logout-btn" onclick="handleLogout()">Đăng xuất</button>
+        <div class="header-controls" id="header-controls">
+            <div class="header-timer" id="header-timer">
+                <span style="font-size: 12px; color: #64748b; font-weight: bold; text-transform: uppercase;">Thời gian</span>
+                <span class="time-left" id="global-timer">--:--</span>
             </div>
+            <button class="home-btn exit-btn" onclick="openModal('exit')">Thoát Đề</button>
         </div>
-
-        <button class="hamburger-btn" id="hamburger-btn" onclick="toggleMobileMenu()" style="display: none;">☰</button>
+        <div class="user-info" id="user-header-info">
+            Xin chào, <span id="display-username" style="color: var(--thpt-main);">User</span>!
+            <button class="logout-btn" onclick="handleLogout()">Đăng xuất</button>
+        </div>
     </header>
 
-    <div id="mobile-dropdown" class="mobile-dropdown">
-        <div class="user-name-mobile">Chào, <span id="display-username-mobile" style="color: var(--thpt-main);">User</span></div>
-        <button class="home-btn exit-btn" id="btn-mobile-exit" onclick="toggleMobileMenu(); openModal('exit')" style="display:none; width: 100%; margin-bottom: 10px;">Thoát Đề</button>
-        <button class="logout-btn" onclick="handleLogout()" style="width: 100%;">Đăng xuất</button>
+    <div id="home-screen" class="fade-in">
+        <h2 class="page-title">Danh sách đề thi</h2>
+        <div class="exam-grid" id="exam-list"></div>
     </div>
-
-    <div id="home-screen" class="fade-in"><h2 class="page-title">Danh sách đề thi</h2><div class="exam-grid" id="exam-list"></div></div>
 
     <div class="workspace" id="exam-workspace">
         <div class="left-panel">
-            <div class="pdf-toolbar" id="custom-toolbar">
-                <button class="tool-btn active" id="tool-pen">🖊️ Bút vẽ</button>
-                <button class="tool-btn" id="tool-highlighter">🖍️ Dạ quang</button>
-                <button class="tool-btn" id="tool-eraser">🗑️ Cục tẩy</button>
-                <button class="tool-btn" id="tool-pan">🖐️ Di chuyển</button>
-                
-                <div style="width: 1px; height: 20px; background: #cbd5e1; margin: 0 5px; flex-shrink: 0;"></div>
-                
-                <div class="tool-group" id="color-palette">
-                    <div class="color-swatch active" style="background: #0f172a;" data-color="#0f172a"></div>
-                    <div class="color-swatch" style="background: #2563eb;" data-color="#2563eb"></div>
-                    <div class="color-swatch" style="background: #ef4444;" data-color="#ef4444"></div>
-                    <div class="color-swatch" style="background: #facc15;" data-color="#facc15"></div>
-                    <div class="color-swatch" style="background: #16a34a;" data-color="#16a34a"></div>
-                </div>
-                
-                <div style="width: 1px; height: 20px; background: #cbd5e1; margin: 0 5px; flex-shrink: 0;"></div>
-                
-                <div class="brush-controls">
-                    <span style="font-size: 16px;">📏</span>
-                    <input type="range" id="brush-size" min="1" max="30" value="3">
-                </div>
-                
-                <button class="btn-action-sm btn-undo" id="btn-undo" title="Phím tắt: Ctrl + Z">↩️ Hoàn tác</button>
-                <button class="btn-action-sm btn-clear" id="btn-clear-canvas">Xóa Tất Cả</button>
-            </div>
-            
-            <div id="pdf-render-wrapper">
-                <div id="pdf-zoom-container">
-                    <div id="pdf-scroll-content">
-                        <canvas id="static-layer" class="pdf-canvas-layer"></canvas>
-                        <canvas id="draw-layer" class="pdf-canvas-layer"></canvas>
-                    </div>
-                </div>
-            </div>
-
-            <div class="zoom-controls" id="zoom-controls" style="display: none;">
-                <button class="zoom-btn" onclick="changeZoom(-0.1)">-</button>
-                <span id="zoom-text" onclick="changeZoom(1, true)" style="cursor: pointer;" title="Bấm để reset">100%</span>
-                <button class="zoom-btn" onclick="changeZoom(0.1)">+</button>
-            </div>
-            
-            <button class="mobile-fab" id="mobile-toggle-sheet" onclick="toggleMobileSheet()">📝 Điền đáp án</button>
+            <iframe id="pdf-frame"></iframe>
         </div>
 
-        <div id="drawer-backdrop" class="drawer-backdrop" onclick="toggleMobileSheet()"></div>
-
-        <div class="right-panel" id="right-panel-drawer">
+        <div class="right-panel">
             <div class="timer-header" id="control-header">
-                <button class="btn-close-panel" onclick="toggleMobileSheet()">✖ Đóng</button>
-                <div style="font-weight: 900; color: var(--thpt-dark); font-size: 15px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 180px;" id="current-exam-name">Đang tải...</div>
-                <button class="submit-btn" id="btn-submit-exam" onclick="openModal('submit')">Nộp bài</button>
+                <div style="font-weight: 900; color: var(--thpt-dark); font-size: 16px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 250px;" id="current-exam-name">Đang tải...</div>
+                <button class="submit-btn" id="btn-submit-exam" onclick="openModal('submit')">Nộp & Chấm điểm</button>
             </div>
+
             <div id="sheets-container"></div>
+
             <div id="summary-screen" class="fade-in">
                 <div class="summary-card">
-                    <h2 style="color: var(--thpt-dark); font-weight: 900;">KẾT QUẢ</h2><div class="final-score" id="final-score-text">0.00</div><p style="margin-bottom: 20px; color: #64748b;" id="summary-desc">Điểm thi tối đa là 10.0.</p>
+                    <h2 style="color: var(--thpt-dark); font-weight: 900;">KẾT QUẢ BÀI THI</h2>
+                    <div class="final-score" id="final-score-text">0.00</div>
+                    <p style="margin-bottom: 20px; color: #64748b;" id="summary-desc">Điểm thi tối đa là 10.0.</p>
                     <div id="summary-stats"></div>
-                    <button class="submit-btn" style="background: var(--thpt-main); margin-top: 25px; width: 100%; padding: 15px;" onclick="document.getElementById('summary-screen').style.display='none'; document.getElementById('sheets-container').style.display='block';">XEM LẠI ĐÁP ÁN CHI TIẾT</button>
-                    <button class="submit-btn" style="background: #f1f5f9; color: var(--thpt-dark); margin-top: 10px; width: 100%; padding: 15px;" onclick="goHome()">VỀ TRANG CHỦ / THOÁT</button>
+                    <button class="submit-btn" style="background: var(--thpt-main); margin-top: 25px; width: 100%; padding: 15px;" onclick="document.getElementById('summary-screen').style.display='none'; document.getElementById('sheets-container').style.display='block';">
+                        XEM LẠI ĐÁP ÁN CHI TIẾT
+                    </button>
                 </div>
             </div>
         </div>
@@ -400,488 +284,485 @@
 
     <div class="modal-overlay" id="custom-modal">
         <div class="custom-modal-content">
-            <div class="modal-title" id="modal-title">Xác nhận</div><div class="modal-msg" id="modal-message">Nội dung...</div><div class="history-list" id="modal-history-list" style="display: none;"></div>
-            <div class="modal-actions" id="modal-action-buttons"><button class="btn-cancel" onclick="closeModal()">Quay lại</button><button class="btn-confirm" id="modal-confirm-btn" onclick="confirmAction()">Đồng ý</button></div>
+            <div class="modal-title" id="modal-title">Xác nhận</div>
+            <div class="modal-msg" id="modal-message">Nội dung...</div>
+            <div class="history-list" id="modal-history-list" style="display: none;"></div>
+            
+            <div class="modal-actions" id="modal-action-buttons">
+                <button class="btn-cancel" onclick="closeModal()">Quay lại</button>
+                <button class="btn-confirm" id="modal-confirm-btn" onclick="confirmAction()">Đồng ý</button>
+            </div>
         </div>
     </div>
 
-    <script type="module">
+   <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
         import { getFirestore, doc, setDoc, getDoc, updateDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
         const firebaseConfig = {
-            apiKey: "AIzaSyBC7rq22ZxFomEry31TtCKqNnO2g3gJUlU", authDomain: "thptqg-2026.firebaseapp.com",
-            projectId: "thptqg-2026", storageBucket: "thptqg-2026.firebasestorage.app",
-            messagingSenderId: "858999109520", appId: "1:858999109520:web:634de94c0a8173a3ba2515"
+            apiKey: "AIzaSyBC7rq22ZxFomEry31TtCKqNnO2g3gJUlU",
+            authDomain: "thptqg-2026.firebaseapp.com",
+            projectId: "thptqg-2026",
+            storageBucket: "thptqg-2026.firebasestorage.app",
+            messagingSenderId: "858999109520",
+            appId: "1:858999109520:web:634de94c0a8173a3ba2515",
+            measurementId: "G-5P5P6SSSGL"
         };
-        const app = initializeApp(firebaseConfig), auth = getAuth(app), db = getFirestore(app);
-
-        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
 
         const EXAM_DATABASE = [
-            { id: "toan_de_ninhbinh", title: "Khảo sát THPT Ninh Bình-Bạc Liêu - Mã 1111", tag: "Mới nhất", pdfUrl: "exams/thpt-ninhbinh.pdf", timeMinutes: 90, keys: { P1: { 1: "C", 2: "B", 3: "C", 4: "B", 5: "C", 6: "D", 7: "C", 8: "C", 9: "B", 10: "B", 11: "D", 12: "B" }, P2: { 1: { a: "T", b: "F", c: "T", d: "T" }, 2: { a: "T", b: "T", c: "F", d: "T" }, 3: { a: "T", b: "F", c: "F", d: "F" }, 4: { a: "T", b: "T", c: "F", d: "F" } }, P3: { 1: "84", 2: "3646", 3: "32", 4: "92", 5: "30,1", 6: "14,5" } } },
-            { id: "toan_de_thainguyen", title: "Khảo sát Sở Thái Nguyên - Mã 0119", tag: "Mới nhất", pdfUrl: "exams/thpt-thainguyen-0119.pdf", timeMinutes: 90, keys: { P1: { 1: "C", 2: "A", 3: "A", 4: "B", 5: "B", 6: "A", 7: "B", 8: "B", 9: "B", 10: "D", 11: "A", 12: "D" }, P2: { 1: { a: "F", b: "F", c: "T", d: "F" }, 2: { a: "F", b: "F", c: "F", d: "T" }, 3: { a: "T", b: "F", c: "T", d: "T" }, 4: { a: "T", b: "T", c: "T", d: "F" } }, P3: { 1: "5,3", 2: "1201", 3: "1664", 4: "257", 5: "-49", 6: "1403" } } },
-            { id: "toan_de_danang", title: "Khảo sát Sở Đà Nẵng - Mã 1001", tag: "Mới nhất", pdfUrl: "exams/thpt-danang-1001.pdf", timeMinutes: 90, keys: { P1: { 1: "B", 2: "A", 3: "A", 4: "C", 5: "D", 6: "B", 7: "A", 8: "C", 9: "A", 10: "B", 11: "A", 12: "C" }, P2: { 1: { a: "T", b: "F", c: "T", d: "F" }, 2: { a: "T", b: "F", c: "T", d: "T" }, 3: { a: "T", b: "T", c: "F", d: "T" }, 4: { a: "T", b: "T", c: "F", d: "T" } }, P3: { 1: "26,1", 2: "0,03", 3: "4050", 4: "2", 5: "25", 6: "409" } } },
-            { id: "toan_de_nghean-0101", title: "Khảo sát Sở Nghệ An - Mã 0101", tag: "Mới nhất", pdfUrl: "exams/thpt_nghean-0101.pdf", timeMinutes: 90, keys: { P1: { 1: "C", 2: "B", 3: "D", 4: "D", 5: "D", 6: "B", 7: "B", 8: "B", 9: "B", 10: "C", 11: "B", 12: "A" }, P2: { 1: { a: "F", b: "T", c: "T", d: "F" }, 2: { a: "T", b: "F", c: "T", d: "T" }, 3: { a: "T", b: "T", c: "T", d: "T" }, 4: { a: "T", b: "T", c: "F", d: "F" } }, P3: { 1: "52,1", 2: "97,7", 3: "9", 4: "4446", 5: "0,29", 6: "1200" } } }
+            {
+                id: "toan_de_ninhbinh",
+                title: "Khảo sát THPT Ninh Bình-Bạc Liêu - Mã 1111",
+                tag: "Mới nhất",
+                pdfUrl: "exams/thpt-ninhbinh.pdf",
+                timeMinutes: 90,
+                keys: {
+                    P1: { 1: "C", 2: "B", 3: "C", 4: "B", 5: "C", 6: "D", 7: "C", 8: "C", 9: "B", 10: "B", 11: "D", 12: "B" },
+                    P2: { 
+                        1: { a: "T", b: "F", c: "T", d: "T" },
+                        2: { a: "T", b: "T", c: "F", d: "T" },
+                        3: { a: "T", b: "F", c: "F", d: "F" },
+                        4: { a: "T", b: "T", c: "F", d: "F" }
+                    },
+                    P3: { 1: "84", 2: "3646", 3: "32", 4: "92", 5: "30,1", 6: "14,5" }
+                }
+            },
+            {
+                id: "toan_de_nghean-0101",
+                title: "Khảo sát Sở Nghệ An - Mã 0101",
+                tag: "Mới nhất",
+                pdfUrl: "exams/thpt_nghean-0101.pdf",
+                timeMinutes: 90,
+                keys: {
+                    P1: { 1: "C", 2: "B", 3: "D", 4: "D", 5: "D", 6: "B", 7: "B", 8: "B", 9: "B", 10: "C", 11: "B", 12: "A" },
+                    P2: { 
+                        1: { a: "F", b: "T", c: "T", d: "F" },
+                        2: { a: "T", b: "F", c: "T", d: "T" },
+                        3: { a: "T", b: "T", c: "T", d: "T" },
+                        4: { a: "T", b: "T", c: "F", d: "F" }
+                    },
+                    P3: { 1: "52,1", 2: "97,7", 3: "9", 4: "4446", 5: "0,29", 6: "1200" }
+                }
+            },
+
+             {
+                id: "toan_de_thainguyen",
+                title: "Khảo sát Sở Thái Nguyên - Mã 0119",
+                tag: "Mới nhất",
+                pdfUrl: "exams/thpt-thainguyen-0119.pdf",
+                timeMinutes: 90,
+                keys: {
+                    P1: { 1: "C", 2: "A", 3: "A", 4: "B", 5: "B", 6: "A", 7: "B", 8: "B", 9: "B", 10: "D", 11: "A", 12: "D" },
+                    P2: { 
+                        1: { a: "F", b: "F", c: "T", d: "F" }, // SSĐS
+                        2: { a: "F", b: "F", c: "F", d: "T" }, // SSSĐ
+                        3: { a: "T", b: "F", c: "T", d: "T" }, // ĐSĐĐ
+                        4: { a: "T", b: "T", c: "T", d: "F" }  // ĐĐĐS
+                    },
+                    P3: { 1: "5,3", 2: "1201", 3: "1664", 4: "257", 5: "-49", 6: "1403" }
+                }
+            },
+
+              {
+                id: "toan_de_danang",
+                title: "Khảo sát Sở Đà Nẵng - Mã 1001",
+                tag: "Mới nhất",
+                pdfUrl: "exams/thpt-danang-1001.pdf",
+                timeMinutes: 90,
+                keys: {
+                    P1: { 1: "B", 2: "A", 3: "A", 4: "C", 5: "D", 6: "B", 7: "A", 8: "C", 9: "A", 10: "B", 11: "A", 12: "C" },
+                    P2: { 
+                        1: { a: "T", b: "F", c: "T", d: "F" },
+                        2: { a: "T", b: "F", c: "T", d: "T" },
+                        3: { a: "T", b: "T", c: "F", d: "T" },
+                        4: { a: "T", b: "T", c: "F", d: "T" }
+                    },
+                    P3: { 1: "26,1", 2: "0,03", 3: "4050", 4: "2", 5: "25", 6: "409" }
+                }
+            },
+            
         ];
 
-        let currentUser=null, currentExam=null, totalTime=0, timerInterval=null, isSubmitted=false, isReviewMode=false, pendingAction=null, userDataCache={history:{}, activeExam:null, activeState:null};
-        let currentSessionId = localStorage.getItem('thpt_session_id'); if(!currentSessionId) { currentSessionId = Date.now().toString() + Math.random().toString(36).substr(2,5); localStorage.setItem('thpt_session_id', currentSessionId); }
-        let unsubSnapshot=null, isInitialLoad=true;
-        let originalPdfWidth = 0, originalPdfHeight = 0;
+        let currentUser = null, currentExam = null, totalTime = 0, timerInterval = null, isSubmitted = false, isReviewMode = false, pendingAction = null;
+        let userDataCache = { history: {}, activeExam: null, activeState: null }; 
+        
+        let currentSessionId = localStorage.getItem('thpt_session_id');
+        if (!currentSessionId) {
+            currentSessionId = Date.now().toString() + Math.random().toString(36).substr(2, 5);
+            localStorage.setItem('thpt_session_id', currentSessionId);
+        }
+
+        let unsubSnapshot = null; 
+        let isInitialLoad = true; 
 
         onAuthStateChanged(auth, (user) => {
-            if(user){
-                currentUser = user; if(unsubSnapshot) unsubSnapshot();
-                unsubSnapshot = onSnapshot(doc(db, "users", user.uid), async(docSnap) => {
-                    if(docSnap.exists()){
+            if (user) {
+                currentUser = user;
+
+                if (unsubSnapshot) unsubSnapshot();
+                unsubSnapshot = onSnapshot(doc(db, "users", user.uid), async (docSnap) => {
+                    if (docSnap.exists()) {
                         userDataCache = docSnap.data();
-                        if(userDataCache.sessionId && currentSessionId && userDataCache.sessionId !== currentSessionId){
-                            document.getElementById('global-loader').style.display='none'; clearInterval(timerInterval); openModal('kickout'); return;
+
+                        if (userDataCache.sessionId && currentSessionId && userDataCache.sessionId !== currentSessionId) {
+                            document.getElementById('global-loader').style.display = 'none'; 
+                            clearInterval(timerInterval);
+                            openModal('kickout');
+                            return;
                         }
-                        if(isInitialLoad){
-                            isInitialLoad=false; document.getElementById('global-loader').style.display='none'; document.getElementById('auth-screen').style.display='none'; 
-                            
-                            // Gắn tên user vào cả header và mobile menu
-                            const username = user.email.split('@')[0];
-                            document.getElementById('display-username').innerText = username;
-                            document.getElementById('display-username-mobile').innerText = username;
-                            
-                            document.getElementById('desktop-controls').style.display = 'flex';
-                            document.getElementById('hamburger-btn').style.display = window.innerWidth <= 767 ? 'block' : 'none';
-                            
-                            const rState = JSON.parse(sessionStorage.getItem('thpt_review_state')||'null');
-                            if(rState && userDataCache.history[rState.id]) startExam(rState.id, 'review', rState.idx);
-                            else if(userDataCache.activeExam && sessionStorage.getItem('thpt_in_exam')==='true') startExam(userDataCache.activeExam, 'continue');
-                            else showHome();
+
+                        if (isInitialLoad) {
+                            isInitialLoad = false;
+                            document.getElementById('global-loader').style.display = 'none'; 
+                            document.getElementById('auth-screen').style.display = 'none';
+                            document.getElementById('display-username').innerText = user.email.split('@')[0];
+                            document.getElementById('user-header-info').style.display = 'flex';
+
+                            // Kiểm tra xem có đang ở trạng thái Xem điểm/Lịch sử không
+                            const reviewState = JSON.parse(sessionStorage.getItem('thpt_review_state') || 'null');
+
+                            if (reviewState && userDataCache.history[reviewState.id]) {
+                                // Ưu tiên 1: Đang xem kết quả bài thi
+                                startExam(reviewState.id, 'review', reviewState.idx);
+                            } else if (userDataCache.activeExam && sessionStorage.getItem('thpt_in_exam') === 'true') {
+                                // Ưu tiên 2: Đang làm bài dở
+                                startExam(userDataCache.activeExam, 'continue');
+                            } else {
+                                // Ưu tiên 3: Hiển thị Home
+                                showHome();
+                            }
                         }
                     } else {
-                        if(isInitialLoad){
-                            isInitialLoad=false; userDataCache={history:{}, activeExam:null, activeState:null, sessionId:currentSessionId}; await setDoc(doc(db, "users", user.uid), userDataCache);
-                            document.getElementById('global-loader').style.display='none'; document.getElementById('auth-screen').style.display='none'; 
+                        if (isInitialLoad) {
+                            isInitialLoad = false;
+                            userDataCache = { history: {}, activeExam: null, activeState: null, sessionId: currentSessionId };
+                            await setDoc(doc(db, "users", user.uid), userDataCache);
                             
-                            const username = user.email.split('@')[0];
-                            document.getElementById('display-username').innerText = username;
-                            document.getElementById('display-username-mobile').innerText = username;
-                            
-                            document.getElementById('desktop-controls').style.display = 'flex';
-                            document.getElementById('hamburger-btn').style.display = window.innerWidth <= 767 ? 'block' : 'none';
+                            document.getElementById('global-loader').style.display = 'none'; 
+                            document.getElementById('auth-screen').style.display = 'none';
+                            document.getElementById('display-username').innerText = user.email.split('@')[0];
+                            document.getElementById('user-header-info').style.display = 'flex';
                             showHome();
                         }
                     }
                 });
-            } else { isInitialLoad=true; currentUser=null; if(unsubSnapshot) unsubSnapshot(); document.getElementById('global-loader').style.display='none'; document.getElementById('auth-screen').style.display='flex'; document.getElementById('desktop-controls').style.display='none'; document.getElementById('hamburger-btn').style.display='none';}
+            } else {
+                isInitialLoad = true;
+                currentUser = null;
+                if (unsubSnapshot) unsubSnapshot(); 
+                document.getElementById('global-loader').style.display = 'none'; 
+                document.getElementById('auth-screen').style.display = 'flex';
+                document.getElementById('user-header-info').style.display = 'none';
+            }
         });
 
-        window.togglePassword = (id, el) => { const i=document.getElementById(id); if(i.type==="password"){i.type="text";el.innerText="🙈";}else{i.type="password";el.innerText="👁️";} };
-        window.checkEnter = (e,t) => { if(e.key==='Enter') t==='login'?handleLogin():handleRegister(); };
-        window.toggleAuth = (t) => { document.getElementById('login-form').classList.remove('active'); document.getElementById('register-form').classList.remove('active'); document.getElementById('login-error').style.display='none'; document.getElementById('reg-error').style.display='none'; document.getElementById('reg-success').style.display='none'; if(t==='login') document.getElementById('login-form').classList.add('active'); else document.getElementById('register-form').classList.add('active'); };
-        window.handleRegister = async () => { const u=document.getElementById('reg-user').value.trim(), p=document.getElementById('reg-pass').value, c=document.getElementById('reg-pass-confirm').value, e=document.getElementById('reg-error'), s=document.getElementById('reg-success'); e.style.display='none'; s.style.display='none'; if(!u||!p||!c){e.innerText="Vui lòng nhập đầy đủ!"; e.style.display="block"; return;} if(p!==c){e.innerText="Xác nhận sai!"; e.style.display="block"; return;} try { currentSessionId=Date.now().toString()+Math.random().toString(36).substr(2,5); localStorage.setItem('thpt_session_id', currentSessionId); const res=await createUserWithEmailAndPassword(auth, u+"@thpt.com", p); await setDoc(doc(db,"users",res.user.uid), {history:{},activeExam:null,activeState:null,sessionId:currentSessionId}); s.innerText="Đăng ký thành công!"; s.style.display="block"; } catch(err){e.innerText="Tài khoản tồn tại hoặc MK yếu!"; e.style.display="block";} };
-        window.handleLogin = async () => { const u=document.getElementById('login-user').value.trim(), p=document.getElementById('login-pass').value, e=document.getElementById('login-error'); e.style.display='none'; try { currentSessionId=Date.now().toString()+Math.random().toString(36).substr(2,5); localStorage.setItem('thpt_session_id', currentSessionId); const res=await signInWithEmailAndPassword(auth, u+"@thpt.com", p); await updateDoc(doc(db,"users",res.user.uid), {sessionId:currentSessionId, activeExam:null, activeState:null}); } catch(err){e.innerText="Sai tài khoản/mật khẩu!"; e.style.display="block";} };
-        window.handleLogout = () => signOut(auth).then(()=>location.reload());
+        function togglePassword(inputId, iconEl) {
+            const input = document.getElementById(inputId);
+            if (input.type === "password") { input.type = "text"; iconEl.innerText = "🙈"; } 
+            else { input.type = "password"; iconEl.innerText = "👁️"; }
+        }
+        window.togglePassword = togglePassword;
 
-        // Quản lý Mobile Menu
-        window.toggleMobileMenu = () => { document.getElementById('mobile-dropdown').classList.toggle('show'); };
-        window.handleLogoClick = () => { if(!isSubmitted && !isReviewMode && currentExam) openModal('exit'); else goHome(); };
+        function checkEnter(e, type) {
+            if (e.key === 'Enter') { if (type === 'login') handleLogin(); else if (type === 'register') handleRegister(); }
+        }
+        window.checkEnter = checkEnter;
 
-        window.toggleMobileSheet = () => {
-            const panel = document.getElementById('right-panel-drawer');
-            const backdrop = document.getElementById('drawer-backdrop');
-            if(panel.classList.contains('open')) {
-                panel.classList.remove('open'); backdrop.classList.remove('show');
-                setTimeout(() => backdrop.style.display = 'none', 300);
-            } else {
-                panel.classList.add('open'); backdrop.style.display = 'block';
-                setTimeout(() => backdrop.classList.add('show'), 10);
-            }
-        };
+        function toggleAuth(type) {
+            document.getElementById('login-form').classList.remove('active'); document.getElementById('register-form').classList.remove('active');
+            document.getElementById('login-error').style.display = 'none'; document.getElementById('reg-error').style.display = 'none'; document.getElementById('reg-success').style.display = 'none';
+            if(type === 'login') document.getElementById('login-form').classList.add('active'); else document.getElementById('register-form').classList.add('active');
+        }
+        window.toggleAuth = toggleAuth;
 
-        window.saveProgress = async () => { if(!currentUser || !currentExam || isSubmitted || isReviewMode || userDataCache.sessionId!==currentSessionId) return; userDataCache.activeState={timeLeft:totalTime, answers:getAllCurrentAnswers()}; await updateDoc(doc(db,"users",currentUser.uid),{activeExam:currentExam.id, activeState:userDataCache.activeState}); };
-        window.showHome = (f=false) => { 
-            if(!f && userDataCache.activeExam && sessionStorage.getItem('thpt_in_exam')==='true'){startExam(userDataCache.activeExam,'continue');return;} 
-            document.getElementById('desktop-controls').style.display='flex'; 
-            document.getElementById('hamburger-btn').style.display = window.innerWidth <= 767 ? 'block' : 'none';
-            document.getElementById('home-screen').style.display='block'; 
-            document.getElementById('exam-workspace').style.display='none'; 
-            document.getElementById('header-timer').style.display='none'; 
-            document.getElementById('btn-desktop-exit').style.display='none';
-            document.getElementById('btn-mobile-exit').style.display='none';
-            currentExam = null;
-            renderHome(); 
-        };
-        
-        function renderHome(){ const l=document.getElementById('exam-list'); l.innerHTML=''; EXAM_DATABASE.forEach(ex=>{ let hd=userDataCache.history[ex.id]||[], tt=ex.tag, tc="", sh="", ah=`<button class="start-btn" onclick="startExam('${ex.id}','new')">Vào thi ngay</button>`; if(hd.length>0){ const la=hd[hd.length-1]; tt=`Đã làm ${hd.length}/10 lần`; tc="background:#d1fae5;color:#059669;"; sh=`<div class="score-badge">${la.score.toFixed(2)} đ</div>`; ah=`<div class="action-buttons">${hd.length<10?`<button class="btn-retake" onclick="startExam('${ex.id}','retake')">Làm lại</button>`:''}<button class="btn-history" onclick="showHistory('${ex.id}')">Lịch sử</button></div>`; } else if(userDataCache.activeExam===ex.id){ tt="Đang làm dở..."; tc="background:#fef08a;color:#ca8a04;"; ah=`<button class="start-btn" style="background:#ca8a04" onclick="startExam('${ex.id}','continue')">Tiếp tục</button>`; } l.innerHTML+=`<div class="exam-card">${sh}<span class="exam-tag" style="${tc}">${tt}</span><div class="exam-title">${ex.title}</div><div class="exam-meta"><span>🕒 ${ex.timeMinutes}p</span><span>Môn Toán</span></div>${ah}</div>`; }); }
-        
-        async function loadPdfToCanvas(pdfUrl) {
-            const loaderText = document.getElementById('loader-text');
-            const loader = document.getElementById('global-loader');
-            const scrollContent = document.getElementById('pdf-scroll-content');
-            const staticLayer = document.getElementById('static-layer');
-            const drawLayer = document.getElementById('draw-layer');
-            
-            loaderText.innerText = "Đang xử lý đề thi ra màn hình...";
-            loader.style.display = 'flex';
-            
-            Array.from(scrollContent.children).forEach(child => {
-                if (child.id !== 'draw-layer' && child.id !== 'static-layer') child.remove();
-            });
-            strokes = []; 
-            
+        async function handleRegister() {
+            const user = document.getElementById('reg-user').value.trim(); const pass = document.getElementById('reg-pass').value; const confirm = document.getElementById('reg-pass-confirm').value;
+            const error = document.getElementById('reg-error'); const success = document.getElementById('reg-success');
+            error.style.display = 'none'; success.style.display = 'none';
+
+            if(!user || !pass || !confirm) { error.innerText = "Vui lòng nhập đầy đủ các ô!"; error.style.display = "block"; return; }
+            if(pass !== confirm) { error.innerText = "Xác nhận mật khẩu không khớp!"; error.style.display = "block"; return; }
+
+            const email = user + "@thpt.com";
             try {
-                const loadingTask = pdfjsLib.getDocument(pdfUrl);
-                const pdf = await loadingTask.promise;
-                let totalHeight = 0, maxWidth = 0; 
-                
-                for (let pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
-                    const page = await pdf.getPage(pageNum);
-                    const viewport = page.getViewport({ scale: 1.5 });
-                    const canvas = document.createElement('canvas');
-                    canvas.className = 'pdf-page-canvas';
-                    canvas.width = viewport.width;
-                    canvas.height = viewport.height;
-                    
-                    const ctx = canvas.getContext('2d');
-                    await page.render({ canvasContext: ctx, viewport: viewport }).promise;
-                    scrollContent.insertBefore(canvas, staticLayer);
-                    
-                    totalHeight += viewport.height;
-                    if (viewport.width > maxWidth) maxWidth = viewport.width;
-                }
-                
-                originalPdfWidth = maxWidth;
-                originalPdfHeight = totalHeight;
-                
-                staticLayer.width = drawLayer.width = maxWidth;
-                staticLayer.height = drawLayer.height = totalHeight;
-                staticLayer.style.width = drawLayer.style.width = maxWidth + 'px';
-                staticLayer.style.height = drawLayer.style.height = totalHeight + 'px';
-                
-                scrollContent.style.width = maxWidth + 'px';
-                scrollContent.style.height = totalHeight + 'px';
-                
-                redrawStaticCanvas();
-                loader.style.display = 'none';
-                
-                // Thuật toán Tự động căn khít lề khi vào thi trên mọi màn hình
-                let initZ = 1;
-                const wrapper = document.getElementById('pdf-render-wrapper');
-                if (window.innerWidth <= 1024) {
-                    initZ = (wrapper.clientWidth - 20) / maxWidth; // -20 để chừa tí lề cho đẹp
-                    if(initZ > 1) initZ = 1; 
-                }
-                changeZoom(initZ, true);
-                
-                if(window.innerWidth < 1024) setTool('pan');
-                else setTool('pen');
-            } catch (error) {
-                alert("Không thể tải file PDF. Vui lòng thử lại!");
-                loader.style.display = 'none';
-            }
+                currentSessionId = Date.now().toString() + Math.random().toString(36).substr(2, 5);
+                localStorage.setItem('thpt_session_id', currentSessionId);
+                const res = await createUserWithEmailAndPassword(auth, email, pass);
+                await setDoc(doc(db, "users", res.user.uid), { history: {}, activeExam: null, activeState: null, sessionId: currentSessionId });
+                success.innerText = "Đăng ký thành công! Đang vào hệ thống..."; success.style.display = "block";
+            } catch (err) { error.innerText = "Tên đăng nhập đã tồn tại hoặc mật khẩu quá ngắn (ít nhất 6 ký tự)!"; error.style.display = "block"; }
         }
+        window.handleRegister = handleRegister;
 
-        window.startExam = async (eId, mode, attIdx=null) => { 
-            document.getElementById('right-panel-drawer').classList.remove('open'); 
-            document.getElementById('drawer-backdrop').classList.remove('show');
-            document.getElementById('drawer-backdrop').style.display = 'none';
-
-            if(mode==='review'){ const idx=attIdx!==null?attIdx:(userDataCache.history[eId].length-1); sessionStorage.setItem('thpt_review_state', JSON.stringify({id:eId, idx:idx})); sessionStorage.removeItem('thpt_in_exam'); } else { sessionStorage.setItem('thpt_in_exam','true'); sessionStorage.removeItem('thpt_review_state'); } 
-            currentExam=EXAM_DATABASE.find(e=>e.id===eId); isReviewMode=(mode==='review'); isSubmitted=isReviewMode; 
-            if(mode==='retake') userDataCache.activeState=null; 
-            if(!isReviewMode){ userDataCache.activeExam=eId; await updateDoc(doc(db,"users",currentUser.uid),{activeExam:eId}); } 
-            
-            document.getElementById('home-screen').style.display='none'; 
-            document.getElementById('exam-workspace').style.display='flex'; 
-            
-            // Cài đặt hiển thị Header cho Workspace
-            document.getElementById('header-timer').style.display = isReviewMode ? 'none' : 'flex'; 
-            document.getElementById('control-header').style.display = isReviewMode ? 'none' : 'flex'; 
-            
-            // Cài đặt nút Thoát/Về Trang Chủ
-            const exitText = isReviewMode ? "Về trang chủ" : "Thoát Đề";
-            document.getElementById('btn-desktop-exit').style.display = 'block';
-            document.getElementById('btn-desktop-exit').innerText = exitText;
-            document.getElementById('btn-mobile-exit').style.display = 'block';
-            document.getElementById('btn-mobile-exit').innerText = exitText;
-
-            document.getElementById('summary-screen').style.display='none'; 
-            document.getElementById('sheets-container').style.display='block'; 
-            document.getElementById('current-exam-name').innerText=currentExam.title; 
-            
-            totalTime=currentExam.timeMinutes*60; 
-            initAnswerSheets(); 
-            
-            await loadPdfToCanvas(currentExam.pdfUrl);
-
-            if(isReviewMode){ 
-                const hd=userDataCache.history[eId], idx=attIdx!==null?attIdx:(hd.length-1); 
-                fillAnswers(hd[idx].answers); runGradingLogic(hd[idx].answers, idx+1); 
-                document.getElementById('custom-toolbar').style.display='none'; document.getElementById('zoom-controls').style.display='flex';
-            } else { 
-                document.getElementById('custom-toolbar').style.display='flex'; document.getElementById('zoom-controls').style.display='flex';
-                if(mode==='continue'&&userDataCache.activeState){ totalTime=userDataCache.activeState.timeLeft; fillAnswers(userDataCache.activeState.answers); } 
-                startTimer(); 
+        async function handleLogin() {
+            const user = document.getElementById('login-user').value.trim(); const pass = document.getElementById('login-pass').value;
+            const error = document.getElementById('login-error'); error.style.display = 'none';
+            const email = user + "@thpt.com";
+            try { 
+                currentSessionId = Date.now().toString() + Math.random().toString(36).substr(2, 5);
+                localStorage.setItem('thpt_session_id', currentSessionId);
+                const res = await signInWithEmailAndPassword(auth, email, pass); 
+                
+                await updateDoc(doc(db, "users", res.user.uid), { sessionId: currentSessionId, activeExam: null, activeState: null });
             } 
-        };
-        
-        window.goHome = () => { sessionStorage.removeItem('thpt_in_exam'); sessionStorage.removeItem('thpt_review_state'); clearInterval(timerInterval); showHome(true); };
-
-        window.showHistory = (eId) => { const hd=userDataCache.history[eId]||[], ex=EXAM_DATABASE.find(e=>e.id===eId), m=document.getElementById('custom-modal'), c=document.getElementById('modal-history-list'); document.getElementById('modal-title').innerText=`Lịch sử: ${ex.title}`; document.getElementById('modal-message').style.display='none'; document.getElementById('modal-action-buttons').style.display='none'; c.style.display='block'; c.innerHTML=''; hd.forEach((a,i)=>{ c.innerHTML+=`<div class="history-item"><div class="history-info"><span class="h-attempt">Lần ${i+1}</span><span class="h-date">${a.date}</span></div><div class="history-action"><span class="h-score">${a.score.toFixed(2)}</span><button class="btn-review-sm" onclick="closeModal(); startExam('${eId}', 'review', ${i})">Xem</button></div></div>`; }); c.innerHTML+=`<button class="btn-cancel" onclick="closeModal()" style="width:100%;margin-top:15px;">Đóng</button>`; m.style.display='flex'; setTimeout(()=>m.classList.add('show'),10); };
-        window.openModal = (act) => { 
-            if(act==='exit'){
-                if(isSubmitted||isReviewMode){goHome();return;} 
-                const m=document.getElementById('custom-modal'), t=document.getElementById('modal-title'), msg=document.getElementById('modal-message'), b=document.getElementById('modal-confirm-btn'), cx=document.querySelector('#custom-modal .btn-cancel'); 
-                document.getElementById('modal-history-list').style.display='none'; msg.style.display='block'; document.getElementById('modal-action-buttons').style.display='flex'; cx.style.display='block'; 
-                t.innerText="Thoát"; msg.innerText="Hệ thống sẽ lưu lại quá trình làm bài. Bạn có muốn thoát?"; b.className="btn-confirm danger"; b.innerText="Thoát"; pendingAction=goHome;
-                m.style.display='flex'; setTimeout(()=>m.classList.add('show'),10); 
-                return;
-            }
-            const m=document.getElementById('custom-modal'), t=document.getElementById('modal-title'), msg=document.getElementById('modal-message'), b=document.getElementById('modal-confirm-btn'), cx=document.querySelector('#custom-modal .btn-cancel'); 
-            document.getElementById('modal-history-list').style.display='none'; msg.style.display='block'; document.getElementById('modal-action-buttons').style.display='flex'; cx.style.display='block'; 
-            
-            if(act==='submit'){t.innerText="Nộp bài"; msg.innerText="Chắc chắn nộp?"; b.className="btn-confirm"; b.innerText="Nộp"; pendingAction=submitAndGrade;} 
-            else if(act==='clear_canvas') {t.innerText="Xóa Tất Cả"; msg.innerText="Bạn chắc chắn muốn xóa toàn bộ nét vẽ?"; b.className="btn-confirm danger"; b.innerText="Xóa sạch"; pendingAction = () => { strokes = []; redrawStaticCanvas(); };}
-            else if(act==='kickout'){t.innerText="Cảnh báo"; msg.innerText="Đăng nhập nơi khác!"; b.className="btn-confirm danger"; b.innerText="Thoát"; cx.style.display='none'; pendingAction=handleLogout;} 
-            
-            m.style.display='flex'; setTimeout(()=>m.classList.add('show'),10); 
-        };
-        window.closeModal = () => { const m=document.getElementById('custom-modal'); m.classList.remove('show'); setTimeout(()=>m.style.display='none',300); };
-        window.confirmAction = () => { if(pendingAction) pendingAction(); closeModal(); };
-
-        function initAnswerSheets(){ const c=document.getElementById('sheets-container'); c.innerHTML=''; let h=''; h+=`<div class="section-title">PHẦN I</div><div class="mcq-grid">`; for(let i=1;i<=12;i++) h+=`<div class="q-compact-row"><div class="q-compact-num">Câu ${i}</div><div class="mcq-options compact">${['A','B','C','D'].map(o=>`<label class="mcq-label"><input type="radio" name="ans_P1_${i}" value="${o}" onchange="saveProgress()"><span class="mcq-box round">${o}</span></label>`).join('')}</div><div class="result-feedback" id="feedback_P1_${i}"></div></div>`; h+=`</div><div class="section-title">PHẦN II</div><div class="tf-grid-compact">`; for(let i=1;i<=4;i++){ h+=`<div class="q-compact-row tf-block"><div class="q-compact-num">Câu ${i}</div><div class="tf-items">`; ['a','b','c','d'].forEach(o=> h+=`<div class="tf-item-row"><span class="tf-item-label">${o})</span><div><label class="tf-label"><input type="radio" name="ans_P2_${i}_${o}" value="T" onchange="saveProgress()"><span class="tf-box small true-box">Đ</span></label><label class="tf-label"><input type="radio" name="ans_P2_${i}_${o}" value="F" onchange="saveProgress()"><span class="tf-box small false-box">S</span></label></div></div>`); h+=`</div><div class="result-feedback" id="feedback_P2_${i}"></div></div>`; } h+=`</div><div class="section-title">PHẦN III</div><div class="short-grid">`; for(let i=1;i<=6;i++) h+=`<div class="q-compact-row short-block"><div class="q-compact-num">Câu ${i}</div><input type="text" class="short-answer-input compact" id="ans_P3_${i}" oninput="saveProgress()"><div class="result-feedback" id="feedback_P3_${i}"></div></div>`; c.innerHTML=h; }
-        function getAllCurrentAnswers(){ const a={}; document.querySelectorAll('input[type="radio"]:checked').forEach(e=>a[e.name]=e.value); document.querySelectorAll('input[type="text"]').forEach(e=>{if(e.value.trim()!=='') a[e.id]=e.value.trim();}); return a; }
-        function fillAnswers(a){ for(const k in a){ const v=a[k], r=document.querySelector(`input[name="${k}"][value="${v}"]`), t=document.getElementById(k); if(r) r.checked=true; if(t) t.value=v; } }
-        function startTimer(){ clearInterval(timerInterval); timerInterval=setInterval(()=>{ if(totalTime<=0){clearInterval(timerInterval); submitAndGrade(); return;} totalTime--; document.getElementById('global-timer').innerText=`${Math.floor(totalTime/60).toString().padStart(2,'0')}:${(totalTime%60).toString().padStart(2,'0')}`; if(totalTime%5===0) saveProgress(); },1000); }
-        window.submitAndGrade = async () => { sessionStorage.removeItem('thpt_in_exam'); clearInterval(timerInterval); isSubmitted=true; 
-            const panel = document.getElementById('right-panel-drawer'); const backdrop = document.getElementById('drawer-backdrop');
-            panel.classList.add('open'); backdrop.style.display = 'block'; setTimeout(() => backdrop.classList.add('show'), 10);
-            
-            const ans=getAllCurrentAnswers(), score=runGradingLogic(ans), id=currentExam.id, hist=userDataCache.history; if(!hist[id]) hist[id]=[]; const d=new Date(), ds=d.toLocaleDateString('vi-VN')+' '+d.toLocaleTimeString('vi-VN',{hour:'2-digit',minute:'2-digit'}); hist[id].push({score:score, answers:ans, date:ds}); sessionStorage.setItem('thpt_review_state', JSON.stringify({id:id, idx:hist[id].length-1})); userDataCache.activeExam=null; userDataCache.activeState=null; await updateDoc(doc(db,"users",currentUser.uid), {history:hist, activeExam:null, activeState:null}); };
-        function runGradingLogic(ans, att=null){ document.getElementById('control-header').style.display='none'; document.getElementById('header-timer').style.display='none'; let s=0; const k=currentExam.keys; let p1=0,p2=0,p3=0; for(let i=1;i<=12;i++){ const b=document.getElementById(`feedback_P1_${i}`).closest('.q-compact-row'); if(ans[`ans_P1_${i}`]===k.P1[i]){p1++; b.classList.add('correct-bg');} else {b.classList.add('wrong-bg'); document.getElementById(`feedback_P1_${i}`).innerHTML=`<span class="correct-text">🎯 ${k.P1[i]}</span>`;} } s+=p1*0.25; for(let i=1;i<=4;i++){ let c=0; ['a','b','c','d'].forEach(o=>{if(ans[`ans_P2_${i}_${o}`]===k.P2[i][o]) c++;}); let pts=c===1?0.1:c===2?0.25:c===3?0.5:c===4?1:0; p2+=pts; const b=document.getElementById(`feedback_P2_${i}`).closest('.q-compact-row'); if(c===4) b.classList.add('correct-bg'); else {b.classList.add('wrong-bg'); const kv=k.P2[i]; document.getElementById(`feedback_P2_${i}`).innerHTML=`<span class="correct-text">🎯 a)${kv.a==='T'?'Đ':'S'} b)${kv.b==='T'?'Đ':'S'} c)${kv.c==='T'?'Đ':'S'} d)${kv.d==='T'?'Đ':'S'} (+${pts})</span>`;} } s+=p2; for(let i=1;i<=6;i++){ const b=document.getElementById(`feedback_P3_${i}`).closest('.q-compact-row'); if((ans[`ans_P3_${i}`]||'').trim()===String(k.P3[i])){p3++; b.classList.add('correct-bg');} else {b.classList.add('wrong-bg'); document.getElementById(`feedback_P3_${i}`).innerHTML=`<span class="correct-text">🎯 ${k.P3[i]}</span>`;} } s+=p3*0.5; document.querySelectorAll('#sheets-container input').forEach(e=>e.disabled=true); document.getElementById('final-score-text').innerText=s.toFixed(2); document.getElementById('summary-desc').innerText=att?`Lần ${att}`:"Kết quả gần nhất"; document.getElementById('summary-stats').innerHTML=`<div class="stat-row">I: ${p1}/12 (+${p1*0.25})</div><div class="stat-row">II: (+${p2.toFixed(2)})</div><div class="stat-row">III: ${p3}/6 (+${p3*0.5})</div>`; document.getElementById('sheets-container').style.display='none'; document.getElementById('summary-screen').style.display='block'; return s; }
-
-        let currentZoom = 1;
-        
-        // ==========================================
-        // THUẬT TOÁN CĂN LỀ & KÍCH THƯỚC: MỞ KHÓA LỀ TRÁI!
-        // ==========================================
-        window.changeZoom = (amount, isAbsolute = false) => {
-            if(!originalPdfWidth) return;
-            if (isAbsolute) currentZoom = amount; else currentZoom += amount;
-            if (currentZoom < 0.2) currentZoom = 0.2; if (currentZoom > 5.0) currentZoom = 5.0; 
-            
-            const content = document.getElementById('pdf-scroll-content');
-            content.style.transform = `scale(${currentZoom})`;
-            
-            const container = document.getElementById('pdf-zoom-container');
-            const scaledWidth = originalPdfWidth * currentZoom;
-            const scaledHeight = originalPdfHeight * currentZoom;
-            
-            container.style.width = scaledWidth + 'px';
-            container.style.height = scaledHeight + 'px';
-            
-            const zoomText = document.getElementById('zoom-text');
-            if(zoomText) zoomText.innerText = Math.round(currentZoom * 100) + '%';
-        };
-        
-        // Cập nhật lại khung nhìn khi xoay điện thoại
-        window.addEventListener('resize', () => {
-            if(document.getElementById('exam-workspace').style.display === 'flex' && originalPdfWidth) {
-                 changeZoom(0); 
-                 document.getElementById('hamburger-btn').style.display = window.innerWidth <= 767 ? 'block' : 'none';
-            }
-        });
-
-        document.getElementById('pdf-render-wrapper').addEventListener('wheel', (e) => {
-            if (e.altKey) { e.preventDefault(); if (e.deltaY < 0) changeZoom(0.1); else changeZoom(-0.1); }
-        });
-
-        // ==========================================
-        // CÔNG NGHỆ PINCH-TO-ZOOM TỐI ƯU CHO MOBILE
-        // ==========================================
-        const pdfWrapper = document.getElementById('pdf-render-wrapper');
-        let initDist = 0; let initZoom = 1; let pinchCenter = null;
-
-        pdfWrapper.addEventListener('touchstart', (e) => {
-            if (e.touches.length === 2) {
-                initDist = Math.hypot(e.touches[0].pageX - e.touches[1].pageX, e.touches[0].pageY - e.touches[1].pageY);
-                initZoom = currentZoom;
-                
-                const rect = pdfWrapper.getBoundingClientRect();
-                pinchCenter = {
-                    x: (e.touches[0].clientX + e.touches[1].clientX) / 2 - rect.left,
-                    y: (e.touches[0].clientY + e.touches[1].clientY) / 2 - rect.top
-                };
-            }
-        }, {passive: true});
-
-        pdfWrapper.addEventListener('touchmove', (e) => {
-            if (e.touches.length === 2) {
-                e.preventDefault(); 
-                const dist = Math.hypot(e.touches[0].pageX - e.touches[1].pageX, e.touches[0].pageY - e.touches[1].pageY);
-                const scale = dist / initDist;
-                
-                const prevZoom = currentZoom;
-                let newZoom = initZoom * scale;
-                if (newZoom < 0.2) newZoom = 0.2; if (newZoom > 5.0) newZoom = 5.0;
-                
-                if(prevZoom !== newZoom) {
-                    const ratio = newZoom / prevZoom;
-                    changeZoom(newZoom, true);
-                    
-                    pdfWrapper.scrollLeft = (pdfWrapper.scrollLeft + pinchCenter.x) * ratio - pinchCenter.x;
-                    pdfWrapper.scrollTop = (pdfWrapper.scrollTop + pinchCenter.y) * ratio - pinchCenter.y;
-                }
-            }
-        }, {passive: false});
-
-        // ==========================================
-        // CÔNG NGHỆ VẼ
-        // ==========================================
-        const staticLayer = document.getElementById('static-layer');
-        const staticCtx = staticLayer.getContext('2d', { desynchronized: true });
-        const drawLayer = document.getElementById('draw-layer');
-        const drawCtx = drawLayer.getContext('2d', { desynchronized: true });
-        
-        let strokes = []; let currentStroke = null; let isDrawing = false;
-        let activeTool = 'pen'; let brushColor = '#0f172a'; let brushSize = 3;
-
-        const btnPen = document.getElementById('tool-pen');
-        const btnHighlighter = document.getElementById('tool-highlighter');
-        const btnEraser = document.getElementById('tool-eraser');
-        const btnPan = document.getElementById('tool-pan');
-        const sizeSlider = document.getElementById('brush-size');
-        const colorPalette = document.getElementById('color-palette');
-
-        function setTool(tool) {
-            activeTool = tool;
-            btnPen.classList.remove('active'); btnHighlighter.classList.remove('active'); 
-            btnEraser.classList.remove('active', 'eraser-active'); btnPan.classList.remove('active');
-            
-            if (tool === 'pan') {
-                btnPan.classList.add('active');
-                drawLayer.style.pointerEvents = 'none';
-                document.getElementById('pdf-render-wrapper').style.cursor = 'grab';
-                colorPalette.style.opacity = '0.3'; colorPalette.style.pointerEvents = 'none';
-            } else {
-                drawLayer.style.pointerEvents = 'auto';
-                if (tool === 'pen') {
-                    btnPen.classList.add('active'); colorPalette.style.opacity = '1'; colorPalette.style.pointerEvents = 'auto'; sizeSlider.value = brushSize = 3; 
-                } else if (tool === 'highlighter') {
-                    btnHighlighter.classList.add('active'); colorPalette.style.opacity = '1'; colorPalette.style.pointerEvents = 'auto'; sizeSlider.value = brushSize = 15; 
-                } else if (tool === 'eraser') {
-                    btnEraser.classList.add('eraser-active'); colorPalette.style.opacity = '0.3'; colorPalette.style.pointerEvents = 'none'; sizeSlider.value = brushSize = 25; 
-                }
-                updateBrushStyle();
-            }
+            catch (err) { error.innerText = "Tài khoản hoặc mật khẩu sai!"; error.style.display = "block"; }
         }
+        window.handleLogin = handleLogin;
 
-        btnPen.addEventListener('click', () => setTool('pen')); 
-        btnHighlighter.addEventListener('click', () => setTool('highlighter')); 
-        btnEraser.addEventListener('click', () => setTool('eraser'));
-        btnPan.addEventListener('click', () => setTool('pan'));
+        function handleLogout() { signOut(auth).then(() => location.reload()); }
+        window.handleLogout = handleLogout;
 
-        function updateBrushStyle() {
-            if (activeTool === 'eraser') {
-                const visualSize = Math.max(15, brushSize * 1.5);
-                const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${visualSize}" height="${visualSize}" viewBox="0 0 ${visualSize} ${visualSize}"><rect x="0" y="0" width="${visualSize}" height="${visualSize}" fill="rgba(156, 163, 175, 0.6)" stroke="#334155" stroke-width="1.5"/></svg>`;
-                const encoded = btoa(svg);
-                drawLayer.style.cursor = `url('data:image/svg+xml;base64,${encoded}') ${visualSize/2} ${visualSize/2}, auto`;
-            } else { drawLayer.style.cursor = 'crosshair'; }
+        async function saveProgress() {
+            if (!currentUser || !currentExam || isSubmitted || isReviewMode) return;
+            if (userDataCache.sessionId !== currentSessionId) return; 
+            userDataCache.activeState = { timeLeft: totalTime, answers: getAllCurrentAnswers() };
+            await updateDoc(doc(db, "users", currentUser.uid), { activeExam: currentExam.id, activeState: userDataCache.activeState });
         }
+        window.saveProgress = saveProgress;
 
-        sizeSlider.addEventListener('input', (e) => { brushSize = parseInt(e.target.value); updateBrushStyle(); });
-        document.querySelectorAll('.color-swatch').forEach(swatch => {
-            swatch.addEventListener('click', () => {
-                if(activeTool === 'eraser' || activeTool === 'pan') setTool('pen'); 
-                document.querySelectorAll('.color-swatch').forEach(s => s.classList.remove('active')); swatch.classList.add('active');
-                brushColor = swatch.dataset.color; updateBrushStyle();
+        function showHome(forceHome = false) {
+            if (!forceHome && userDataCache.activeExam && sessionStorage.getItem('thpt_in_exam') === 'true') { 
+                startExam(userDataCache.activeExam, 'continue'); 
+                return; 
+            }
+            document.getElementById('user-header-info').style.display = 'flex'; 
+            document.getElementById('home-screen').style.display = 'block';
+            renderHome();
+        }
+        window.showHome = showHome;
+
+        function renderHome() {
+            const list = document.getElementById('exam-list'); list.innerHTML = '';
+            EXAM_DATABASE.forEach(exam => {
+                let historyData = userDataCache.history[exam.id] || [];
+                let tagText = exam.tag, tagColor = "", scoreHtml = "", actionHtml = `<button class="start-btn" onclick="startExam('${exam.id}', 'new')">Vào thi ngay</button>`;
+
+                if (historyData.length > 0) {
+                    const attemptCount = historyData.length; const latestAttempt = historyData[attemptCount - 1];
+                    tagText = `Đã làm ${attemptCount}/10 lần`; tagColor = "background: #d1fae5; color: #059669;";
+                    scoreHtml = `<div class="score-badge">${latestAttempt.score.toFixed(2)} đ</div>`;
+                    actionHtml = `<div class="action-buttons">${attemptCount < 10 ? `<button class="btn-retake" onclick="startExam('${exam.id}', 'retake')">Làm lại</button>` : ''}<button class="btn-history" onclick="showHistory('${exam.id}')">Lịch sử</button></div>`;
+                } else if (userDataCache.activeExam === exam.id) {
+                    tagText = "Đang làm dở..."; tagColor = "background: #fef08a; color: #ca8a04;";
+                    actionHtml = `<button class="start-btn" style="background:#ca8a04" onclick="startExam('${exam.id}', 'continue')">Tiếp tục làm bài</button>`;
+                }
+
+                list.innerHTML += `<div class="exam-card">${scoreHtml} <span class="exam-tag" style="${tagColor}">${tagText}</span><div class="exam-title">${exam.title}</div><div class="exam-meta"><span>🕒 ${exam.timeMinutes} phút</span><span>Môn Toán</span></div>${actionHtml}</div>`;
             });
-        });
-
-        function drawSingleStroke(ctx, stroke) {
-            ctx.beginPath(); ctx.lineJoin = 'round'; ctx.lineCap = 'round'; ctx.lineWidth = stroke.size;
-            if (stroke.tool === 'eraser') { ctx.globalCompositeOperation = 'destination-out'; ctx.globalAlpha = 1; } 
-            else if (stroke.tool === 'highlighter') { ctx.globalCompositeOperation = 'source-over'; ctx.globalAlpha = 0.5; } 
-            else { ctx.globalCompositeOperation = 'source-over'; ctx.globalAlpha = 1; }
-            ctx.strokeStyle = stroke.color; ctx.fillStyle = stroke.color;
-
-            if (stroke.points.length > 0) {
-                if (stroke.points.length < 3) {
-                    ctx.arc(stroke.points[0].x, stroke.points[0].y, stroke.size / 2, 0, Math.PI * 2); ctx.fill();
-                } else {
-                    ctx.moveTo(stroke.points[0].x, stroke.points[0].y);
-                    for (let i = 1; i < stroke.points.length - 2; i++) {
-                        const xc = (stroke.points[i].x + stroke.points[i + 1].x) / 2;
-                        const yc = (stroke.points[i].y + stroke.points[i + 1].y) / 2;
-                        ctx.quadraticCurveTo(stroke.points[i].x, stroke.points[i].y, xc, yc);
-                    }
-                    ctx.quadraticCurveTo(stroke.points[stroke.points.length - 2].x, stroke.points[stroke.points.length - 2].y, stroke.points[stroke.points.length - 1].x, stroke.points[stroke.points.length - 1].y);
-                    ctx.stroke(); 
-                }
-            }
         }
 
-        function redrawStaticCanvas() {
-            staticCtx.clearRect(0, 0, staticLayer.width, staticLayer.height);
-            strokes.forEach(stroke => drawSingleStroke(staticCtx, stroke));
-        }
-
-        function getDrawCoords(e) {
-            const rect = drawLayer.getBoundingClientRect();
-            const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-            const clientY = e.touches ? e.touches[0].clientY : e.clientY;
-            const scaleX = drawLayer.width / rect.width;
-            const scaleY = drawLayer.height / rect.height;
-            return { x: (clientX - rect.left) * scaleX, y: (clientY - rect.top) * scaleY };
-        }
-
-        function beginDraw(e) {
-            if(isReviewMode || activeTool === 'pan' || window.innerWidth < 768) return;
-            e.preventDefault(); 
-            isDrawing = true;
-            const c = getDrawCoords(e);
-            currentStroke = { tool: activeTool, color: brushColor, size: brushSize, points: [c] };
-            if (activeTool === 'eraser') drawSingleStroke(staticCtx, currentStroke);
-            else drawSingleStroke(drawCtx, currentStroke);
-        }
-
-        function strokeDraw(e) {
-            if (!isDrawing || isReviewMode || activeTool === 'pan' || window.innerWidth < 768) return;
-            e.preventDefault(); 
-            const c = getDrawCoords(e);
-            currentStroke.points.push(c);
-            if (activeTool === 'eraser') {
-                const p1 = currentStroke.points[currentStroke.points.length - 2];
-                const p2 = currentStroke.points[currentStroke.points.length - 1];
-                staticCtx.beginPath(); staticCtx.globalCompositeOperation = 'destination-out'; staticCtx.lineWidth = brushSize; staticCtx.lineCap = 'round'; staticCtx.lineJoin = 'round'; staticCtx.moveTo(p1.x, p1.y); staticCtx.lineTo(p2.x, p2.y); staticCtx.stroke();
+        async function startExam(examId, mode, attemptIndex = null) {
+            // Quản lý trí nhớ (Memory Tags) cho quá trình F5
+            if (mode === 'review') {
+                const idxToSave = (attemptIndex !== null) ? attemptIndex : (userDataCache.history[examId].length - 1);
+                sessionStorage.setItem('thpt_review_state', JSON.stringify({ id: examId, idx: idxToSave }));
+                sessionStorage.removeItem('thpt_in_exam');
             } else {
-                drawCtx.clearRect(0, 0, drawLayer.width, drawLayer.height);
-                drawSingleStroke(drawCtx, currentStroke);
+                sessionStorage.setItem('thpt_in_exam', 'true'); 
+                sessionStorage.removeItem('thpt_review_state');
+            }
+            
+            currentExam = EXAM_DATABASE.find(e => e.id === examId);
+            isReviewMode = (mode === 'review'); isSubmitted = isReviewMode;
+            
+            if (mode === 'retake') userDataCache.activeState = null;
+            if (!isReviewMode) { 
+                userDataCache.activeExam = examId; 
+                await updateDoc(doc(db, "users", currentUser.uid), { activeExam: examId }); 
+            }
+
+            document.getElementById('home-screen').style.display = 'none'; document.getElementById('user-header-info').style.display = 'none';
+            document.getElementById('exam-workspace').style.display = 'flex'; document.getElementById('header-controls').style.display = 'flex'; 
+            document.getElementById('header-timer').style.display = isReviewMode ? 'none' : 'flex'; document.getElementById('control-header').style.display = isReviewMode ? 'none' : 'flex';
+            document.getElementById('summary-screen').style.display = 'none'; document.getElementById('sheets-container').style.display = 'block';
+            document.getElementById('pdf-frame').src = currentExam.pdfUrl + "#toolbar=0&navpanes=0&scrollbar=0&view=FitH"; document.getElementById('current-exam-name').innerText = currentExam.title;
+            
+            totalTime = currentExam.timeMinutes * 60; initAnswerSheets();
+            
+            if (isReviewMode) {
+                const historyData = userDataCache.history[examId];
+                const indexToReview = (attemptIndex !== null) ? attemptIndex : (historyData.length - 1);
+                const savedAnswers = historyData[indexToReview].answers;
+                fillAnswers(savedAnswers); runGradingLogic(savedAnswers, indexToReview + 1);
+            } else {
+                if (mode === 'continue' && userDataCache.activeState && userDataCache.activeState.answers) { 
+                    totalTime = userDataCache.activeState.timeLeft; fillAnswers(userDataCache.activeState.answers); 
+                }
+                startTimer();
+            }
+        }
+        window.startExam = startExam;
+
+        function goHome() { 
+            // Xóa sạch trí nhớ trạng thái khi cố tình ra ngoài
+            sessionStorage.removeItem('thpt_in_exam'); 
+            sessionStorage.removeItem('thpt_review_state');
+
+            clearInterval(timerInterval); 
+            document.getElementById('exam-workspace').style.display = 'none'; 
+            document.getElementById('header-controls').style.display = 'none'; 
+            showHome(true); 
+        }
+        window.goHome = goHome;
+
+        function showHistory(examId) {
+            const historyData = userDataCache.history[examId] || []; const examInfo = EXAM_DATABASE.find(e => e.id === examId);
+            const modal = document.getElementById('custom-modal'); document.getElementById('modal-title').innerText = `Lịch sử: ${examInfo.title}`;
+            document.getElementById('modal-message').style.display = 'none'; document.getElementById('modal-action-buttons').style.display = 'none'; 
+            const listContainer = document.getElementById('modal-history-list'); listContainer.style.display = 'block'; listContainer.innerHTML = '';
+            historyData.forEach((attempt, index) => {
+                const dateStr = attempt.date || "Không rõ ngày";
+                listContainer.innerHTML += `<div class="history-item"><div class="history-info"><span class="h-attempt">Lần thi thứ ${index + 1}</span><span class="h-date">${dateStr}</span></div><div class="history-action"><span class="h-score">${attempt.score.toFixed(2)} đ</span><button class="btn-review-sm" onclick="closeModal(); startExam('${examId}', 'review', ${index})">Xem bài</button></div></div>`;
+            });
+            listContainer.innerHTML += `<button class="btn-cancel" onclick="closeModal()" style="width: 100%; margin-top: 15px;">Đóng</button>`;
+            modal.style.display = 'flex'; setTimeout(() => modal.classList.add('show'), 10);
+        }
+        window.showHistory = showHistory;
+
+       function openModal(action) {
+            if (action === 'exit' && (isSubmitted || isReviewMode)) { goHome(); return; }
+            const modal = document.getElementById('custom-modal'); 
+            const title = document.getElementById('modal-title');
+            const msg = document.getElementById('modal-message');
+            const confirmBtn = document.getElementById('modal-confirm-btn');
+            const cancelBtn = document.querySelector('#custom-modal .btn-cancel'); 
+
+            document.getElementById('modal-history-list').style.display = 'none'; 
+            msg.style.display = 'block'; 
+            document.getElementById('modal-action-buttons').style.display = 'flex';
+            cancelBtn.style.display = 'block'; 
+            
+            if (action === 'submit') { 
+                title.innerText = "Nộp bài"; 
+                msg.innerText = "Bạn có chắc chắn nộp bài?"; 
+                confirmBtn.className = "btn-confirm"; 
+                confirmBtn.innerText = "Nộp"; 
+                pendingAction = submitAndGrade; 
+            } 
+            else if (action === 'exit') { 
+                title.innerText = "Thoát"; 
+                msg.innerText = "Trạng thái sẽ được tự động lưu. Đồng ý thoát?"; 
+                confirmBtn.className = "btn-confirm danger"; 
+                confirmBtn.innerText = "Thoát"; 
+                pendingAction = goHome; 
+            }
+            else if (action === 'kickout') {
+                title.innerText = "⚠️ Cảnh báo bảo mật"; 
+                msg.innerText = "Tài khoản của bạn vừa được đăng nhập trên một thiết bị khác!\n\nBài làm dở ở máy này đã bị hủy. Vui lòng đăng xuất."; 
+                confirmBtn.className = "btn-confirm danger"; 
+                confirmBtn.innerText = "Đăng xuất"; 
+                cancelBtn.style.display = 'none'; 
+                pendingAction = handleLogout;
+            }
+            
+            modal.style.display = 'flex'; setTimeout(() => modal.classList.add('show'), 10);
+        }
+        window.openModal = openModal;
+
+        function closeModal() { const modal = document.getElementById('custom-modal'); modal.classList.remove('show'); setTimeout(() => modal.style.display = 'none', 300); pendingAction = null; }
+        window.closeModal = closeModal;
+
+        function confirmAction() { if (pendingAction) pendingAction(); closeModal(); }
+        window.confirmAction = confirmAction;
+
+        function initAnswerSheets() {
+            const sheets = document.getElementById('sheets-container'); sheets.innerHTML = ''; let html = '';
+            html += `<div class="section-title">PHẦN I. Câu trắc nghiệm</div><div class="mcq-grid">`;
+            for(let i=1; i<=12; i++) html += `<div class="q-compact-row" id="block_P1_${i}"><div class="q-compact-num">Câu ${i}</div><div class="mcq-options compact">${['A','B','C','D'].map(opt => `<label class="mcq-label"><input type="radio" name="ans_P1_${i}" value="${opt}" onchange="saveProgress()"><span class="mcq-box round">${opt}</span></label>`).join('')}</div><div class="result-feedback" id="feedback_P1_${i}"></div></div>`;
+            html += `</div><div class="section-title" style="margin-top:25px;">PHẦN II. Đúng/Sai</div><div class="tf-grid-compact">`;
+            for(let i=1; i<=4; i++) {
+                html += `<div class="q-compact-row tf-block" id="block_P2_${i}"><div class="q-compact-num" style="width:100%; margin-bottom:8px;">Câu ${i}</div><div class="tf-items">`;
+                ['a','b','c','d'].forEach(opt => { html += `<div class="tf-item-row"><span class="tf-item-label">${opt})</span><div><label class="tf-label"><input type="radio" name="ans_P2_${i}_${opt}" value="T" onchange="saveProgress()"><span class="tf-box small true-box">Đ</span></label><label class="tf-label"><input type="radio" name="ans_P2_${i}_${opt}" value="F" onchange="saveProgress()"><span class="tf-box small false-box">S</span></label></div></div>`; });
+                html += `</div><div class="result-feedback" id="feedback_P2_${i}"></div></div>`;
+            }
+            html += `</div><div class="section-title" style="margin-top:25px;">PHẦN III. Trả lời ngắn</div><div class="short-grid">`;
+            for(let i=1; i<=6; i++) html += `<div class="q-compact-row short-block" id="block_P3_${i}"><div class="q-compact-num">Câu ${i}</div><input type="text" class="short-answer-input compact" id="ans_P3_${i}" oninput="saveProgress()"><div class="result-feedback" id="feedback_P3_${i}"></div></div>`;
+            html += `</div>`; sheets.innerHTML = html;
+        }
+
+        function getAllCurrentAnswers() {
+            const answers = {}; document.querySelectorAll('input[type="radio"]:checked').forEach(el => answers[el.name] = el.value);
+            document.querySelectorAll('input[type="text"]').forEach(el => { if (el.value.trim() !== '') answers[el.id] = el.value.trim(); }); return answers;
+        }
+
+        function fillAnswers(answers) {
+            for (const key in answers) {
+                const val = answers[key]; const radio = document.querySelector(`input[name="${key}"][value="${val}"]`); if (radio) radio.checked = true;
+                const textInput = document.getElementById(key); if (textInput) textInput.value = val;
             }
         }
 
-        function endDraw() { 
-            if (!isDrawing) return;
-            isDrawing = false; 
-            strokes.push(currentStroke);
-            if (activeTool !== 'eraser') {
-                drawSingleStroke(staticCtx, currentStroke);
-                drawCtx.clearRect(0, 0, drawLayer.width, drawLayer.height);
-            }
-            currentStroke = null;
+        function startTimer() {
+            clearInterval(timerInterval);
+            timerInterval = setInterval(() => {
+                if (totalTime <= 0) { openModal('submit'); return; }
+                totalTime--; const m = Math.floor(totalTime / 60).toString().padStart(2, '0'), s = (totalTime % 60).toString().padStart(2, '0');
+                document.getElementById('global-timer').innerText = `${m}:${s}`;
+                if(totalTime % 5 === 0) saveProgress(); 
+            }, 1000);
         }
 
-        function undoLastStroke() { if (strokes.length > 0) { strokes.pop(); redrawStaticCanvas(); } }
-        
-        window.addEventListener('keydown', (e) => { if (e.ctrlKey && e.key === 'z') { e.preventDefault(); undoLastStroke(); } });
-        document.getElementById('btn-undo').addEventListener('click', undoLastStroke);
-        document.getElementById('btn-clear-canvas').addEventListener('click', () => { openModal('clear_canvas'); });
+        async function submitAndGrade() {
+            // Xóa trạng thái đang thi
+            sessionStorage.removeItem('thpt_in_exam'); 
+            
+            clearInterval(timerInterval); isSubmitted = true;
+            const finalAnswers = getAllCurrentAnswers(); const score = runGradingLogic(finalAnswers);
+            
+            if (!userDataCache.history[currentExam.id]) userDataCache.history[currentExam.id] = [];
+            const now = new Date(); const dateStr = now.toLocaleDateString('vi-VN') + ' - ' + now.toLocaleTimeString('vi-VN', {hour: '2-digit', minute:'2-digit'});
+            userDataCache.history[currentExam.id].push({ score: score, answers: finalAnswers, date: dateStr });
+            
+            // Ghi nhớ trạng thái Xem Kết Quả để F5 không mất
+            const newAttemptIndex = userDataCache.history[currentExam.id].length - 1;
+            sessionStorage.setItem('thpt_review_state', JSON.stringify({ id: currentExam.id, idx: newAttemptIndex }));
+            
+            userDataCache.activeExam = null; userDataCache.activeState = null;
+            
+            await updateDoc(doc(db, "users", currentUser.uid), { history: userDataCache.history, activeExam: null, activeState: null });
+        }
+        window.submitAndGrade = submitAndGrade;
 
-        drawLayer.addEventListener('mousedown', beginDraw); drawLayer.addEventListener('mousemove', strokeDraw); window.addEventListener('mouseup', endDraw);
-        drawLayer.addEventListener('touchstart', (e)=>{if(e.touches.length===1) beginDraw(e);}, {passive:false}); 
-        drawLayer.addEventListener('touchmove', (e)=>{if(e.touches.length===1) strokeDraw(e);}, {passive:false}); 
-        window.addEventListener('touchend', endDraw);
+        function runGradingLogic(userAnswers, attemptNum = null) {
+            document.getElementById('control-header').style.display = 'none'; document.getElementById('header-timer').style.display = 'none'; 
+            let totalScore = 0; const key = currentExam.keys; let p1Correct = 0, p2Score = 0, p3Correct = 0;
+            
+            for(let i=1; i<=12; i++) {
+                const uAns = userAnswers[`ans_P1_${i}`]; const cAns = key.P1 ? key.P1[i] : null; const block = document.getElementById(`block_P1_${i}`);
+                if (uAns === cAns && cAns) { p1Correct++; block.classList.add('correct-bg'); } 
+                else { block.classList.add('wrong-bg'); document.getElementById(`feedback_P1_${i}`).innerHTML = `<span class="correct-text">🎯 Đáp án: ${cAns}</span>`; }
+            } totalScore += p1Correct * 0.25;
 
+            for(let i=1; i<=4; i++) {
+                let cItems = 0;
+                ['a','b','c','d'].forEach(opt => { const uAns = userAnswers[`ans_P2_${i}_${opt}`]; const cAns = (key.P2 && key.P2[i]) ? key.P2[i][opt] : null; if (uAns === cAns && cAns) cItems++; });
+                let pts = 0; if (cItems === 1) pts = 0.1; else if (cItems === 2) pts = 0.25; else if (cItems === 3) pts = 0.5; else if (cItems === 4) pts = 1.0;
+                p2Score += pts; const block = document.getElementById(`block_P2_${i}`);
+                if (cItems === 4) block.classList.add('correct-bg');
+                else { block.classList.add('wrong-bg'); const k = key.P2[i]; document.getElementById(`feedback_P2_${i}`).innerHTML = `<span class="correct-text">🎯 Đúng: a)${k.a==='T'?'Đ':'S'}, b)${k.b==='T'?'Đ':'S'}, c)${k.c==='T'?'Đ':'S'}, d)${k.d==='T'?'Đ':'S'} (+${pts}đ)</span>`; }
+            } totalScore += p2Score;
+
+            for(let i=1; i<=6; i++) {
+                const uAns = userAnswers[`ans_P3_${i}`] || ""; const cAns = key.P3 ? String(key.P3[i]).trim() : null; const block = document.getElementById(`block_P3_${i}`);
+                if (uAns === cAns && cAns) { p3Correct++; block.classList.add('correct-bg'); } 
+                else { block.classList.add('wrong-bg'); document.getElementById(`feedback_P3_${i}`).innerHTML = `<span class="correct-text">🎯 Đáp án: ${cAns}</span>`; }
+            } totalScore += p3Correct * 0.5;
+
+            document.querySelectorAll('#sheets-container input').forEach(el => el.disabled = true);
+            document.getElementById('final-score-text').innerText = totalScore.toFixed(2);
+            document.getElementById('summary-desc').innerText = (isReviewMode && attemptNum) ? `Kết quả Lần thi thứ ${attemptNum}.` : (isReviewMode ? "Kết quả bài làm gần nhất." : "Điểm thi tối đa là 10.0.");
+            document.getElementById('summary-stats').innerHTML = `<div class="stat-row"><span>Phần I (Trắc nghiệm)</span><b>${p1Correct}/12 câu (+${p1Correct * 0.25}đ)</b></div><div class="stat-row"><span>Phần II (Đúng/Sai)</span><b>(+${p2Score.toFixed(2)}đ)</b></div><div class="stat-row"><span>Phần III (Trả lời ngắn)</span><b>${p3Correct}/6 câu (+${p3Correct * 0.5}đ)</b></div>`;
+            document.getElementById('sheets-container').style.display = 'none'; document.getElementById('summary-screen').style.display = 'block';
+            return totalScore;
+        }
+
+        window.addEventListener('beforeunload', () => { 
+            if (currentUser && currentExam && !isSubmitted && !isReviewMode && userDataCache.sessionId === currentSessionId) saveProgress(); 
+        });
     </script>
 </body>
 </html>
