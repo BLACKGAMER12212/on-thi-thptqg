@@ -51,19 +51,32 @@
         .auth-switch span { color: var(--thpt-main); font-weight: bold; cursor: pointer; transition: 0.2s;}
         .auth-switch span:hover { text-decoration: underline; }
 
-        /* Header */
+        /* ================= Header & Menu Mobile ================= */
         header { background: white; padding: 0 20px; display: flex; align-items: center; border-bottom: 2px solid var(--border-color); height: 60px; justify-content: space-between; z-index: 100;}
         .logo-area { display: flex; align-items: center; cursor: pointer; }
         header h1 { font-size: 24px; color: var(--thpt-main); font-weight: 900; letter-spacing: -1px;}
-        .header-controls { display: none; align-items: center; gap: 10px; }
-        .header-timer { background: #f1f5f9; padding: 6px 12px; border-radius: 8px; border: 1px solid var(--border-color); display: flex; align-items: center; gap: 8px; }
-        .header-timer .time-left { font-size: 18px; font-weight: bold; color: var(--thpt-main); font-variant-numeric: tabular-nums; }
+        
+        .header-center { display: none; align-items: center; background: #f1f5f9; padding: 6px 12px; border-radius: 8px; border: 1px solid var(--border-color); }
+        .time-left { font-size: 18px; font-weight: bold; color: var(--thpt-main); font-variant-numeric: tabular-nums; }
+        
+        .header-controls { display: flex; align-items: center; gap: 15px; }
         .home-btn { border: none; padding: 8px 12px; border-radius: 6px; font-weight: bold; cursor: pointer; transition: 0.2s; font-size: 13px;}
         .exit-btn { background: #fef2f2; color: var(--thpt-danger); border: 1px solid #fca5a5; }
         .exit-btn:hover { background: var(--thpt-danger); color: white; }
+        
         .user-info { font-weight: bold; color: var(--thpt-dark); display: flex; align-items: center; gap: 15px;}
         .logout-btn { background: #f1f5f9; color: #64748b; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: bold; transition: 0.2s;}
         .logout-btn:hover { background: #fee2e2; color: var(--thpt-danger); }
+
+        .hamburger-btn { display: none; background: none; border: none; font-size: 26px; color: var(--thpt-dark); cursor: pointer; padding: 5px; }
+        
+        .mobile-dropdown { 
+            display: none; position: fixed; top: 60px; right: 20px; background: white; 
+            padding: 20px; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.15); 
+            border: 1px solid var(--border-color); z-index: 1001; flex-direction: column; width: 200px;
+        }
+        .mobile-dropdown.show { display: flex; animation: fadeIn 0.2s ease-out; }
+        .user-name-mobile { font-weight: bold; margin-bottom: 15px; text-align: center; padding-bottom: 15px; border-bottom: 1px solid #e2e8f0; font-size: 15px;}
 
         /* Giao diện HOME */
         #home-screen { display: none; flex: 1; padding: 40px 20px; overflow-y: auto; background: var(--bg-color); touch-action: auto;}
@@ -115,32 +128,27 @@
 
         /* ============================================================
            KIẾN TRÚC HIỂN THỊ PDF HOÀN TOÀN MỚI
-           Tự do vuốt 360 độ, tự động căn giữa máy tính
+           Tự do vuốt 360 độ, tự động căn giữa bằng JS
            ============================================================ */
         #pdf-render-wrapper {
-            flex: 1; 
-            overflow: auto; /* Bật thanh cuộn tự nhiên */
-            text-align: center; /* VŨ KHÍ BÍ MẬT: Giữ tờ PDF luôn ở giữa trên Desktop */
-            padding: 20px; 
-            background: #e2e8f0;
-            overscroll-behavior: none; /* Khóa các thao tác quẹt trở lại của iPhone để cuộn mượt hơn */
-            -webkit-overflow-scrolling: touch;
+            flex: 1; overflow: auto; position: relative; padding: 20px; 
+            background: #e2e8f0; overscroll-behavior: none; -webkit-overflow-scrolling: touch;
         }
         
-        #pdf-scroll-content {
-            display: inline-block; /* Ăn theo lệnh text-align: center của wrapper */
-            text-align: left; /* Reset lại để chữ nghĩa bên trong không bị lệch */
+        #pdf-zoom-container {
             position: relative;
-            line-height: 0; /* Khử khoảng trắng thừa của inline-block */
-            padding-bottom: 50px; /* Chừa 1 khoảng trống dưới cùng dễ vuốt trên điện thoại */
+            /* width, height và margin-left sẽ được điều khiển bằng Javascript để Scroll chuẩn nhất */
+        }
+
+        #pdf-scroll-content {
+            position: absolute; top: 0; left: 0;
+            transform-origin: top left;
+            /* transform scale sẽ được áp dụng vào đây */
         }
 
         .pdf-page-canvas { 
-            display: block; 
-            background: white; 
-            box-shadow: 0 10px 25px rgba(0,0,0,0.1); 
-            margin-bottom: 15px; 
-            pointer-events: none; 
+            display: block; background: white; box-shadow: 0 10px 25px rgba(0,0,0,0.1); 
+            margin-bottom: 15px; pointer-events: none; 
         }
 
         /* Lớp kính cảm ứng 2 layer */
@@ -148,7 +156,7 @@
         #static-layer { z-index: 4; pointer-events: none; } 
         #draw-layer { z-index: 5; touch-action: none; pointer-events: auto; } 
 
-        /* NÚT FLOAT TRÒN TRỊA XINH XẮN */
+        /* NÚT FLOAT GỌI BẢNG TRẢ LỜI */
         .mobile-fab {
             display: none; position: fixed; bottom: 25px; right: 25px;
             width: 60px; height: 60px; background: var(--thpt-main); color: white;
@@ -234,8 +242,6 @@
         .h-score { font-size: 16px; font-weight: 900; color: var(--thpt-success); }
         .btn-review-sm { background: #e0f2fe; color: var(--thpt-main); border: none; padding: 6px 10px; border-radius: 6px; font-weight: bold; font-size: 12px; }
 
-        #user-header-info { display: none; }
-
         /* =========================================
            RESPONSIVE: TABLET & IPAD
            ========================================= */
@@ -255,15 +261,13 @@
            RESPONSIVE: ĐIỆN THOẠI 
            ========================================= */
         @media (max-width: 767px) {
+            .header-controls { display: none !important; }
+            .hamburger-btn { display: block; }
             #custom-toolbar { display: none !important; }
-            /* Cực kỳ quan trọng: Khóa lớp vẽ tĩnh để lớp cuộn phía dưới (wrapper) nhận 100% cảm ứng tay */
             .pdf-canvas-layer { pointer-events: none !important; } 
-            
             #pdf-render-wrapper { padding: 10px; }
             .zoom-controls { display: none !important; }
-            header h1 { font-size: 18px; }
-            .header-controls { flex-wrap: wrap; justify-content: flex-end;}
-            .user-info { font-size: 13px; }
+            header h1 { font-size: 20px; }
         }
     </style>
 </head>
@@ -301,13 +305,29 @@
     </div>
 
     <header>
-        <div class="logo-area" onclick="openModal('exit')"><h1>THPTQG 2026</h1></div>
-        <div class="header-controls" id="header-controls">
-            <div class="header-timer" id="header-timer"><span style="font-size: 11px; color: #64748b; font-weight: bold; text-transform: uppercase;">Time</span><span class="time-left" id="global-timer">--:--</span></div>
-            <button class="home-btn exit-btn" onclick="openModal('exit')">Thoát Đề</button>
+        <div class="logo-area" onclick="handleLogoClick()"><h1>THPTQG 2026</h1></div>
+        
+        <div class="header-center" id="header-timer">
+            <span style="font-size: 11px; color: #64748b; font-weight: bold; text-transform: uppercase; margin-right: 5px;">Time</span>
+            <span class="time-left" id="global-timer">--:--</span>
         </div>
-        <div class="user-info" id="user-header-info">Chào, <span id="display-username" style="color: var(--thpt-main);">User</span><button class="logout-btn" onclick="handleLogout()">Đăng xuất</button></div>
+        
+        <div class="header-controls" id="desktop-controls" style="display: none;">
+            <button class="home-btn exit-btn" id="btn-desktop-exit" onclick="openModal('exit')" style="display:none;">Thoát Đề</button>
+            <div class="user-info">
+                Chào, <span id="display-username" style="color: var(--thpt-main);">User</span>
+                <button class="logout-btn" onclick="handleLogout()">Đăng xuất</button>
+            </div>
+        </div>
+
+        <button class="hamburger-btn" id="hamburger-btn" onclick="toggleMobileMenu()" style="display: none;">☰</button>
     </header>
+
+    <div id="mobile-dropdown" class="mobile-dropdown">
+        <div class="user-name-mobile">Chào, <span id="display-username-mobile" style="color: var(--thpt-main);">User</span></div>
+        <button class="home-btn exit-btn" id="btn-mobile-exit" onclick="toggleMobileMenu(); openModal('exit')" style="display:none; width: 100%; margin-bottom: 10px;">Thoát Đề</button>
+        <button class="logout-btn" onclick="handleLogout()" style="width: 100%;">Đăng xuất</button>
+    </div>
 
     <div id="home-screen" class="fade-in"><h2 class="page-title">Danh sách đề thi</h2><div class="exam-grid" id="exam-list"></div></div>
 
@@ -341,9 +361,11 @@
             </div>
             
             <div id="pdf-render-wrapper">
-                <div id="pdf-scroll-content">
-                    <canvas id="static-layer" class="pdf-canvas-layer"></canvas>
-                    <canvas id="draw-layer" class="pdf-canvas-layer"></canvas>
+                <div id="pdf-zoom-container">
+                    <div id="pdf-scroll-content">
+                        <canvas id="static-layer" class="pdf-canvas-layer"></canvas>
+                        <canvas id="draw-layer" class="pdf-canvas-layer"></canvas>
+                    </div>
                 </div>
             </div>
 
@@ -368,7 +390,9 @@
             <div id="summary-screen" class="fade-in">
                 <div class="summary-card">
                     <h2 style="color: var(--thpt-dark); font-weight: 900;">KẾT QUẢ</h2><div class="final-score" id="final-score-text">0.00</div><p style="margin-bottom: 20px; color: #64748b;" id="summary-desc">Điểm thi tối đa là 10.0.</p>
-                    <div id="summary-stats"></div><button class="submit-btn" style="background: var(--thpt-main); margin-top: 25px; width: 100%; padding: 15px;" onclick="document.getElementById('summary-screen').style.display='none'; document.getElementById('sheets-container').style.display='block';">XEM LẠI ĐÁP ÁN CHI TIẾT</button>
+                    <div id="summary-stats"></div>
+                    <button class="submit-btn" style="background: var(--thpt-main); margin-top: 25px; width: 100%; padding: 15px;" onclick="document.getElementById('summary-screen').style.display='none'; document.getElementById('sheets-container').style.display='block';">XEM LẠI ĐÁP ÁN CHI TIẾT</button>
+                    <button class="submit-btn" style="background: #f1f5f9; color: var(--thpt-dark); margin-top: 10px; width: 100%; padding: 15px;" onclick="goHome()">VỀ TRANG CHỦ / THOÁT</button>
                 </div>
             </div>
         </div>
@@ -405,6 +429,7 @@
         let currentUser=null, currentExam=null, totalTime=0, timerInterval=null, isSubmitted=false, isReviewMode=false, pendingAction=null, userDataCache={history:{}, activeExam:null, activeState:null};
         let currentSessionId = localStorage.getItem('thpt_session_id'); if(!currentSessionId) { currentSessionId = Date.now().toString() + Math.random().toString(36).substr(2,5); localStorage.setItem('thpt_session_id', currentSessionId); }
         let unsubSnapshot=null, isInitialLoad=true;
+        let originalPdfWidth = 0, originalPdfHeight = 0;
 
         onAuthStateChanged(auth, (user) => {
             if(user){
@@ -416,7 +441,16 @@
                             document.getElementById('global-loader').style.display='none'; clearInterval(timerInterval); openModal('kickout'); return;
                         }
                         if(isInitialLoad){
-                            isInitialLoad=false; document.getElementById('global-loader').style.display='none'; document.getElementById('auth-screen').style.display='none'; document.getElementById('display-username').innerText=user.email.split('@')[0]; document.getElementById('user-header-info').style.display='flex';
+                            isInitialLoad=false; document.getElementById('global-loader').style.display='none'; document.getElementById('auth-screen').style.display='none'; 
+                            
+                            // Gắn tên user vào cả header và mobile menu
+                            const username = user.email.split('@')[0];
+                            document.getElementById('display-username').innerText = username;
+                            document.getElementById('display-username-mobile').innerText = username;
+                            
+                            document.getElementById('desktop-controls').style.display = 'flex';
+                            document.getElementById('hamburger-btn').style.display = window.innerWidth <= 767 ? 'block' : 'none';
+                            
                             const rState = JSON.parse(sessionStorage.getItem('thpt_review_state')||'null');
                             if(rState && userDataCache.history[rState.id]) startExam(rState.id, 'review', rState.idx);
                             else if(userDataCache.activeExam && sessionStorage.getItem('thpt_in_exam')==='true') startExam(userDataCache.activeExam, 'continue');
@@ -425,11 +459,19 @@
                     } else {
                         if(isInitialLoad){
                             isInitialLoad=false; userDataCache={history:{}, activeExam:null, activeState:null, sessionId:currentSessionId}; await setDoc(doc(db, "users", user.uid), userDataCache);
-                            document.getElementById('global-loader').style.display='none'; document.getElementById('auth-screen').style.display='none'; document.getElementById('display-username').innerText=user.email.split('@')[0]; document.getElementById('user-header-info').style.display='flex'; showHome();
+                            document.getElementById('global-loader').style.display='none'; document.getElementById('auth-screen').style.display='none'; 
+                            
+                            const username = user.email.split('@')[0];
+                            document.getElementById('display-username').innerText = username;
+                            document.getElementById('display-username-mobile').innerText = username;
+                            
+                            document.getElementById('desktop-controls').style.display = 'flex';
+                            document.getElementById('hamburger-btn').style.display = window.innerWidth <= 767 ? 'block' : 'none';
+                            showHome();
                         }
                     }
                 });
-            } else { isInitialLoad=true; currentUser=null; if(unsubSnapshot) unsubSnapshot(); document.getElementById('global-loader').style.display='none'; document.getElementById('auth-screen').style.display='flex'; document.getElementById('user-header-info').style.display='none'; }
+            } else { isInitialLoad=true; currentUser=null; if(unsubSnapshot) unsubSnapshot(); document.getElementById('global-loader').style.display='none'; document.getElementById('auth-screen').style.display='flex'; document.getElementById('desktop-controls').style.display='none'; document.getElementById('hamburger-btn').style.display='none';}
         });
 
         window.togglePassword = (id, el) => { const i=document.getElementById(id); if(i.type==="password"){i.type="text";el.innerText="🙈";}else{i.type="password";el.innerText="👁️";} };
@@ -439,24 +481,36 @@
         window.handleLogin = async () => { const u=document.getElementById('login-user').value.trim(), p=document.getElementById('login-pass').value, e=document.getElementById('login-error'); e.style.display='none'; try { currentSessionId=Date.now().toString()+Math.random().toString(36).substr(2,5); localStorage.setItem('thpt_session_id', currentSessionId); const res=await signInWithEmailAndPassword(auth, u+"@thpt.com", p); await updateDoc(doc(db,"users",res.user.uid), {sessionId:currentSessionId, activeExam:null, activeState:null}); } catch(err){e.innerText="Sai tài khoản/mật khẩu!"; e.style.display="block";} };
         window.handleLogout = () => signOut(auth).then(()=>location.reload());
 
+        // Quản lý Mobile Menu
+        window.toggleMobileMenu = () => { document.getElementById('mobile-dropdown').classList.toggle('show'); };
+        window.handleLogoClick = () => { if(!isSubmitted && !isReviewMode && currentExam) openModal('exit'); else goHome(); };
+
         window.toggleMobileSheet = () => {
             const panel = document.getElementById('right-panel-drawer');
             const backdrop = document.getElementById('drawer-backdrop');
-            const isOpen = panel.classList.contains('open');
-            
-            if(isOpen) {
-                panel.classList.remove('open');
-                backdrop.classList.remove('show');
+            if(panel.classList.contains('open')) {
+                panel.classList.remove('open'); backdrop.classList.remove('show');
                 setTimeout(() => backdrop.style.display = 'none', 300);
             } else {
-                panel.classList.add('open');
-                backdrop.style.display = 'block';
+                panel.classList.add('open'); backdrop.style.display = 'block';
                 setTimeout(() => backdrop.classList.add('show'), 10);
             }
         };
 
         window.saveProgress = async () => { if(!currentUser || !currentExam || isSubmitted || isReviewMode || userDataCache.sessionId!==currentSessionId) return; userDataCache.activeState={timeLeft:totalTime, answers:getAllCurrentAnswers()}; await updateDoc(doc(db,"users",currentUser.uid),{activeExam:currentExam.id, activeState:userDataCache.activeState}); };
-        window.showHome = (f=false) => { if(!f && userDataCache.activeExam && sessionStorage.getItem('thpt_in_exam')==='true'){startExam(userDataCache.activeExam,'continue');return;} document.getElementById('user-header-info').style.display='flex'; document.getElementById('home-screen').style.display='block'; document.getElementById('exam-workspace').style.display='none'; document.getElementById('header-controls').style.display='none'; renderHome(); };
+        window.showHome = (f=false) => { 
+            if(!f && userDataCache.activeExam && sessionStorage.getItem('thpt_in_exam')==='true'){startExam(userDataCache.activeExam,'continue');return;} 
+            document.getElementById('desktop-controls').style.display='flex'; 
+            document.getElementById('hamburger-btn').style.display = window.innerWidth <= 767 ? 'block' : 'none';
+            document.getElementById('home-screen').style.display='block'; 
+            document.getElementById('exam-workspace').style.display='none'; 
+            document.getElementById('header-timer').style.display='none'; 
+            document.getElementById('btn-desktop-exit').style.display='none';
+            document.getElementById('btn-mobile-exit').style.display='none';
+            currentExam = null;
+            renderHome(); 
+        };
+        
         function renderHome(){ const l=document.getElementById('exam-list'); l.innerHTML=''; EXAM_DATABASE.forEach(ex=>{ let hd=userDataCache.history[ex.id]||[], tt=ex.tag, tc="", sh="", ah=`<button class="start-btn" onclick="startExam('${ex.id}','new')">Vào thi ngay</button>`; if(hd.length>0){ const la=hd[hd.length-1]; tt=`Đã làm ${hd.length}/10 lần`; tc="background:#d1fae5;color:#059669;"; sh=`<div class="score-badge">${la.score.toFixed(2)} đ</div>`; ah=`<div class="action-buttons">${hd.length<10?`<button class="btn-retake" onclick="startExam('${ex.id}','retake')">Làm lại</button>`:''}<button class="btn-history" onclick="showHistory('${ex.id}')">Lịch sử</button></div>`; } else if(userDataCache.activeExam===ex.id){ tt="Đang làm dở..."; tc="background:#fef08a;color:#ca8a04;"; ah=`<button class="start-btn" style="background:#ca8a04" onclick="startExam('${ex.id}','continue')">Tiếp tục</button>`; } l.innerHTML+=`<div class="exam-card">${sh}<span class="exam-tag" style="${tc}">${tt}</span><div class="exam-title">${ex.title}</div><div class="exam-meta"><span>🕒 ${ex.timeMinutes}p</span><span>Môn Toán</span></div>${ah}</div>`; }); }
         
         async function loadPdfToCanvas(pdfUrl) {
@@ -495,19 +549,25 @@
                     if (viewport.width > maxWidth) maxWidth = viewport.width;
                 }
                 
+                originalPdfWidth = maxWidth;
+                originalPdfHeight = totalHeight;
+                
                 staticLayer.width = drawLayer.width = maxWidth;
                 staticLayer.height = drawLayer.height = totalHeight;
                 staticLayer.style.width = drawLayer.style.width = maxWidth + 'px';
                 staticLayer.style.height = drawLayer.style.height = totalHeight + 'px';
                 
+                scrollContent.style.width = maxWidth + 'px';
+                scrollContent.style.height = totalHeight + 'px';
+                
                 redrawStaticCanvas();
                 loader.style.display = 'none';
                 
-                // TỰ ĐỘNG CĂN VỪA KHÍT MÀN HÌNH ĐIỆN THOẠI LÚC MỚI VÀO
+                // Thuật toán Tự động căn khít lề khi vào thi trên mọi màn hình
                 let initZ = 1;
-                const wrapperWidth = document.getElementById('pdf-render-wrapper').clientWidth;
+                const wrapper = document.getElementById('pdf-render-wrapper');
                 if (window.innerWidth <= 1024) {
-                    initZ = (wrapperWidth - 20) / maxWidth; 
+                    initZ = (wrapper.clientWidth - 20) / maxWidth; // -20 để chừa tí lề cho đẹp
                     if(initZ > 1) initZ = 1; 
                 }
                 changeZoom(initZ, true);
@@ -530,7 +590,24 @@
             if(mode==='retake') userDataCache.activeState=null; 
             if(!isReviewMode){ userDataCache.activeExam=eId; await updateDoc(doc(db,"users",currentUser.uid),{activeExam:eId}); } 
             
-            document.getElementById('home-screen').style.display='none'; document.getElementById('user-header-info').style.display='none'; document.getElementById('exam-workspace').style.display='flex'; document.getElementById('header-controls').style.display='flex'; document.getElementById('header-timer').style.display=isReviewMode?'none':'flex'; document.getElementById('control-header').style.display=isReviewMode?'none':'flex'; document.getElementById('summary-screen').style.display='none'; document.getElementById('sheets-container').style.display='block'; document.getElementById('current-exam-name').innerText=currentExam.title; 
+            document.getElementById('home-screen').style.display='none'; 
+            document.getElementById('exam-workspace').style.display='flex'; 
+            
+            // Cài đặt hiển thị Header cho Workspace
+            document.getElementById('header-timer').style.display = isReviewMode ? 'none' : 'flex'; 
+            document.getElementById('control-header').style.display = isReviewMode ? 'none' : 'flex'; 
+            
+            // Cài đặt nút Thoát/Về Trang Chủ
+            const exitText = isReviewMode ? "Về trang chủ" : "Thoát Đề";
+            document.getElementById('btn-desktop-exit').style.display = 'block';
+            document.getElementById('btn-desktop-exit').innerText = exitText;
+            document.getElementById('btn-mobile-exit').style.display = 'block';
+            document.getElementById('btn-mobile-exit').innerText = exitText;
+
+            document.getElementById('summary-screen').style.display='none'; 
+            document.getElementById('sheets-container').style.display='block'; 
+            document.getElementById('current-exam-name').innerText=currentExam.title; 
+            
             totalTime=currentExam.timeMinutes*60; 
             initAnswerSheets(); 
             
@@ -551,12 +628,18 @@
 
         window.showHistory = (eId) => { const hd=userDataCache.history[eId]||[], ex=EXAM_DATABASE.find(e=>e.id===eId), m=document.getElementById('custom-modal'), c=document.getElementById('modal-history-list'); document.getElementById('modal-title').innerText=`Lịch sử: ${ex.title}`; document.getElementById('modal-message').style.display='none'; document.getElementById('modal-action-buttons').style.display='none'; c.style.display='block'; c.innerHTML=''; hd.forEach((a,i)=>{ c.innerHTML+=`<div class="history-item"><div class="history-info"><span class="h-attempt">Lần ${i+1}</span><span class="h-date">${a.date}</span></div><div class="history-action"><span class="h-score">${a.score.toFixed(2)}</span><button class="btn-review-sm" onclick="closeModal(); startExam('${eId}', 'review', ${i})">Xem</button></div></div>`; }); c.innerHTML+=`<button class="btn-cancel" onclick="closeModal()" style="width:100%;margin-top:15px;">Đóng</button>`; m.style.display='flex'; setTimeout(()=>m.classList.add('show'),10); };
         window.openModal = (act) => { 
-            if(act==='exit'&&(isSubmitted||isReviewMode)){goHome();return;} 
+            if(act==='exit'){
+                if(isSubmitted||isReviewMode){goHome();return;} 
+                const m=document.getElementById('custom-modal'), t=document.getElementById('modal-title'), msg=document.getElementById('modal-message'), b=document.getElementById('modal-confirm-btn'), cx=document.querySelector('#custom-modal .btn-cancel'); 
+                document.getElementById('modal-history-list').style.display='none'; msg.style.display='block'; document.getElementById('modal-action-buttons').style.display='flex'; cx.style.display='block'; 
+                t.innerText="Thoát"; msg.innerText="Hệ thống sẽ lưu lại quá trình làm bài. Bạn có muốn thoát?"; b.className="btn-confirm danger"; b.innerText="Thoát"; pendingAction=goHome;
+                m.style.display='flex'; setTimeout(()=>m.classList.add('show'),10); 
+                return;
+            }
             const m=document.getElementById('custom-modal'), t=document.getElementById('modal-title'), msg=document.getElementById('modal-message'), b=document.getElementById('modal-confirm-btn'), cx=document.querySelector('#custom-modal .btn-cancel'); 
             document.getElementById('modal-history-list').style.display='none'; msg.style.display='block'; document.getElementById('modal-action-buttons').style.display='flex'; cx.style.display='block'; 
             
             if(act==='submit'){t.innerText="Nộp bài"; msg.innerText="Chắc chắn nộp?"; b.className="btn-confirm"; b.innerText="Nộp"; pendingAction=submitAndGrade;} 
-            else if(act==='exit'){t.innerText="Thoát"; msg.innerText="Lưu và thoát?"; b.className="btn-confirm danger"; b.innerText="Thoát"; pendingAction=goHome;} 
             else if(act==='clear_canvas') {t.innerText="Xóa Tất Cả"; msg.innerText="Bạn chắc chắn muốn xóa toàn bộ nét vẽ?"; b.className="btn-confirm danger"; b.innerText="Xóa sạch"; pendingAction = () => { strokes = []; redrawStaticCanvas(); };}
             else if(act==='kickout'){t.innerText="Cảnh báo"; msg.innerText="Đăng nhập nơi khác!"; b.className="btn-confirm danger"; b.innerText="Thoát"; cx.style.display='none'; pendingAction=handleLogout;} 
             
@@ -577,28 +660,53 @@
         function runGradingLogic(ans, att=null){ document.getElementById('control-header').style.display='none'; document.getElementById('header-timer').style.display='none'; let s=0; const k=currentExam.keys; let p1=0,p2=0,p3=0; for(let i=1;i<=12;i++){ const b=document.getElementById(`feedback_P1_${i}`).closest('.q-compact-row'); if(ans[`ans_P1_${i}`]===k.P1[i]){p1++; b.classList.add('correct-bg');} else {b.classList.add('wrong-bg'); document.getElementById(`feedback_P1_${i}`).innerHTML=`<span class="correct-text">🎯 ${k.P1[i]}</span>`;} } s+=p1*0.25; for(let i=1;i<=4;i++){ let c=0; ['a','b','c','d'].forEach(o=>{if(ans[`ans_P2_${i}_${o}`]===k.P2[i][o]) c++;}); let pts=c===1?0.1:c===2?0.25:c===3?0.5:c===4?1:0; p2+=pts; const b=document.getElementById(`feedback_P2_${i}`).closest('.q-compact-row'); if(c===4) b.classList.add('correct-bg'); else {b.classList.add('wrong-bg'); const kv=k.P2[i]; document.getElementById(`feedback_P2_${i}`).innerHTML=`<span class="correct-text">🎯 a)${kv.a==='T'?'Đ':'S'} b)${kv.b==='T'?'Đ':'S'} c)${kv.c==='T'?'Đ':'S'} d)${kv.d==='T'?'Đ':'S'} (+${pts})</span>`;} } s+=p2; for(let i=1;i<=6;i++){ const b=document.getElementById(`feedback_P3_${i}`).closest('.q-compact-row'); if((ans[`ans_P3_${i}`]||'').trim()===String(k.P3[i])){p3++; b.classList.add('correct-bg');} else {b.classList.add('wrong-bg'); document.getElementById(`feedback_P3_${i}`).innerHTML=`<span class="correct-text">🎯 ${k.P3[i]}</span>`;} } s+=p3*0.5; document.querySelectorAll('#sheets-container input').forEach(e=>e.disabled=true); document.getElementById('final-score-text').innerText=s.toFixed(2); document.getElementById('summary-desc').innerText=att?`Lần ${att}`:"Kết quả gần nhất"; document.getElementById('summary-stats').innerHTML=`<div class="stat-row">I: ${p1}/12 (+${p1*0.25})</div><div class="stat-row">II: (+${p2.toFixed(2)})</div><div class="stat-row">III: ${p3}/6 (+${p3*0.5})</div>`; document.getElementById('sheets-container').style.display='none'; document.getElementById('summary-screen').style.display='block'; return s; }
 
         let currentZoom = 1;
-        const scrollContent = document.getElementById('pdf-scroll-content');
         
+        // ==========================================
+        // TÍNH TOÁN CĂN LỀ & KÍCH THƯỚC ĐỘNG BẰNG JAVASCRIPT
+        // Giúp loại bỏ hoàn toàn viền chết bên trái của CSS
+        // ==========================================
         window.changeZoom = (amount, isAbsolute = false) => {
+            if(!originalPdfWidth) return;
             if (isAbsolute) currentZoom = amount; else currentZoom += amount;
-            if (currentZoom < 0.2) currentZoom = 0.2; if (currentZoom > 5.0) currentZoom = 5.0; // Mở rộng giới hạn zoom
+            if (currentZoom < 0.2) currentZoom = 0.2; if (currentZoom > 5.0) currentZoom = 5.0; 
             
-            const canvases = document.querySelectorAll('#pdf-scroll-content canvas');
-            canvases.forEach(cvs => {
-                cvs.style.width = (cvs.width * currentZoom) + 'px';
-                cvs.style.height = (cvs.height * currentZoom) + 'px';
-            });
+            const content = document.getElementById('pdf-scroll-content');
+            content.style.transform = `scale(${currentZoom})`;
+            
+            const container = document.getElementById('pdf-zoom-container');
+            const wrapper = document.getElementById('pdf-render-wrapper');
+            
+            const scaledWidth = originalPdfWidth * currentZoom;
+            const scaledHeight = originalPdfHeight * currentZoom;
+            
+            container.style.width = scaledWidth + 'px';
+            container.style.height = scaledHeight + 'px';
+            
+            // Căn giữa tự động nếu màn hình lớn hơn tờ PDF, ngược lại thì đẩy sát viền trái
+            if (scaledWidth < wrapper.clientWidth) {
+                container.style.marginLeft = (wrapper.clientWidth - scaledWidth) / 2 + 'px';
+            } else {
+                container.style.marginLeft = '0px';
+            }
             
             const zoomText = document.getElementById('zoom-text');
             if(zoomText) zoomText.innerText = Math.round(currentZoom * 100) + '%';
         };
         
+        // Cập nhật lại khung nhìn khi xoay dọc/ngang điện thoại hoặc kéo cửa sổ máy tính
+        window.addEventListener('resize', () => {
+            if(document.getElementById('exam-workspace').style.display === 'flex' && originalPdfWidth) {
+                 changeZoom(0); // Không đổi zoom, chỉ tính lại margin
+                 document.getElementById('hamburger-btn').style.display = window.innerWidth <= 767 ? 'block' : 'none';
+            }
+        });
+
         document.getElementById('pdf-render-wrapper').addEventListener('wheel', (e) => {
             if (e.altKey) { e.preventDefault(); if (e.deltaY < 0) changeZoom(0.1); else changeZoom(-0.1); }
         });
 
         // ==========================================
-        // CÔNG NGHỆ PINCH-TO-ZOOM THÔNG MINH
+        // CÔNG NGHỆ PINCH-TO-ZOOM TỐI ƯU
         // ==========================================
         const pdfWrapper = document.getElementById('pdf-render-wrapper');
         let initDist = 0; let initZoom = 1;
@@ -635,6 +743,7 @@
                     
                     changeZoom(newZoom, true);
                     
+                    // Cập nhật thanh cuộn để giữ nguyên ngón tay tại điểm chạm
                     pdfWrapper.scrollLeft = (scrollX + pointerX) * ratio - pointerX;
                     pdfWrapper.scrollTop = (scrollY + pointerY) * ratio - pointerY;
                 }
