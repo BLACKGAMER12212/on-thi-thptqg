@@ -7,7 +7,6 @@
     <link rel="stylesheet" href="style.css">
     
     <style>
-        /* Tối ưu giao diện riêng cho trang Reset Pass dựa theo style em đã làm */
         body {
             background-color: #f8fafc;
             display: flex;
@@ -83,7 +82,6 @@
             transform: translateY(-2px);
             box-shadow: 0 6px 12px rgba(2, 132, 199, 0.3);
         }
-        /* Khối báo lỗi / thành công */
         #error-message {
             display: none;
             color: #EF4444;
@@ -148,10 +146,17 @@
     </div>
 </div>
 
+<div id="notification-modal" class="modal-overlay" style="display: none;">
+    <div class="modal-box">
+        <h3 id="notif-title">Thông báo</h3>
+        <p id="notif-message">Nội dung thông báo...</p>
+        <button id="notif-close-btn" onclick="window.closeNotificationModal()">Xác nhận</button>
+    </div>
+</div>
+
 <script type="module">
     import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm";
 
-    // 1. CẤU HÌNH SUPABASE TỪ FILE SCRIPT.JS CỦA EM (GIỮ NGUYÊN)
     const supabaseUrl = 'https://foujvxpzsilshacrpslu.supabase.co';
     const supabaseKey = 'sb_publishable_Xzo4hIwEc52h_AV_FZDs1w_c5-jDaCR';
     const supabase = createClient(supabaseUrl, supabaseKey);
@@ -161,7 +166,21 @@
     const successArea = document.getElementById('success-area');
     const btnReset = document.getElementById('btn-reset');
     
-    // 2. CHẶN LINK HẾT HẠN NGAY LÚC VÀO TRANG
+    // Hàm hiển thị thông báo
+    window.showNotification = (title, message) => {
+        document.getElementById('notif-title').innerText = title;
+        document.getElementById('notif-message').innerText = message;
+        document.getElementById('notification-modal').style.display = 'flex';
+        setTimeout(() => document.getElementById('notification-modal').classList.add('show'), 10);
+    };
+
+    window.closeNotificationModal = () => {
+        const modal = document.getElementById('notification-modal');
+        modal.classList.remove('show');
+        setTimeout(() => modal.style.display = 'none', 300);
+    };
+    
+    // Kiểm tra link hết hạn
     document.addEventListener("DOMContentLoaded", () => {
         const hashParams = new URLSearchParams(window.location.hash.substring(1));
         const error = hashParams.get("error");
@@ -170,68 +189,57 @@
         if (error === "access_denied" || errorCode === "otp_expired") {
             if (formArea) formArea.style.display = 'none';
             if (errorEl) {
-                errorEl.innerText = "Lỗi bảo mật! Link có thể đã hết hạn, vui lòng yêu cầu link mới.";
+                window.showNotification("Link không hợp lệ", "Lỗi bảo mật! Link có thể đã hết hạn hoặc không tồn tại, vui lòng yêu cầu link mới.");
+                errorEl.innerText = "Link đã hết hạn. Vui lòng quay lại màn hình đăng nhập!";
                 errorEl.style.display = 'block';
             }
             window.history.replaceState(null, null, window.location.pathname);
         }
     });
 
-    // 3. XỬ LÝ LƯU MẬT KHẨU KHI BẤM NÚT
+    // Xử lý đổi mật khẩu
     btnReset.addEventListener('click', async () => {
-        // HỖ TRỢ ẤN ENTER ĐỂ GỬI FORM
-    const handleEnter = (e) => {
-        if (e.key === 'Enter') {
-            btnReset.click(); // Giả lập hành động bấm nút "LƯU MẬT KHẨU"
-        }
-    };
-    document.getElementById('new-password').addEventListener('keypress', handleEnter);
-    document.getElementById('confirm-password').addEventListener('keypress', handleEnter);
+        const handleEnter = (e) => {
+            if (e.key === 'Enter') btnReset.click(); 
+        };
+        document.getElementById('new-password').addEventListener('keypress', handleEnter);
+        document.getElementById('confirm-password').addEventListener('keypress', handleEnter);
+        
         const p1 = document.getElementById('new-password').value;
         const p2 = document.getElementById('confirm-password').value;
 
-        // Ẩn bảng lỗi đi mỗi lần bấm nút để check lại từ đầu
         errorEl.style.display = 'none';
 
-        // BẮT LỖI 1: KHÔNG NHẬP GÌ CẢ
         if (!p1 || !p2) {
             errorEl.innerText = "Vui lòng nhập đầy đủ mật khẩu!";
             errorEl.style.display = 'block';
             return;
         }
 
-        // BẮT LỖI 2: 2 Ô MẬT KHẨU KHÔNG KHỚP NHAU (Làm theo yêu cầu của em)
         if (p1 !== p2) {
             errorEl.innerText = "Mật khẩu xác nhận không khớp! Vui lòng kiểm tra lại.";
             errorEl.style.display = 'block';
             return;
         }
 
-        // BẮT LỖI 3: MẬT KHẨU QUÁ NGẮN
         if (p1.length < 6) {
             errorEl.innerText = "Mật khẩu phải có ít nhất 6 ký tự!";
             errorEl.style.display = 'block';
             return;
         }
 
-        // Cập nhật trạng thái nút
         btnReset.innerText = "ĐANG LƯU...";
         btnReset.disabled = true;
 
         try {
-            // Gọi lệnh update pass của Supabase
             const { data, error } = await supabase.auth.updateUser({ password: p1 });
+            if (error) throw error; 
             
-            if (error) throw error; // Nếu có lỗi từ Supabase, ném nó xuống block catch bên dưới
-            
-            // Thành công: Ẩn form, hiện khung báo xanh lá
             formArea.style.display = 'none';
             successArea.style.display = 'block';
             
         } catch (err) {
-            console.error("Lỗi từ Supabase: ", err);
-            
-            // BẮT LỖI 4: MẬT KHẨU TRÙNG VỚI MẬT KHẨU CŨ (Supabase trả lỗi về)
+            console.error("Lỗi: ", err);
             if (err.message && err.message.toLowerCase().includes('different')) {
                 errorEl.innerText = "Mật khẩu mới không được trùng với mật khẩu hiện tại!";
             } else if (err.message && err.message.includes('expired')) {
@@ -239,12 +247,9 @@
             } else {
                 errorEl.innerText = "Đã xảy ra lỗi hệ thống hoặc link hết hạn. Vui lòng thử lại!";
             }
-            
-            // Hiển thị lỗi lên khung phía trên cùng
             errorEl.style.display = 'block';
             
         } finally {
-            // Trả lại trạng thái nút ban đầu nếu có lỗi để học sinh nhập lại
             if (formArea.style.display !== 'none') {
                 btnReset.innerText = "LƯU MẬT KHẨU & ĐĂNG NHẬP";
                 btnReset.disabled = false;
