@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Đặt lại mật khẩu - Hệ thống thi thử THPTQG</title>
+    <link rel="stylesheet" href="style.css">
+    
+    <style>
+        /* Tối ưu giao diện riêng cho trang Reset Pass dựa theo style em đã làm */
+        body {
+            background-color: #f8fafc;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        .reset-container {
+            background: white;
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.08);
+            width: 100%;
+            max-width: 420px;
+            text-align: center;
+            border: 1px solid #e2e8f0;
+        }
+        .reset-container h2 {
+            color: #0284C7;
+            font-weight: 900;
+            font-size: 26px;
+            margin-top: 0;
+            margin-bottom: 5px;
+        }
+        .reset-container p {
+            color: #64748b;
+            font-size: 14px;
+            margin-bottom: 25px;
+        }
+        .input-group {
+            text-align: left;
+            margin-bottom: 15px;
+        }
+        .input-group label {
+            display: block;
+            font-size: 12px;
+            font-weight: bold;
+            color: #1E293B;
+            margin-bottom: 5px;
+        }
+        .auth-input {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            outline: none;
+            font-size: 14px;
+            box-sizing: border-box;
+            background: #f8fafc;
+            transition: 0.2s;
+        }
+        .auth-input:focus {
+            border-color: #0284C7;
+            background: white;
+            box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.1);
+        }
+        .btn-primary {
+            background: #0284C7;
+            color: white;
+            border: none;
+            padding: 14px;
+            width: 100%;
+            border-radius: 8px;
+            font-weight: bold;
+            font-size: 15px;
+            cursor: pointer;
+            transition: 0.2s;
+            margin-top: 10px;
+        }
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(2, 132, 199, 0.3);
+        }
+        /* Khối báo lỗi / thành công */
+        #error-message {
+            display: none;
+            color: #EF4444;
+            background: #fef2f2;
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid #fca5a5;
+            font-weight: bold;
+            text-align: center;
+            margin-bottom: 20px;
+            font-size: 13px;
+        }
+        #success-area {
+            display: none;
+            color: #10B981;
+            background: #ecfdf5;
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid #86efac;
+            font-weight: bold;
+            text-align: center;
+            margin-bottom: 20px;
+            font-size: 14px;
+        }
+        .back-link {
+            display: inline-block;
+            margin-top: 15px;
+            color: #0284C7;
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: bold;
+        }
+        .back-link:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+
+<div class="reset-container">
+    <h2>ĐẶT LẠI MẬT KHẨU</h2>
+    <p>Nhập mật khẩu mới cho tài khoản của bạn</p>
+
+    <div id="error-message"></div>
+
+    <div id="success-area">
+        ✅ Đổi mật khẩu thành công!<br>
+        <a href="index.html" class="back-link">Quay lại trang chủ để Đăng nhập</a>
+    </div>
+
+    <div id="form-area">
+        <div class="input-group">
+            <label>MẬT KHẨU MỚI</label>
+            <input type="password" id="new-password" class="auth-input" placeholder="••••••••••••">
+        </div>
+        <div class="input-group">
+            <label>XÁC NHẬN MẬT KHẨU MỚI</label>
+            <input type="password" id="confirm-password" class="auth-input" placeholder="••••••••••••">
+        </div>
+        
+        <button id="btn-reset" class="btn-primary">LƯU MẬT KHẨU & ĐĂNG NHẬP</button>
+    </div>
+</div>
+
+<script type="module">
+    import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm";
+
+    // 1. CẤU HÌNH SUPABASE TỪ FILE SCRIPT.JS CỦA EM (GIỮ NGUYÊN)
+    const supabaseUrl = 'https://foujvxpzsilshacrpslu.supabase.co';
+    const supabaseKey = 'sb_publishable_Xzo4hIwEc52h_AV_FZDs1w_c5-jDaCR';
+    const supabase = createClient(supabaseUrl, supabaseKey);
+
+    const formArea = document.getElementById('form-area');
+    const errorEl = document.getElementById('error-message');
+    const successArea = document.getElementById('success-area');
+    const btnReset = document.getElementById('btn-reset');
+    
+    // 2. CHẶN LINK HẾT HẠN NGAY LÚC VÀO TRANG
+    document.addEventListener("DOMContentLoaded", () => {
+        const hashParams = new URLSearchParams(window.location.hash.substring(1));
+        const error = hashParams.get("error");
+        const errorCode = hashParams.get("error_code");
+
+        if (error === "access_denied" || errorCode === "otp_expired") {
+            if (formArea) formArea.style.display = 'none';
+            if (errorEl) {
+                errorEl.innerText = "Lỗi bảo mật! Link có thể đã hết hạn, vui lòng yêu cầu link mới.";
+                errorEl.style.display = 'block';
+            }
+            window.history.replaceState(null, null, window.location.pathname);
+        }
+    });
+
+    // 3. XỬ LÝ LƯU MẬT KHẨU KHI BẤM NÚT
+    btnReset.addEventListener('click', async () => {
+        // HỖ TRỢ ẤN ENTER ĐỂ GỬI FORM
+    const handleEnter = (e) => {
+        if (e.key === 'Enter') {
+            btnReset.click(); // Giả lập hành động bấm nút "LƯU MẬT KHẨU"
+        }
+    };
+    document.getElementById('new-password').addEventListener('keypress', handleEnter);
+    document.getElementById('confirm-password').addEventListener('keypress', handleEnter);
+        const p1 = document.getElementById('new-password').value;
+        const p2 = document.getElementById('confirm-password').value;
+
+        // Ẩn bảng lỗi đi mỗi lần bấm nút để check lại từ đầu
+        errorEl.style.display = 'none';
+
+        // BẮT LỖI 1: KHÔNG NHẬP GÌ CẢ
+        if (!p1 || !p2) {
+            errorEl.innerText = "Vui lòng nhập đầy đủ mật khẩu!";
+            errorEl.style.display = 'block';
+            return;
+        }
+
+        // BẮT LỖI 2: 2 Ô MẬT KHẨU KHÔNG KHỚP NHAU (Làm theo yêu cầu của em)
+        if (p1 !== p2) {
+            errorEl.innerText = "Mật khẩu xác nhận không khớp! Vui lòng kiểm tra lại.";
+            errorEl.style.display = 'block';
+            return;
+        }
+
+        // BẮT LỖI 3: MẬT KHẨU QUÁ NGẮN
+        if (p1.length < 6) {
+            errorEl.innerText = "Mật khẩu phải có ít nhất 6 ký tự!";
+            errorEl.style.display = 'block';
+            return;
+        }
+
+        // Cập nhật trạng thái nút
+        btnReset.innerText = "ĐANG LƯU...";
+        btnReset.disabled = true;
+
+        try {
+            // Gọi lệnh update pass của Supabase
+            const { data, error } = await supabase.auth.updateUser({ password: p1 });
+            
+            if (error) throw error; // Nếu có lỗi từ Supabase, ném nó xuống block catch bên dưới
+            
+            // Thành công: Ẩn form, hiện khung báo xanh lá
+            formArea.style.display = 'none';
+            successArea.style.display = 'block';
+            
+        } catch (err) {
+            console.error("Lỗi từ Supabase: ", err);
+            
+            // BẮT LỖI 4: MẬT KHẨU TRÙNG VỚI MẬT KHẨU CŨ (Supabase trả lỗi về)
+            if (err.message && err.message.toLowerCase().includes('different')) {
+                errorEl.innerText = "Mật khẩu mới không được trùng với mật khẩu hiện tại!";
+            } else if (err.message && err.message.includes('expired')) {
+                errorEl.innerText = "Link này đã hết hạn. Vui lòng yêu cầu link mới!";
+            } else {
+                errorEl.innerText = "Đã xảy ra lỗi hệ thống hoặc link hết hạn. Vui lòng thử lại!";
+            }
+            
+            // Hiển thị lỗi lên khung phía trên cùng
+            errorEl.style.display = 'block';
+            
+        } finally {
+            // Trả lại trạng thái nút ban đầu nếu có lỗi để học sinh nhập lại
+            if (formArea.style.display !== 'none') {
+                btnReset.innerText = "LƯU MẬT KHẨU & ĐĂNG NHẬP";
+                btnReset.disabled = false;
+            }
+        }
+    });
+</script>
+</body>
+</html>
