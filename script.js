@@ -1462,3 +1462,17 @@ document.getElementById('btn-undo').addEventListener('click', () => {
 document.getElementById('btn-clear-canvas').addEventListener('click', () => {
     window.openModal('clear_canvas');
 });
+
+// Hàm hiển thị thông báo
+function showNotification(title, message) {
+  const modal = document.getElementById('custom-modal');
+  document.getElementById('modal-title').innerText = title;
+  document.getElementById('modal-message').innerText = message;
+  
+  modal.style.display = 'flex';
+}
+
+// Hàm đóng thông báo
+function closeCustomModal() {
+  document.getElementById('custom-modal').style.display = 'none';
+}
