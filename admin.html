@@ -1,0 +1,1780 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hệ Thống Quản Trị - Luyện Thi THPTQG</title>
+    
+    <link rel="stylesheet" href="style.css">
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css"/>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
+
+    <style>
+        /* =========================================================
+           1. CẤU HÌNH MÀU SẮC VÀ GIAO DIỆN CƠ BẢN
+        ========================================================= */
+
+        :root {
+            --admin-bg: #f8fafc;
+            --admin-card: #ffffff;
+            --admin-border: #e2e8f0;
+            --admin-primary: #0284c7;
+            --admin-text-main: #0f172a;
+            --admin-text-sub: #64748b;
+        }
+
+        body {
+            background-color: var(--admin-bg) !important;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            margin: 0; 
+            padding: 0;
+            overflow-y: auto !important;
+            height: auto !important;
+        }
+
+
+        /* =========================================================
+           2. MÀN HÌNH ĐĂNG NHẬP
+        ========================================================= */
+
+        #admin-login-view {
+            min-height: 100vh; 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            background: #0f172a; 
+            padding: 20px;
+        }
+
+        .login-card {
+            background: #ffffff; 
+            width: 100%; 
+            max-width: 400px; 
+            padding: 40px; 
+            border-radius: 12px;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3); 
+            border: 1px solid #1e293b;
+        }
+
+        .login-header { 
+            text-align: center; 
+            margin-bottom: 30px; 
+        }
+
+        .login-header h2 { 
+            font-size: 20px; 
+            font-weight: 800; 
+            color: #0f172a; 
+            margin: 0 0 8px 0; 
+        }
+
+        .login-header p { 
+            font-size: 13px; 
+            color: #64748b; 
+            margin: 0; 
+        }
+
+        .input-label { 
+            display: block; 
+            font-size: 12px; 
+            font-weight: 700; 
+            color: #334155; 
+            margin-bottom: 6px; 
+            text-transform: uppercase; 
+        }
+        
+        .admin-input {
+            width: 100%; 
+            padding: 10px 14px; 
+            border: 1px solid #cbd5e1; 
+            border-radius: 6px; 
+            font-size: 14px; 
+            outline: none; 
+            background: #f8fafc; 
+            box-sizing: border-box;
+        }
+
+        .admin-input:focus { 
+            border-color: #0284c7; 
+            background: #ffffff; 
+            box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.15); 
+        }
+
+        .btn-login-submit {
+            width: 100%; 
+            background: #0284c7; 
+            color: #ffffff; 
+            border: none; 
+            padding: 12px; 
+            border-radius: 6px; 
+            font-weight: 700; 
+            font-size: 14px; 
+            cursor: pointer; 
+            margin-top: 10px;
+        }
+
+        .btn-login-submit:hover { 
+            background: #0369a1; 
+        }
+
+        #login-error-msg {
+            display: none; 
+            background: #fef2f2; 
+            color: #dc2626; 
+            border: 1px solid #fecaca; 
+            padding: 10px; 
+            border-radius: 6px; 
+            font-size: 13px; 
+            font-weight: 600; 
+            margin-bottom: 20px; 
+            text-align: center;
+        }
+
+
+        /* =========================================================
+           3. BẢNG ĐIỀU KHIỂN (DASHBOARD)
+        ========================================================= */
+
+        #admin-dashboard-view { 
+            display: none; 
+        }
+
+        .admin-header {
+            background: #0f172a; 
+            border-bottom: 1px solid #1e293b; 
+            padding: 0 30px; 
+            height: 60px; 
+            display: flex; 
+            align-items: center; 
+            justify-content: space-between; 
+            position: sticky; 
+            top: 0; 
+            z-index: 100;
+        }
+
+        .admin-brand { 
+            font-size: 15px; 
+            font-weight: 800; 
+            color: #ffffff; 
+        }
+
+        .admin-nav { 
+            display: flex; 
+            gap: 5px; 
+        }
+        
+        .admin-nav-btn { 
+            background: transparent; 
+            border: none; 
+            color: #94a3b8; 
+            padding: 8px 16px; 
+            border-radius: 6px; 
+            font-size: 13px; 
+            font-weight: 600; 
+            cursor: pointer; 
+        }
+
+        .admin-nav-btn:hover, .admin-nav-btn.active { 
+            color: #ffffff; 
+            background: #1e293b; 
+        }
+
+        .admin-user-info { 
+            display: flex; 
+            align-items: center; 
+            gap: 15px; 
+        }
+
+        .admin-user-tag { 
+            font-size: 13px; 
+            color: #cbd5e1; 
+            font-weight: 600; 
+        }
+        
+        .btn-logout-sm { 
+            background: rgba(239, 68, 68, 0.1); 
+            color: #ef4444; 
+            border: 1px solid rgba(239, 68, 68, 0.2); 
+            padding: 6px 12px; 
+            border-radius: 6px; 
+            font-size: 12px; 
+            font-weight: 700; 
+            cursor: pointer; 
+        }
+
+        .main-container { 
+            max-width: 1200px; 
+            margin: 30px auto; 
+            padding: 0 20px; 
+        }
+
+        .metrics-grid { 
+            display: grid; 
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); 
+            gap: 20px; 
+            margin-bottom: 30px; 
+        }
+
+        .metric-card { 
+            background: #ffffff; 
+            padding: 20px 24px; 
+            border-radius: 8px; 
+            border: 1px solid var(--admin-border); 
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05); 
+        }
+
+        .metric-title { 
+            font-size: 12px; 
+            font-weight: 700; 
+            color: var(--admin-text-sub); 
+            text-transform: uppercase; 
+            margin-bottom: 8px; 
+        }
+
+        .metric-value { 
+            font-size: 28px; 
+            font-weight: 800; 
+            color: var(--admin-text-main); 
+        }
+
+        .panel-card { 
+            background: #ffffff; 
+            border-radius: 8px; 
+            border: 1px solid var(--admin-border); 
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05); 
+            padding: 24px; 
+            margin-bottom: 30px; 
+        }
+
+        .panel-header { 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            margin-bottom: 20px; 
+        }
+
+        .panel-title { 
+            font-size: 16px; 
+            font-weight: 800; 
+            color: var(--admin-text-main); 
+        }
+        
+        .btn-add-primary { 
+            background: var(--admin-primary); 
+            color: #ffffff; 
+            border: none; 
+            padding: 9px 18px; 
+            border-radius: 6px; 
+            font-size: 13px; 
+            font-weight: 700; 
+            cursor: pointer; 
+        }
+        
+        .data-table-wrapper { 
+            width: 100%; 
+            overflow-x: auto; 
+        }
+
+        .data-table { 
+            width: 100%; 
+            border-collapse: collapse; 
+            text-align: left; 
+            font-size: 13px; 
+        }
+
+        .data-table th { 
+            background: #f8fafc; 
+            padding: 12px 16px; 
+            color: #475569; 
+            font-weight: 700; 
+            border-bottom: 1px solid var(--admin-border); 
+            text-transform: uppercase; 
+            font-size: 11px; 
+        }
+
+        .data-table td { 
+            padding: 14px 16px; 
+            border-bottom: 1px solid var(--admin-border); 
+            color: #334155; 
+        }
+
+        .data-table tr:hover { 
+            background-color: #f8fafc; 
+        }
+
+        .badge { 
+            padding: 3px 8px; 
+            border-radius: 4px; 
+            font-size: 11px; 
+            font-weight: 700; 
+            display: inline-block; 
+        }
+
+        .badge.admin { background: #fef3c7; color: #b45309; }
+        .badge.student { background: #e0f2fe; color: #0369a1; }
+        .badge.category { background: #f1f5f9; color: #475569; }
+
+        .btn-tb-action { 
+            background: transparent; 
+            border: 1px solid var(--admin-border); 
+            padding: 5px 10px; 
+            border-radius: 4px; 
+            font-size: 12px; 
+            font-weight: 600; 
+            cursor: pointer; 
+            margin-right: 4px; 
+        }
+
+        .btn-tb-action.edit { color: #0284c7; } 
+        .btn-tb-action.edit:hover { background: #e0f2fe; }
+        .btn-tb-action.answer { color: #16a34a; } 
+        .btn-tb-action.answer:hover { background: #dcfce7; }
+        .btn-tb-action.delete { color: #dc2626; } 
+        .btn-tb-action.delete:hover { background: #fef2f2; }
+
+
+        /* =========================================================
+           4. GIAO DIỆN SOẠN ĐÁP ÁN (FULL MÀN HÌNH)
+        ========================================================= */
+
+        #answer-editor-overlay {
+            display: none; 
+            position: fixed; 
+            top: 0; 
+            left: 0; 
+            width: 100vw; 
+            height: 100vh;
+            background: #f1f5f9; 
+            z-index: 99999; 
+            overflow-y: auto !important; 
+            box-sizing: border-box;
+        }
+
+        .editor-top-sticky {
+            position: sticky; 
+            top: 0; 
+            z-index: 1000; 
+            background: #ffffff; 
+            border-bottom: 2px solid #cbd5e1;
+            padding: 15px 30px; 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+        }
+
+        .editor-title-box h2 { 
+            margin: 0; 
+            font-size: 18px; 
+            color: #0f172a; 
+            font-weight: 800; 
+        }
+
+        .editor-title-box p { 
+            margin: 4px 0 0 0; 
+            font-size: 13px; 
+            color: #64748b; 
+        }
+
+        .editor-body-content { 
+            max-width: 900px; 
+            margin: 30px auto 80px auto; 
+            padding: 0 20px; 
+        }
+        
+        .editor-section-card { 
+            background: #ffffff; 
+            border-radius: 12px; 
+            border: 1px solid #cbd5e1; 
+            padding: 24px; 
+            margin-bottom: 30px; 
+            box-shadow: 0 2px 8px rgba(0,0,0,0.02); 
+        }
+
+        .editor-section-title { 
+            font-size: 16px; 
+            font-weight: 800; 
+            color: #0284c7; 
+            padding-bottom: 12px; 
+            border-bottom: 2px solid #e0f2fe; 
+            margin-bottom: 20px; 
+            display: flex; 
+            align-items: center; 
+            gap: 8px; 
+        }
+
+        .q-box-large { 
+            background: #f8fafc; 
+            border: 1px solid #cbd5e1; 
+            border-radius: 10px; 
+            padding: 20px; 
+            margin-bottom: 20px; 
+            transition: border-color 0.2s, box-shadow 0.2s; 
+        }
+
+        .q-box-large:focus-within { 
+            border-color: #0284c7; 
+            background: #ffffff; 
+        }
+
+        .q-box-header { 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            margin-bottom: 15px; 
+            flex-wrap: wrap; 
+            gap: 10px; 
+        }
+
+        .q-badge-num { 
+            background: #0284c7; 
+            color: white; 
+            font-size: 14px; 
+            font-weight: 800; 
+            padding: 6px 14px; 
+            border-radius: 6px; 
+            display: inline-block; 
+        }
+
+
+        /* =========================================================
+           5. ÔM KHÍT VÀ KÉO DÃN ẢNH TỰ DO (CSS RESIZE)
+        ========================================================= */
+
+        /* Ô đứt đoạn chờ ảnh */
+        .drop-zone {
+            width: 100%; 
+            min-height: 100px; 
+            border: 2px dashed #94a3b8; 
+            border-radius: 8px;
+            background: #f1f5f9; 
+            display: flex; 
+            flex-direction: column; 
+            justify-content: center; 
+            align-items: center;
+            color: #475569; 
+            font-size: 13px; 
+            font-weight: 600; 
+            cursor: pointer; 
+            margin-bottom: 15px; 
+            outline: none; 
+            transition: 0.2s;
+        }
+
+        .drop-zone:focus, .drop-zone:hover {
+            border-color: #0284c7; 
+            background: #f0f9ff; 
+            color: #0284c7;
+        }
+
+        /* Vùng hiển thị ảnh và chỉnh sửa kích thước */
+        .image-wrapper {
+            display: none; 
+            margin-bottom: 15px;
+            text-align: center; 
+        }
+
+        /* Khung kéo thả tự do CSS Resize */
+        .resizable-box {
+            display: inline-block; 
+            position: relative;
+            resize: both; 
+            overflow: hidden; 
+            border: 2px solid #cbd5e1;
+            padding: 4px;
+            background: #ffffff;
+            border-radius: 6px;
+            min-width: 100px;
+            min-height: 50px;
+            max-width: 100%; 
+            transition: border-color 0.2s;
+        }
+
+        .resizable-box:hover {
+            border-color: #0284c7;
+        }
+
+        .resizable-box img {
+            width: 100%;
+            height: 100%;
+            object-fit: fill; 
+            display: block;
+            pointer-events: none; 
+        }
+
+        .resize-hint {
+            display: block;
+            font-size: 12px;
+            color: #64748b;
+            margin-top: 5px;
+            font-style: italic;
+        }
+
+
+        /* THANH NÚT CHỨC NĂNG DƯỚI ẢNH */
+        .img-action-bar {
+            display: flex; 
+            gap: 10px; 
+            margin-top: 10px;
+            justify-content: center;
+        }
+
+        .btn-action-tool {
+            background: #ffffff; 
+            color: #0f172a; 
+            border: 1px solid #cbd5e1; 
+            padding: 6px 14px; 
+            border-radius: 6px; 
+            font-size: 13px; 
+            font-weight: bold;
+            cursor: pointer; 
+            transition: 0.2s; 
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+
+        .btn-action-tool:hover { 
+            background: #e2e8f0; 
+            border-color: #94a3b8; 
+        }
+
+        .btn-action-tool.danger { 
+            background: #ef4444; 
+            color: white; 
+            border-color: #ef4444; 
+        }
+
+        .btn-action-tool.danger:hover { 
+            background: #dc2626; 
+        }
+
+
+        /* =========================================================
+           6. CÁC NÚT ĐÁP ÁN (A,B,C,D) VÀ NHẬP TEXT
+        ========================================================= */
+
+        .opt-buttons-grid { 
+            display: flex; 
+            gap: 10px; 
+        }
+
+        .opt-btn-item input { 
+            display: none; 
+        }
+
+        .opt-btn-item span {
+            display: inline-flex; 
+            justify-content: center; 
+            align-items: center;
+            width: 42px; 
+            height: 42px; 
+            background: white; 
+            border: 2px solid #cbd5e1;
+            border-radius: 8px; 
+            font-size: 16px; 
+            font-weight: 800; 
+            color: #334155;
+            cursor: pointer; 
+            transition: all 0.15s;
+        }
+
+        .opt-btn-item input:checked + span {
+            background: #0284c7; 
+            color: white; 
+            border-color: #0284c7;
+            transform: scale(1.05); 
+            box-shadow: 0 4px 10px rgba(2, 132, 199, 0.3);
+        }
+
+        .tf-grid-pro { 
+            display: grid; 
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); 
+            gap: 12px; 
+            margin-bottom: 12px; 
+        }
+
+        .tf-card-item { 
+            background: white; 
+            padding: 10px; 
+            border-radius: 8px; 
+            border: 1px solid #cbd5e1; 
+            text-align: center; 
+        }
+
+        .tf-card-label { 
+            font-size: 13px; 
+            font-weight: 800; 
+            color: #0f172a; 
+            margin-bottom: 6px; 
+            display: block; 
+        }
+
+        .tf-select-box { 
+            width: 100%; 
+            padding: 8px; 
+            border-radius: 6px; 
+            border: 1px solid #cbd5e1; 
+            font-weight: bold; 
+            font-size: 13px; 
+            outline: none; 
+            background: #f8fafc; 
+        }
+
+        .short-ans-input { 
+            width: 100%; 
+            max-width: 250px; 
+            padding: 10px 14px; 
+            border: 1.5px solid #0284c7; 
+            border-radius: 6px; 
+            font-weight: bold; 
+            font-size: 15px; 
+            outline: none; 
+            background: white; 
+        }
+        
+        .exp-textarea-large {
+            width: 100%; 
+            min-height: 100px; 
+            padding: 12px; 
+            border: 1px solid #cbd5e1;
+            border-radius: 8px; 
+            font-size: 14px; 
+            line-height: 1.6; 
+            outline: none;
+            background: white; 
+            resize: vertical; 
+            box-sizing: border-box; 
+            font-family: inherit;
+        }
+
+        .exp-textarea-large:focus { 
+            border-color: #0284c7; 
+            box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.1); 
+        }
+
+
+        /* =========================================================
+           7. MODAL CẮT ẢNH & THÔNG BÁO (Z-INDEX CAO NHẤT)
+        ========================================================= */
+
+        #crop-modal { z-index: 100050 !important; }
+        #preview-student-modal { z-index: 100010 !important; }
+        #notification-modal { z-index: 100060 !important; }
+        #upload-modal { z-index: 100000 !important; }
+
+        .student-preview-card {
+            background: #ffffff; 
+            border: 1px solid #cbd5e1; 
+            border-radius: 12px; 
+            padding: 18px 20px; 
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1); 
+            text-align: left;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="admin-login-view">
+        <div class="login-card">
+            <div class="login-header">
+                <h2>CỔNG QUẢN TRỊ HỆ THỐNG</h2>
+                <p>Đăng nhập bằng tài khoản Quản trị viên</p>
+            </div>
+            
+            <div id="login-error-msg"></div>
+            
+            <form onsubmit="window.handleAdminLogin(event)">
+                <div style="margin-bottom: 15px;">
+                    <label class="input-label">Tài khoản / Gmail Admin</label>
+                    <input type="text" id="admin-user-input" class="admin-input" placeholder="Nhập username..." required>
+                </div>
+                <div style="margin-bottom: 25px;">
+                    <label class="input-label">Mật khẩu</label>
+                    <input type="password" id="admin-pass-input" class="admin-input" placeholder="••••••••••••" required>
+                </div>
+                <button type="submit" class="btn-login-submit" id="btn-login-btn">ĐĂNG NHẬP ADMIN</button>
+            </form>
+        </div>
+    </div>
+
+
+    <div id="admin-dashboard-view">
+        <header class="admin-header">
+            <div class="admin-brand">PORTAL QUẢN TRỊ</div>
+            <nav class="admin-nav">
+                <button class="admin-nav-btn active" onclick="window.switchMainTab('exams', this)">KHO ĐỀ THI</button>
+                <button class="admin-nav-btn" onclick="window.switchMainTab('users', this)">TÀI KHOẢN HỌC SINH</button>
+            </nav>
+            <div class="admin-user-info">
+                <span class="admin-user-tag">Xin chào, <b id="admin-name-text">Admin</b></span>
+                <button class="btn-logout-sm" onclick="window.handleAdminLogout()">Đăng xuất</button>
+            </div>
+        </header>
+
+        <div class="main-container">
+            <div id="tab-exams" class="admin-main-pane">
+                <div class="metrics-grid">
+                    <div class="metric-card"><div class="metric-title">Tổng số Học sinh</div><div class="metric-value" id="stat-users-count">0</div></div>
+                    <div class="metric-card"><div class="metric-title">Đề thi trên CSDL</div><div class="metric-value" id="stat-exams-count">0</div></div>
+                    <div class="metric-card"><div class="metric-title">Chức vụ hiện tại</div><div class="metric-value" id="stat-role-text" style="font-size: 20px; color: #0284c7;">Admin</div></div>
+                </div>
+
+                <div class="panel-card">
+                    <div class="panel-header">
+                        <div class="panel-title">DANH SÁCH ĐỀ THI TỔNG HỢP</div>
+                        <button class="btn-add-primary" onclick="window.openUploadModal()">+ Thêm Đề Thi Mới (Bước 1)</button>
+                    </div>
+                    <div class="data-table-wrapper">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Mã Đề (ID)</th>
+                                    <th>Tên Đề Thi</th>
+                                    <th>Thể Loại</th>
+                                    <th>Khóa</th>
+                                    <th>Lượt Xem</th>
+                                    <th>Lượt Tim</th>
+                                    <th>Thao Tác Quản Lý</th>
+                                </tr>
+                            </thead>
+                            <tbody id="exams-tbody"><tr><td colspan="7" style="text-align: center; color: #94a3b8;">Đang tải...</td></tr></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div id="tab-users" class="admin-main-pane" style="display: none;">
+                <div class="panel-card">
+                    <div class="panel-header"><div class="panel-title">DANH SÁCH TÀI KHOẢN HỆ THỐNG</div></div>
+                    <div class="data-table-wrapper">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Username</th>
+                                    <th>Họ và Tên</th>
+                                    <th>Gmail</th>
+                                    <th>Trường THPT</th>
+                                    <th>SĐT</th>
+                                    <th>Quyền Hạn</th>
+                                    <th>Phân Quyền</th>
+                                </tr>
+                            </thead>
+                            <tbody id="users-tbody"><tr><td colspan="7" style="text-align:center; color:#94a3b8;">Đang tải...</td></tr></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <div id="answer-editor-overlay">
+        <div class="editor-top-sticky">
+            <div class="editor-title-box">
+                <h2 id="editor-exam-title">Đang soạn đáp án cho đề: ---</h2>
+                <p>CẮT DÁN & KÉO ẢNH SIÊU MƯỢT! Nhấp vào khung nhấp nháy để dán ảnh. Kéo góc dưới bên phải ảnh để thay đổi kích thước tự do.</p>
+            </div>
+            <div style="display: flex; gap: 12px;">
+                <button type="button" onclick="window.closeAnswerEditor()" style="padding: 10px 20px; background: #e2e8f0; border: none; font-weight: 800; border-radius: 6px; cursor: pointer;">Quay Lại</button>
+                <button type="button" onclick="window.saveFullAnswersAndExplanations()" id="btn-save-answers-final" style="padding: 10px 24px; background: #0284c7; color: white; border: none; font-weight: 800; border-radius: 6px; cursor: pointer; box-shadow: 0 4px 12px rgba(2,132,199,0.3);">LƯU LÊN SERVER</button>
+            </div>
+        </div>
+
+        <div class="editor-body-content">
+            <div class="editor-section-card">
+                <div class="editor-section-title">📌 PHẦN I: 12 CÂU TRẮC NGHIỆM NHIỀU PHƯƠNG ÁN</div>
+                <div id="editor-p1-container"></div>
+            </div>
+
+            <div class="editor-section-card">
+                <div class="editor-section-title">📌 PHẦN II: 4 CÂU TRẮC NGHIỆM ĐÚNG / SAI</div>
+                <div id="editor-p2-container"></div>
+            </div>
+
+            <div class="editor-section-card">
+                <div class="editor-section-title">📌 PHẦN III: 6 CÂU TRẢ LỜI NGẮN / ĐIỀN SỐ</div>
+                <div id="editor-p3-container"></div>
+            </div>
+        </div>
+    </div>
+
+
+    <div class="modal-overlay" id="crop-modal" style="display:none;" onclick="window.handleBackdropClick(event, 'crop-modal')">
+        <div style="background: white; width: 92%; max-width: 800px; padding: 20px; border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.3);" onclick="event.stopPropagation()">
+            
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; border-bottom: 1px solid #e2e8f0; padding-bottom: 10px;">
+                <h3 style="margin:0; font-size:16px; color:#0f172a;">✂️ CẮT BỎ VIỀN THỪA CỦA ẢNH</h3>
+                <button type="button" onclick="window.closeCropModal()" style="background:none; border:none; font-size:18px; cursor:pointer;">✖</button>
+            </div>
+            
+            <div style="height: 400px; background: #0f172a; overflow: hidden; display: flex; justify-content: center; align-items: center; border-radius: 8px;">
+                <img id="crop-target-image" style="max-width: 100%; display: block;">
+            </div>
+
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 15px; flex-wrap: wrap; gap: 10px;">
+                <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                    <button type="button" class="btn-action-tool" onclick="window.cropper.rotate(-90)">🔄 Xoay Trái</button>
+                    <button type="button" class="btn-action-tool" onclick="window.cropper.rotate(90)">🔄 Xoay Phải</button>
+                    <button type="button" class="btn-action-tool" onclick="window.cropper.reset()">⏪ Phục hồi</button>
+                </div>
+                <div style="display: flex; gap: 10px;">
+                    <button type="button" onclick="window.closeCropModal()" style="background:#cbd5e1; border:none; padding:8px 16px; border-radius:6px; font-weight:bold; cursor:pointer;">Hủy bỏ</button>
+                    <button type="button" onclick="window.applyCropResult()" style="background:#0284c7; color:white; border:none; padding:8px 20px; border-radius:6px; font-weight:bold; cursor:pointer; box-shadow:0 4px 10px rgba(2,132,199,0.3);">✅ LƯU LẠI ẢNH CẮT</button>
+                </div>
+            </div>
+            
+        </div>
+    </div>
+
+
+    <div class="modal-overlay" id="upload-modal" onclick="window.handleBackdropClick(event, 'upload-modal')">
+        <div class="custom-modal-content" style="max-width: 520px; width: 95%; background: white; padding: 25px; border-radius: 10px;" onclick="event.stopPropagation()">
+            <div class="modal-header" style="border-bottom: 1px solid #e2e8f0; padding-bottom: 12px; display: flex; justify-content: space-between; align-items: center;">
+                <h3 style="margin:0; font-size: 16px; color: #0f172a;">BƯỚC 1: UPLOAD ĐỀ THI MỚI</h3>
+                <button onclick="window.closeUploadModal()" style="background:none; border:none; font-size:16px; cursor:pointer;">✖</button>
+            </div>
+            
+            <form id="upload-form" onsubmit="window.submitNewExamStep1(event)" style="margin-top: 15px;">
+                <div class="modal-form-group" style="margin-bottom: 15px;">
+                    <label class="input-label">Tên Đề Thi *</label>
+                    <input type="text" id="up-title" class="admin-input" placeholder="VD: Khảo sát chất lượng Toán 12 - Sở Hà Nội" required>
+                </div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px;">
+                    <div class="modal-form-group">
+                        <label class="input-label">Khóa Học Sinh *</label>
+                        <select id="up-cohort" class="admin-input">
+                            <option value="2k9">2k9 (Thi 2027)</option>
+                            <option value="2k8">2k8 (Thi 2026)</option>
+                        </select>
+                    </div>
+                    <div class="modal-form-group">
+                        <label class="input-label">Thể Loại *</label>
+                        <select id="up-category" class="admin-input">
+                            <option value="so">Sở GD&ĐT</option>
+                            <option value="chuyen">Trường Chuyên</option>
+                            <option value="practise">Đề Luyện Tập</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-form-group" style="margin-bottom: 20px;">
+                    <label class="input-label">Chọn File PDF Đề thi *</label>
+                    <input type="file" id="up-pdf-file" accept="application/pdf" class="admin-input" style="padding: 7px; cursor: pointer;" required>
+                </div>
+                <div style="display: flex; justify-content: flex-end; gap: 10px;">
+                    <button type="button" onclick="window.closeUploadModal()" style="background:#e2e8f0; border:none; padding:9px 18px; border-radius:6px; font-weight:700; cursor:pointer;">Hủy</button>
+                    <button type="submit" class="btn-add-primary" id="btn-upload-submit">TẢI LÊN & TẠO ĐỀ</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+
+    <div class="modal-overlay" id="preview-student-modal" style="display: none;" onclick="window.handleBackdropClick(event, 'preview-student-modal')">
+        <div style="background: white; width: 95%; max-width: 600px; padding: 25px; border-radius: 12px; position: relative;" onclick="event.stopPropagation()">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 2px solid #e2e8f0; padding-bottom: 10px;">
+                <h3 style="margin:0; font-size:16px; color:#0284c7;">👁️ Xem trước giao diện Học sinh</h3>
+                <button type="button" onclick="window.closeStudentPreview()" style="background:none; border:none; font-size:18px; cursor:pointer;">✖</button>
+            </div>
+            
+            <div id="preview-student-content"></div>
+
+            <div style="text-align: right; margin-top: 20px;">
+                <button type="button" onclick="window.closeStudentPreview()" class="btn-action-tool" style="display: inline-block;">Đóng Xem Trước</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="notification-modal" class="modal-overlay" onclick="window.handleBackdropClick(event, 'notification-modal')">
+        <div class="modal-box" style="background:white; padding:25px; border-radius:10px; max-width:350px; width:90%; text-align:center;" onclick="event.stopPropagation()">
+            <h3 id="notif-title" style="margin-top:0; font-size:16px; color:#0f172a;">Thông báo</h3>
+            <p id="notif-message" style="font-size:14px; color:#475569; margin:15px 0;">Nội dung...</p>
+            <button onclick="window.closeNotificationModal()" style="background:#0284c7; color:white; border:none; padding:10px 20px; border-radius:6px; font-weight:bold; cursor:pointer; width:100%;">Đồng ý</button>
+        </div>
+    </div>
+
+
+    <input type="file" id="hidden-question-file-input" accept="image/*" style="display: none;">
+
+
+    <script type="module">
+        import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm";
+        
+        // 1. KHỞI TẠO BẢO MẬT VỚI SUPABASE
+        const supabaseUrl = 'https://foujvxpzsilshacrpslu.supabase.co';
+        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZvdWp2eHB6c2lsc2hhY3Jwc2x1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODY0MzYyMzQsImV4cCI6MjEwMjAxMjIzNH0.K8_zJZjKkmU-_WdaXowkM7dLhVBP5GpMRPAsbiiDLb4';
+        
+        // 👉 ĐÃ THÊM LẠI TÍNH NĂNG 2 TÀI KHOẢN ĐỘC LẬP BẰNG storageKey
+        const supabase = createClient(supabaseUrl, supabaseKey, {
+            auth: {
+                storageKey: 'thpt_admin_auth_token',
+                autoRefreshToken: true,
+                persistSession: true,
+                detectSessionInUrl: true
+            }
+        });
+
+
+        // BIẾN QUẢN LÝ TRẠNG THÁI
+        let currentAdmin = null;
+        let editingExamId = null;
+        let imageFilesStore = {}; 
+        let currentTargetQidForSelect = null;
+        
+        // Quản lý Modal Cắt ảnh
+        window.cropper = null;
+        let cropTargetQid = null;
+
+
+        // =====================================================================
+        // TRẢ THEO HÀM DỰNG EDITOR KHUNG DÁN ẢNH CÓ RESIZE MƯỢT MÀ
+        // =====================================================================
+
+        window.openAnswerEditor = async (examId, examTitle) => {
+            editingExamId = examId;
+            document.getElementById('editor-exam-title').innerText = `Đang soạn đáp án cho: ${examTitle}`;
+            
+            imageFilesStore = {}; 
+
+            buildEditorForms();
+
+            const { data: ex, error } = await supabase
+                .from('exams')
+                .select('answers')
+                .eq('id', examId)
+                .single();
+
+            if (ex && ex.answers) {
+                fillExistingAnswers(ex.answers);
+            }
+
+            const overlay = document.getElementById('answer-editor-overlay');
+            overlay.style.display = 'block';
+            overlay.scrollTop = 0;
+        };
+
+        window.closeAnswerEditor = () => {
+            document.getElementById('answer-editor-overlay').style.display = 'none';
+            editingExamId = null;
+        };
+
+
+        function createImageWorkspaceHTML(qId) {
+            return `
+                <div class="drop-zone" id="drop_zone_${qId}" tabindex="0" data-qid="${qId}" ondblclick="window.triggerImageSelect('${qId}')">
+                    <span>📸 Nhấp đúp chuột hoặc trỏ vào đây bấm <b>Ctrl+V</b> để dán ảnh</span>
+                </div>
+
+                <div class="image-wrapper" id="img_wrap_${qId}">
+                    <div class="resizable-box" id="resize_box_${qId}">
+                        <img id="img_preview_${qId}" crossorigin="anonymous">
+                    </div>
+                    <span class="resize-hint">💡 Gợi ý: Cầm góc dưới bên phải bức ảnh và kéo để thu phóng kích thước tùy ý!</span>
+                    
+                    <div class="img-action-bar">
+                        <button type="button" class="btn-action-tool" onclick="window.openCropModal('${qId}')">✂️ Cắt Ảnh</button>
+                        <button type="button" class="btn-action-tool" onclick="window.showStudentPreview(event, '${qId}')">👁️ Xem trước</button>
+                        <button type="button" class="btn-action-tool danger" onclick="window.removeImage('${qId}')">🗑️ Xóa Ảnh</button>
+                    </div>
+                </div>
+            `;
+        }
+
+        function buildEditorForms() {
+            // ================== P1: 12 CÂU MCQ ==================
+            const p1Container = document.getElementById('editor-p1-container');
+            p1Container.innerHTML = '';
+            for (let i = 1; i <= 12; i++) {
+                const qId = `P1_${i}`;
+                p1Container.innerHTML += `
+                    <div class="q-box-large">
+                        <div class="q-box-header">
+                            <span class="q-badge-num">Câu ${i}</span>
+                            <div class="opt-buttons-grid">
+                                <label class="opt-btn-item"><input type="radio" name="ed_p1_q${i}" value="A" checked><span>A</span></label>
+                                <label class="opt-btn-item"><input type="radio" name="ed_p1_q${i}" value="B"><span>B</span></label>
+                                <label class="opt-btn-item"><input type="radio" name="ed_p1_q${i}" value="C"><span>C</span></label>
+                                <label class="opt-btn-item"><input type="radio" name="ed_p1_q${i}" value="D"><span>D</span></label>
+                            </div>
+                        </div>
+                        
+                        ${createImageWorkspaceHTML(qId)}
+
+                        <div>
+                            <span style="font-size:13px; font-weight:700; color:#334155; display:block; margin-bottom:6px;">📝 Lời giải (Chữ):</span>
+                            <textarea id="ed_p1_exp_${i}" class="exp-textarea-large" placeholder="Nhập hướng dẫn giải..."></textarea>
+                        </div>
+                    </div>
+                `;
+            }
+
+            // ================== P2: 4 CÂU ĐÚNG SAI ==================
+            const p2Container = document.getElementById('editor-p2-container');
+            p2Container.innerHTML = '';
+            for (let i = 1; i <= 4; i++) {
+                const qId = `P2_${i}`;
+                p2Container.innerHTML += `
+                    <div class="q-box-large">
+                        <div class="q-box-header" style="flex-direction: column; align-items: flex-start;">
+                            <span class="q-badge-num" style="background:#0284c7;">Câu ${i} (Đúng / Sai)</span>
+                            <div class="tf-grid-pro">
+                                <div class="tf-card-item">
+                                    <span class="tf-card-label">Ý a)</span>
+                                    <select class="tf-select-box" id="ed_p2_${i}_a"><option value="T">Đúng (T)</option><option value="F">Sai (F)</option></select>
+                                </div>
+                                <div class="tf-card-item">
+                                    <span class="tf-card-label">Ý b)</span>
+                                    <select class="tf-select-box" id="ed_p2_${i}_b"><option value="T">Đúng (T)</option><option value="F">Sai (F)</option></select>
+                                </div>
+                                <div class="tf-card-item">
+                                    <span class="tf-card-label">Ý c)</span>
+                                    <select class="tf-select-box" id="ed_p2_${i}_c"><option value="T">Đúng (T)</option><option value="F">Sai (F)</option></select>
+                                </div>
+                                <div class="tf-card-item">
+                                    <span class="tf-card-label">Ý d)</span>
+                                    <select class="tf-select-box" id="ed_p2_${i}_d"><option value="T">Đúng (T)</option><option value="F">Sai (F)</option></select>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        ${createImageWorkspaceHTML(qId)}
+
+                        <div>
+                            <span style="font-size:13px; font-weight:700; color:#334155; display:block; margin-bottom:6px;">📝 Lời giải chi tiết cho cả 4 ý:</span>
+                            <textarea id="ed_p2_exp_${i}" class="exp-textarea-large" placeholder="Nhập hướng dẫn giải chi tiết..."></textarea>
+                        </div>
+                    </div>
+                `;
+            }
+
+            // ================== P3: 6 CÂU ĐIỀN SỐ ==================
+            const p3Container = document.getElementById('editor-p3-container');
+            p3Container.innerHTML = '';
+            for (let i = 1; i <= 6; i++) {
+                const qId = `P3_${i}`;
+                p3Container.innerHTML += `
+                    <div class="q-box-large">
+                        <div class="q-box-header">
+                            <span class="q-badge-num" style="background:#0d9488;">Câu ${i} (Điền số)</span>
+                            <div style="display: flex; align-items: center; gap: 10px;">
+                                <span style="font-size: 13px; font-weight: 800; color: #0d9488;">ĐÁP ÁN ĐÚNG:</span>
+                                <input type="text" id="ed_p3_ans_${i}" class="short-ans-input" placeholder="VD: 84 hoặc -12,5">
+                            </div>
+                        </div>
+
+                        ${createImageWorkspaceHTML(qId)}
+
+                        <div>
+                            <span style="font-size:13px; font-weight:700; color:#334155; display:block; margin-bottom:6px;">📝 Lời giải chi tiết:</span>
+                            <textarea id="ed_p3_exp_${i}" class="exp-textarea-large" placeholder="Nhập hướng dẫn giải..."></textarea>
+                        </div>
+                    </div>
+                `;
+            }
+        }
+
+
+        // =====================================================================
+        // SỰ KIỆN: DÁN ẢNH BẰNG CTRL+V HOẶC CLICK ĐÚP 
+        // =====================================================================
+        
+        const hiddenFileInput = document.getElementById('hidden-question-file-input');
+        
+        window.triggerImageSelect = (qId) => {
+            currentTargetQidForSelect = qId;
+            hiddenFileInput.value = '';
+            hiddenFileInput.click();
+        };
+
+        if (hiddenFileInput) {
+            hiddenFileInput.addEventListener('change', (e) => {
+                const file = e.target.files[0];
+                if (!file || !currentTargetQidForSelect) return;
+                
+                const qId = currentTargetQidForSelect;
+                const reader = new FileReader();
+                
+                reader.onload = (event) => { 
+                    processNewImage(qId, event.target.result, file); 
+                };
+                reader.readAsDataURL(file);
+            });
+        }
+
+
+        document.addEventListener('paste', (event) => {
+            const activeElement = document.activeElement;
+            
+            if (activeElement && activeElement.classList.contains('drop-zone')) {
+                const qId = activeElement.dataset.qid; 
+                
+                const items = (event.clipboardData || event.originalEvent.clipboardData).items;
+                for (let index in items) {
+                    const item = items[index];
+                    
+                    if (item.kind === 'file' && item.type.includes('image/')) {
+                        const blob = item.getAsFile();
+                        const reader = new FileReader();
+                        
+                        reader.onload = (e) => { 
+                            processNewImage(qId, e.target.result, blob); 
+                        };
+                        reader.readAsDataURL(blob);
+                        event.preventDefault();
+                    }
+                }
+            }
+        });
+
+
+        function processNewImage(qId, imgSrc, blobFile) {
+            const dropZone = document.getElementById(`drop_zone_${qId}`);
+            const imgWrap = document.getElementById(`img_wrap_${qId}`);
+            const imgEl = document.getElementById(`img_preview_${qId}`);
+            const resizeBox = document.getElementById(`resize_box_${qId}`);
+            
+            if (dropZone) dropZone.style.display = 'none';
+            
+            imgEl.src = imgSrc;
+            
+            imgEl.onload = () => {
+                resizeBox.style.width = "auto";
+                resizeBox.style.height = "auto";
+                if (imgWrap) imgWrap.style.display = 'block';
+            };
+            
+            if (blobFile) {
+                imageFilesStore[qId] = blobFile;
+            }
+        }
+
+
+        window.removeImage = (qId) => {
+            const dropZone = document.getElementById(`drop_zone_${qId}`);
+            const imgWrap = document.getElementById(`img_wrap_${qId}`);
+            const imgEl = document.getElementById(`img_preview_${qId}`);
+            
+            imgEl.src = "";
+            if (imgWrap) imgWrap.style.display = 'none';
+            
+            if (dropZone) dropZone.style.display = 'flex';
+            
+            delete imageFilesStore[qId];
+        };
+
+
+        // =====================================================================
+        // TÍNH NĂNG CẮT ẢNH AN TOÀN BẰNG BẢNG MODAL CHUYÊN BIỆT
+        // =====================================================================
+
+        window.openCropModal = (qId) => {
+            const imgEl = document.getElementById(`img_preview_${qId}`);
+            if (!imgEl || !imgEl.src) return;
+
+            cropTargetQid = qId;
+            const cropImg = document.getElementById('crop-target-image');
+            
+            cropImg.src = imgEl.src;
+
+            const modal = document.getElementById('crop-modal');
+            modal.style.display = 'flex';
+
+            if (window.cropper) {
+                window.cropper.destroy();
+            }
+
+            window.cropper = new Cropper(cropImg, {
+                viewMode: 1,
+                autoCropArea: 0.95,
+                responsive: true,
+                restore: false,
+                checkCrossOrigin: false
+            });
+        };
+
+
+        window.closeCropModal = () => {
+            if (window.cropper) {
+                window.cropper.destroy();
+                window.cropper = null;
+            }
+            document.getElementById('crop-modal').style.display = 'none';
+            cropTargetQid = null;
+        };
+
+
+        window.applyCropResult = () => {
+            if (!window.cropper || !cropTargetQid) return;
+
+            const qId = cropTargetQid;
+            const canvas = window.cropper.getCroppedCanvas({
+                imageSmoothingEnabled: true,
+                imageSmoothingQuality: 'high',
+            });
+
+            if (!canvas) return;
+
+            canvas.toBlob((blob) => {
+                imageFilesStore[qId] = blob; 
+                
+                const imgEl = document.getElementById(`img_preview_${qId}`);
+                const resizeBox = document.getElementById(`resize_box_${qId}`);
+
+                imgEl.src = canvas.toDataURL('image/png');
+                
+                imgEl.onload = () => {
+                    resizeBox.style.width = "auto";
+                    resizeBox.style.height = "auto";
+                };
+
+                window.closeCropModal();
+                
+            }, 'image/png');
+        };
+
+
+        // =====================================================================
+        // TÍNH NĂNG "XEM TRƯỚC" GIAO DIỆN HỌC SINH LÀM BÀI
+        // =====================================================================
+        
+        window.showStudentPreview = (e, qId) => {
+            e.stopPropagation();
+            
+            const parts = qId.split('_');
+            const partStr = parts[0];
+            const qNum = parts[1];
+            
+            const modal = document.getElementById('preview-student-modal');
+            const content = document.getElementById('preview-student-content');
+            
+            const expText = document.getElementById(`ed_${partStr.toLowerCase()}_exp_${qNum}`).value || "Không có hướng dẫn giải";
+            
+            const imgEl = document.getElementById(`img_preview_${qId}`);
+            const imgSrc = (imgEl && imgEl.src) ? imgEl.src : null;
+
+            let previewHtml = '';
+
+            if (partStr === 'P1') {
+                const checkedEl = document.querySelector(`input[name="ed_p1_q${qNum}"]:checked`);
+                const ans = checkedEl ? checkedEl.value : 'A';
+                
+                let choicesHtml = '';
+                ['A', 'B', 'C', 'D'].forEach(opt => {
+                    const cls = (opt === ans) ? 'background: #10b981; color: white; border-color: #10b981;' : 'background: #f8fafc; color: #64748b; border: 2px solid #cbd5e1;';
+                    choicesHtml += `<div style="width: 40px; height: 40px; border-radius: 50%; display: inline-flex; justify-content: center; align-items: center; font-weight: 800; font-size: 15px; ${cls}">${opt}</div>`;
+                });
+
+                previewHtml = `
+                    <div class="student-preview-card">
+                        <div style="margin-bottom: 15px;">
+                            <span style="background: #e0f2fe; color: #0284c7; font-size: 14px; font-weight: 800; padding: 5px 12px; border-radius: 6px;">Câu ${qNum}</span>
+                        </div>
+                        ${imgSrc ? `<img src="${imgSrc}" style="max-width: 100%; border-radius: 8px; border: 1px solid #cbd5e1; margin-bottom: 15px;">` : ''}
+                        <div style="display: flex; gap: 12px; margin-bottom: 15px;">${choicesHtml}</div>
+                        <div style="padding: 14px; background: #f8fafc; border: 1px solid #cbd5e1; border-radius: 8px;">
+                            <div style="font-size: 13px; font-weight: 800; color: #0284c7; margin-bottom: 8px;">HƯỚNG DẪN GIẢI:</div>
+                            <div style="font-size: 14px; white-space: pre-wrap;">${expText}</div>
+                        </div>
+                    </div>
+                `;
+            } else if (partStr === 'P2') {
+                const a = document.getElementById(`ed_p2_${qNum}_a`).value;
+                const b = document.getElementById(`ed_p2_${qNum}_b`).value;
+                const c = document.getElementById(`ed_p2_${qNum}_c`).value;
+                const d = document.getElementById(`ed_p2_${qNum}_d`).value;
+
+                const tfHtml = `
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px;">
+                        <div style="padding: 10px; border: 1px solid #cbd5e1; border-radius: 8px; text-align: center;">Ý a: <b>${a === 'T' ? 'Đúng' : 'Sai'}</b></div>
+                        <div style="padding: 10px; border: 1px solid #cbd5e1; border-radius: 8px; text-align: center;">Ý b: <b>${b === 'T' ? 'Đúng' : 'Sai'}</b></div>
+                        <div style="padding: 10px; border: 1px solid #cbd5e1; border-radius: 8px; text-align: center;">Ý c: <b>${c === 'T' ? 'Đúng' : 'Sai'}</b></div>
+                        <div style="padding: 10px; border: 1px solid #cbd5e1; border-radius: 8px; text-align: center;">Ý d: <b>${d === 'T' ? 'Đúng' : 'Sai'}</b></div>
+                    </div>
+                `;
+
+                previewHtml = `
+                    <div class="student-preview-card">
+                        <div style="margin-bottom: 15px;">
+                            <span style="background: #e0f2fe; color: #0284c7; font-size: 14px; font-weight: 800; padding: 5px 12px; border-radius: 6px;">Câu ${qNum} (Đúng/Sai)</span>
+                        </div>
+                        ${imgSrc ? `<img src="${imgSrc}" style="max-width: 100%; border-radius: 8px; border: 1px solid #cbd5e1; margin-bottom: 15px;">` : ''}
+                        ${tfHtml}
+                        <div style="padding: 14px; background: #f8fafc; border: 1px solid #cbd5e1; border-radius: 8px;">
+                            <div style="font-size: 13px; font-weight: 800; color: #0284c7; margin-bottom: 8px;">HƯỚNG DẪN GIẢI:</div>
+                            <div style="font-size: 14px; white-space: pre-wrap;">${expText}</div>
+                        </div>
+                    </div>
+                `;
+            } else if (partStr === 'P3') {
+                const ans = document.getElementById(`ed_p3_ans_${qNum}`).value || "?";
+
+                previewHtml = `
+                    <div class="student-preview-card">
+                        <div style="margin-bottom: 15px;">
+                            <span style="background: #e0f2fe; color: #0284c7; font-size: 14px; font-weight: 800; padding: 5px 12px; border-radius: 6px;">Câu ${qNum} (Điền số)</span>
+                        </div>
+                        ${imgSrc ? `<img src="${imgSrc}" style="max-width: 100%; border-radius: 8px; border: 1px solid #cbd5e1; margin-bottom: 15px;">` : ''}
+                        <div style="font-size: 14px; font-weight: 700; margin-bottom: 15px;">👉 Đáp án chuẩn: <span style="color: #10b981; font-size: 16px;">${ans}</span></div>
+                        <div style="padding: 14px; background: #f8fafc; border: 1px solid #cbd5e1; border-radius: 8px;">
+                            <div style="font-size: 13px; font-weight: 800; color: #0284c7; margin-bottom: 8px;">HƯỚNG DẪN GIẢI:</div>
+                            <div style="font-size: 14px; white-space: pre-wrap;">${expText}</div>
+                        </div>
+                    </div>
+                `;
+            }
+
+            content.innerHTML = previewHtml;
+            modal.style.display = 'flex';
+        };
+
+        window.closeStudentPreview = () => {
+            document.getElementById('preview-student-modal').style.display = 'none';
+        };
+
+
+        // =====================================================================
+        // ĐIỀN LẠI DỮ LIỆU CŨ VÀ ẢNH CŨ VÀO FORM
+        // =====================================================================
+
+        function fillExistingAnswers(answers) {
+            const handleFill = (part, maxQ, getValFunc) => {
+                if (!answers[part]) return;
+                
+                for (let i = 1; i <= maxQ; i++) {
+                    const qData = answers[part][i.toString()];
+                    let expStr = '', imgUrl = '';
+                    
+                    if (typeof qData === 'object') {
+                        expStr = qData.exp || '';
+                        imgUrl = qData.img || ''; 
+                        getValFunc(i, qData);
+                    } else if (qData) {
+                        getValFunc(i, { ans: qData });
+                    }
+                    
+                    const expEl = document.getElementById(`ed_${part.toLowerCase()}_exp_${i}`);
+                    if (expEl) expEl.value = expStr;
+
+                    // Nếu có ảnh trên DB, đưa thẳng vào hiển thị
+                    if (imgUrl) {
+                        const qId = `${part}_${i}`;
+                        processNewImage(qId, imgUrl, null);
+                    }
+                }
+            };
+
+            handleFill('P1', 12, (i, data) => {
+                const radio = document.querySelector(`input[name="ed_p1_q${i}"][value="${data.ans || 'A'}"]`);
+                if (radio) radio.checked = true;
+            });
+
+            handleFill('P2', 4, (i, data) => {
+                ['a','b','c','d'].forEach(sub => {
+                    if (data[sub]) document.getElementById(`ed_p2_${i}_${sub}`).value = data[sub];
+                });
+            });
+
+            handleFill('P3', 6, (i, data) => {
+                const ansEl = document.getElementById(`ed_p3_ans_${i}`);
+                if (ansEl) ansEl.value = data.ans || '';
+            });
+        }
+
+
+        // =====================================================================
+        // UP ẢNH & LƯU DB SUPABASE
+        // =====================================================================
+
+        window.saveFullAnswersAndExplanations = async () => {
+            const btn = document.getElementById('btn-save-answers-final');
+            if (!btn) return;
+
+            btn.innerText = "ĐANG TẢI ẢNH LÊN MÂY..."; 
+            btn.disabled = true;
+            
+            try {
+                let uploadedImageUrls = {}; 
+
+                // 1. CHÉP HÌNH TỪ KHUNG RESIZE ĐỂ LẤY ĐÚNG KÍCH CỠ ADMIN VỪA KÉO
+                for (const [qId, blobFile] of Object.entries(imageFilesStore)) {
+                    if (blobFile) {
+                        
+                        const resizeBox = document.getElementById(`resize_box_${qId}`);
+                        const imgEl = document.getElementById(`img_preview_${qId}`);
+                        
+                        let finalBlobToUpload = blobFile;
+                        
+                        // Nếu hộp có kích thước thực sự thì chép sang Canvas để nén ảnh lại bằng đúng độ lớn đó
+                        if (resizeBox && resizeBox.clientWidth > 10 && resizeBox.clientHeight > 10) {
+                            const finalW = resizeBox.clientWidth;
+                            const finalH = resizeBox.clientHeight;
+                            
+                            const cvs = document.createElement('canvas');
+                            cvs.width = finalW;
+                            cvs.height = finalH;
+                            const ctx = cvs.getContext('2d');
+                            
+                            ctx.drawImage(imgEl, 0, 0, finalW, finalH);
+                            
+                            finalBlobToUpload = await new Promise(r => cvs.toBlob(r, 'image/png'));
+                        }
+
+                        // Upload ảnh
+                        const ext = blobFile.name ? blobFile.name.split('.').pop() : (blobFile.type.split('/')[1] || 'png');
+                        const fileName = `${editingExamId}_${qId}_${Date.now()}.${ext}`;
+                        
+                        try {
+                            const { data, error } = await supabase.storage.from('exam-questions').upload(fileName, finalBlobToUpload, { upsert: true });
+                            
+                            if (!error) {
+                                const { data: publicData } = supabase.storage.from('exam-questions').getPublicUrl(fileName);
+                                if (publicData && publicData.publicUrl) {
+                                    uploadedImageUrls[qId] = publicData.publicUrl;
+                                }
+                            }
+                        } catch (stErr) {
+                            console.warn("Lỗi Storage:", stErr);
+                        }
+                    }
+                }
+
+                btn.innerText = "ĐANG GHI DỮ LIỆU ĐÁP ÁN...";
+
+                const getFinalImgUrl = (qId) => {
+                    if (uploadedImageUrls[qId]) return uploadedImageUrls[qId]; 
+                    
+                    const imgEl = document.getElementById(`img_preview_${qId}`);
+                    if (imgEl && imgEl.src && imgEl.src.startsWith('http')) {
+                        return imgEl.src; 
+                    }
+                    return null;
+                };
+
+                let p1Obj = {};
+                for (let i = 1; i <= 12; i++) {
+                    const sel = document.querySelector(`input[name="ed_p1_q${i}"]:checked`);
+                    p1Obj[i.toString()] = { 
+                        ans: sel ? sel.value : 'A', 
+                        exp: document.getElementById(`ed_p1_exp_${i}`).value,
+                        img: getFinalImgUrl(`P1_${i}`)
+                    };
+                }
+                
+                let p2Obj = {};
+                for (let i = 1; i <= 4; i++) {
+                    p2Obj[i.toString()] = {
+                        a: document.getElementById(`ed_p2_${i}_a`).value,
+                        b: document.getElementById(`ed_p2_${i}_b`).value,
+                        c: document.getElementById(`ed_p2_${i}_c`).value,
+                        d: document.getElementById(`ed_p2_${i}_d`).value,
+                        exp: document.getElementById(`ed_p2_exp_${i}`).value,
+                        img: getFinalImgUrl(`P2_${i}`)
+                    };
+                }
+                
+                let p3Obj = {};
+                for (let i = 1; i <= 6; i++) {
+                    p3Obj[i.toString()] = {
+                        ans: document.getElementById(`ed_p3_ans_${i}`).value.trim(),
+                        exp: document.getElementById(`ed_p3_exp_${i}`).value,
+                        img: getFinalImgUrl(`P3_${i}`)
+                    };
+                }
+
+                // Cập nhật CSDL
+                const { error } = await supabase
+                    .from('exams')
+                    .update({ answers: { P1: p1Obj, P2: p2Obj, P3: p3Obj } })
+                    .eq('id', editingExamId);
+
+                if (error) throw error;
+                
+                window.closeAnswerEditor();
+                window.showNotification("Thành công", "Đã lưu toàn bộ đáp án và ảnh câu hỏi thành công!");
+                loadExams();
+                
+            } catch (err) { 
+                window.showNotification("Lỗi", err.message || "Không thể lưu đáp án!"); 
+            } finally { 
+                btn.innerText = "LƯU LÊN SERVER"; 
+                btn.disabled = false; 
+            }
+        };
+
+
+        // =====================================================================
+        // KIỂM TRA ĐĂNG NHẬP VÀ XỬ LÝ SỰ KIỆN QUẢN TRỊ (ĐÃ FIX LỖI KHÔNG BÁO)
+        // =====================================================================
+        
+        supabase.auth.onAuthStateChange(async (event, session) => {
+            if (session && session.user) {
+                const { data: profile } = await supabase
+                    .from('user_profiles')
+                    .select('*')
+                    .eq('id', session.user.id)
+                    .maybeSingle();
+                
+                if (profile && (profile.role === 'admin' || profile.role === 'editor')) {
+                    currentAdmin = profile; 
+                    showDashboard();
+                } else {
+                    await supabase.auth.signOut(); 
+                    showLogin("Tài khoản của bạn không có quyền Admin! Vui lòng vào Supabase đổi cột 'role' thành 'admin'.");
+                }
+            } else if (event === 'INITIAL_SESSION' || event === 'SIGNED_OUT') {
+                // Đảm bảo không ghi đè chữ lỗi nếu nó vừa được hiện ra
+                const errorMsgEl = document.getElementById('login-error-msg');
+                if (!errorMsgEl || !errorMsgEl.innerText.includes('quyền Admin')) {
+                    showLogin();
+                }
+            }
+        });
+
+
+        window.handleAdminLogin = async (e) => {
+            e.preventDefault();
+            const uInput = document.getElementById('admin-user-input').value.trim();
+            const pInput = document.getElementById('admin-pass-input').value.trim();
+            const btn = document.getElementById('btn-login-btn');
+            const errEl = document.getElementById('login-error-msg');
+
+            errEl.style.display = 'none'; 
+            btn.innerText = "ĐANG XÁC THỰC..."; 
+            btn.disabled = true;
+
+            try {
+                let loginSuccess = false;
+                let loginEmail = uInput.includes('@') ? uInput : (uInput.toLowerCase() + "@thithu.local");
+                
+                let { data: authData, error: authErr } = await supabase.auth.signInWithPassword({ email: loginEmail, password: pInput });
+                
+                if (!authErr && authData.user) {
+                    loginSuccess = true;
+                } else if (authErr && !uInput.includes('@')) {
+                    const { data: userProf } = await supabase.from('user_profiles').select('email').eq('username', uInput).maybeSingle();
+                    if (userProf && userProf.email) {
+                        const res2 = await supabase.auth.signInWithPassword({ email: userProf.email, password: pInput });
+                        if (!res2.error && res2.data.user) {
+                            loginSuccess = true;
+                        }
+                    }
+                }
+                
+                if (!loginSuccess) { 
+                    errEl.innerText = "Sai tài khoản hoặc mật khẩu Quản trị!"; 
+                    errEl.style.display = 'block'; 
+                    btn.innerText = "ĐĂNG NHẬP ADMIN"; 
+                    btn.disabled = false;
+                } else {
+                    btn.innerText = "ĐĂNG NHẬP THÀNH CÔNG! ĐANG TẢI GIAO DIỆN...";
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, 500);
+                }
+            } catch (err) { 
+                errEl.innerText = "Lỗi kết nối máy chủ!"; 
+                errEl.style.display = 'block';
+                btn.innerText = "ĐĂNG NHẬP ADMIN"; 
+                btn.disabled = false;
+            }
+        };
+
+
+        window.handleAdminLogout = async () => { 
+            await supabase.auth.signOut(); 
+            showLogin(); 
+        };
+
+        function showLogin(errorMsg) {
+            document.getElementById('admin-login-view').style.display = 'flex';
+            document.getElementById('admin-dashboard-view').style.display = 'none';
+            if (errorMsg) { 
+                const errEl = document.getElementById('login-error-msg'); 
+                errEl.innerText = errorMsg; 
+                errEl.style.display = 'block'; 
+            }
+        }
+
+        function showDashboard() {
+            document.getElementById('admin-login-view').style.display = 'none';
+            document.getElementById('admin-dashboard-view').style.display = 'block';
+            document.getElementById('admin-name-text').innerText = currentAdmin.username || 'Admin';
+            document.getElementById('stat-role-text').innerText = currentAdmin.role === 'admin' ? 'Chủ Tịch (Admin)' : 'Biên Tập Viên';
+            loadMetrics(); 
+            loadExams(); 
+            loadUsers();
+        }
+
+
+        async function loadMetrics() {
+            const { count: uCount } = await supabase.from('user_profiles').select('*', { count: 'exact', head: true });
+            document.getElementById('stat-users-count').innerText = uCount || 0;
+            const { count: eCount } = await supabase.from('exams').select('*', { count: 'exact', head: true });
+            document.getElementById('stat-exams-count').innerText = eCount || 0;
+        }
+
+        async function loadExams() {
+            const tbody = document.getElementById('exams-tbody');
+            tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; color:#94a3b8;">Đang tải...</td></tr>';
+            const { data: exams } = await supabase.from('exams').select('*').order('created_at', { ascending: false });
+
+            if (!exams || exams.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; color:#94a3b8;">Chưa có đề thi nào trên CSDL. Hãy bấm "+ Thêm Đề Thi Mới"!</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = '';
+            exams.forEach(ex => {
+                let catText = ex.category === 'so' ? 'Sở GD&ĐT' : ex.category === 'chuyen' ? 'Trường Chuyên' : 'Luyện Tập';
+                tbody.innerHTML += `
+                    <tr>
+                        <td><b>${ex.id}</b></td>
+                        <td><b>${ex.title}</b></td>
+                        <td><span class="badge category">${catText}</span></td>
+                        <td>${ex.cohort || '2k9'}</td>
+                        <td>${ex.views || 0}</td>
+                        <td>${ex.likes || 0}</td>
+                        <td>
+                            <button class="btn-tb-action answer" onclick="window.openAnswerEditor('${ex.id}', '${ex.title.replace(/'/g, "\\'")}')">📝 Soạn Đáp Án</button>
+                            <button class="btn-tb-action delete" onclick="window.deleteExam('${ex.id}')">Xóa</button>
+                        </td>
+                    </tr>
+                `;
+            });
+        }
+
+        async function loadUsers() {
+            const tbody = document.getElementById('users-tbody');
+            tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; color:#94a3b8;">Đang tải...</td></tr>';
+            const { data: users } = await supabase.from('user_profiles').select('*').order('id', { ascending: false });
+            if (!users || users.length === 0) { 
+                tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; color:#94a3b8;">Chưa có tài khoản.</td></tr>'; 
+                return; 
+            }
+
+            tbody.innerHTML = '';
+            users.forEach(u => {
+                let rClass = u.role === 'admin' ? 'admin' : 'student';
+                let rText = u.role === 'admin' ? 'Admin' : 'Học sinh';
+                let mailText = u.email && !u.email.includes('@thithu.local') ? u.email : 'Chưa có Gmail';
+                tbody.innerHTML += `
+                    <tr>
+                        <td><b>${u.username}</b></td>
+                        <td>${u.full_name || u.username}</td>
+                        <td>${mailText}</td>
+                        <td>${u.school || 'Chưa điền'}</td>
+                        <td>${u.phone || 'Chưa điền'}</td>
+                        <td><span class="badge ${rClass}">${rText}</span></td>
+                        <td><button class="btn-tb-action edit" onclick="window.toggleRole('${u.id}', '${u.role}')">${u.role === 'admin' ? 'Hạ Quyền' : 'Phong Admin'}</button></td>
+                    </tr>
+                `;
+            });
+        }
+
+
+        // =====================================================================
+        // QUẢN LÝ BẢNG MODAL VÀ SỰ KIỆN HỦY/THÊM/SỬA
+        // =====================================================================
+
+        window.deleteExam = async (examId) => {
+            if (!confirm(`Xác nhận XÓA vĩnh viễn đề thi [${examId}]?`)) return;
+            try {
+                const { error } = await supabase.from('exams').delete().eq('id', examId);
+                if (error) throw error;
+                window.showNotification("Thành công", "Đã xóa đề thi!"); 
+                loadExams(); 
+                loadMetrics();
+            } catch (err) { window.showNotification("Lỗi", err.message); }
+        };
+
+
+        window.toggleRole = async (userId, currentRole) => {
+            const newRole = currentRole === 'admin' ? 'student' : 'admin';
+            if (!confirm(`Đổi quyền tài khoản này thành [${newRole.toUpperCase()}]?`)) return;
+            try {
+                const { error } = await supabase.from('user_profiles').update({ role: newRole }).eq('id', userId);
+                if (error) throw error; 
+                window.showNotification("Thành công", "Đã cập nhật quyền!"); 
+                loadUsers();
+            } catch (err) { window.showNotification("Lỗi", err.message); }
+        };
+
+        window.switchMainTab = (tabName, btn) => {
+            document.querySelectorAll('.admin-main-pane').forEach(el => el.style.display = 'none');
+            document.getElementById(`tab-${tabName}`).style.display = 'block';
+            document.querySelectorAll('.admin-nav-btn').forEach(b => b.classList.remove('active'));
+            if (btn) btn.classList.add('active');
+        };
+
+        window.openUploadModal = () => {
+            document.getElementById('upload-form').reset();
+            const modal = document.getElementById('upload-modal');
+            modal.style.display = 'flex';
+            requestAnimationFrame(() => modal.classList.add('active'));
+        };
+
+        window.closeUploadModal = () => {
+            const modal = document.getElementById('upload-modal');
+            modal.classList.remove('active'); setTimeout(() => modal.style.display = 'none', 300);
+        };
+
+        window.showNotification = (title, message) => {
+            document.getElementById('notif-title').innerText = title;
+            document.getElementById('notif-message').innerText = message;
+            const m = document.getElementById('notification-modal'); m.style.display = 'flex'; requestAnimationFrame(()=>m.classList.add('active'));
+        };
+
+        window.closeNotificationModal = () => { 
+            document.getElementById('notification-modal').classList.remove('active'); 
+            setTimeout(() => document.getElementById('notification-modal').style.display='none', 300); 
+        };
+        
+        window.handleBackdropClick = (e, modalId) => { 
+            if (e.target === e.currentTarget) { 
+                if (modalId === 'upload-modal') window.closeUploadModal(); 
+                if (modalId === 'notification-modal') window.closeNotificationModal(); 
+                if (modalId === 'preview-student-modal') window.closeStudentPreview();
+                if (modalId === 'crop-modal') window.closeCropModal();
+            } 
+        };
+        
+        window.submitNewExamStep1 = async (e) => {
+            e.preventDefault();
+            const btn = document.getElementById('btn-upload-submit');
+            btn.innerText = "ĐANG TẢI LÊN PDF..."; btn.disabled = true;
+
+            const title = document.getElementById('up-title').value.trim();
+            const cohort = document.getElementById('up-cohort').value;
+            const category = document.getElementById('up-category').value;
+            const fileInput = document.getElementById('up-pdf-file');
+            const file = fileInput.files[0];
+
+            try {
+                if (!file) throw new Error("Vui lòng chọn 1 File PDF đề thi!");
+                const id = "de_" + Date.now().toString().slice(-6);
+                const fileExt = file.name.split('.').pop();
+                const uniqueFileName = `${id}_${Date.now()}.${fileExt}`;
+
+                const { error: uploadErr } = await supabase.storage.from('exams').upload(uniqueFileName, file, { upsert: true });
+                if (uploadErr) throw new Error("Lỗi tải file: " + uploadErr.message);
+
+                const { data: publicUrlData } = supabase.storage.from('exams').getPublicUrl(uniqueFileName);
+                const pdf_url = publicUrlData.publicUrl;
+
+                const { error: dbError } = await supabase.from('exams').insert({
+                    id, title, cohort, category, pdf_url, answers: { P1: {}, P2: {}, P3: {} }
+                });
+                if (dbError) throw dbError;
+
+                window.closeUploadModal();
+                window.showNotification("Thành công", "Tạo đề thành công! Màn hình điền đáp án sẽ mở ngay.");
+                loadExams(); loadMetrics();
+
+                setTimeout(() => { window.openAnswerEditor(id, title); }, 600);
+            } catch (err) {
+                window.showNotification("Lỗi", err.message);
+            } finally { btn.innerText = "TẢI LÊN & TẠO ĐỀ"; btn.disabled = false; }
+        };
+
+    </script>
+</body>
+</html>
