@@ -5,11 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Hệ thống thi thử THPTQG - Luyện đề</title>
     
+    <!-- Thư viện đọc PDF -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
+    <!-- ================== BANNER QUẢNG CÁO ================== -->
     <div class="ad-banner-side ad-left">
         <div>
             <p>Vị trí Đặt Quảng Cáo</p>
@@ -37,22 +39,28 @@
         </div>
     </div>
 
+    <!-- ================== MÀN HÌNH LOADING ================== -->
     <div id="global-loader">
         <div class="spinner"></div>
         <div id="loader-text">Đang kết nối hệ thống...</div>
     </div>
 
+    <!-- ================== MÀN HÌNH ĐĂNG NHẬP / ĐĂNG KÝ ================== -->
     <div id="auth-screen">
         <div class="auth-wrapper">
             
+            <!-- Form Đăng Nhập -->
             <div class="auth-card active" id="login-form">
                 <h1>THI THỬ ONLINE</h1>
                 <p>Hệ thống ôn luyện & thi thử</p>
+                
                 <div class="auth-error" id="login-error"></div>
+                
                 <div class="input-group">
                     <label>TÀI KHOẢN</label>
                     <input type="text" id="login-user" class="auth-input" autocomplete="off" placeholder="Tên tài khoản" onkeypress="window.checkEnter(event, 'login')">
                 </div>
+                
                 <div class="input-group" style="margin-bottom: 5px;">
                     <label>MẬT KHẨU</label>
                     <div class="password-wrapper">
@@ -60,20 +68,26 @@
                         <span class="toggle-password" onclick="window.togglePassword('login-pass', this)">👁️</span>
                     </div>
                 </div>
+                
                 <div style="text-align: right; margin-bottom: 15px;">
                     <span style="font-size: 13px; color: var(--thpt-main); cursor: pointer; font-weight: bold; transition: 0.2s;" onclick="window.toggleAuth('forgot')">Quên mật khẩu?</span>
                 </div>
+                
                 <button class="auth-btn btn-primary" onclick="window.handleLogin()">ĐĂNG NHẬP</button>
+                
                 <div class="auth-switch">
                     Chưa có tài khoản? <span onclick="window.toggleAuth('register')">Đăng ký ngay</span>
                 </div>
             </div>
 
+            <!-- Form Đăng Ký -->
             <div class="auth-card" id="register-form" style="max-width: 550px;">
                 <h1>TẠO TÀI KHOẢN</h1>
                 <p>Điền thông tin để lưu lịch sử làm bài</p>
+                
                 <div class="auth-error" id="reg-error"></div>
                 <div class="auth-success" id="reg-success"></div>
+                
                 <div class="register-grid">
                     <div class="input-group full-width">
                         <label>HỌ VÀ TÊN <span style="color: #EF4444;">*</span></label>
@@ -114,21 +128,28 @@
                         </div>
                     </div>
                 </div>
+                
                 <button class="auth-btn btn-primary" onclick="window.handleRegister()">ĐĂNG KÝ</button>
+                
                 <div class="auth-switch">
                     Đã có tài khoản? <span onclick="window.toggleAuth('login')">Đăng nhập</span>
                 </div>
             </div>
 
+            <!-- Form Quên Mật Khẩu -->
             <div class="auth-card" id="forgot-form">
                 <h1>QUÊN MẬT KHẨU</h1>
                 <p>Nhập Gmail bạn đã đăng ký để nhận link tạo MK mới</p>
+                
                 <div class="auth-error" id="forgot-error"></div>
+                
                 <div class="input-group">
                     <label>GMAIL CỦA BẠN</label>
                     <input type="email" id="forgot-email" class="auth-input" autocomplete="off" placeholder="Ví dụ: abc@gmail.com" onkeypress="window.checkEnter(event, 'forgot')">
                 </div>
+                
                 <button class="auth-btn btn-primary" id="btn-forgot" style="background: #10B981;" onclick="window.handleForgot()">GỬI LINK ĐẶT LẠI MK</button>
+                
                 <div class="auth-switch">
                     Nhớ ra mật khẩu rồi? <span onclick="window.toggleAuth('login')">Đăng nhập</span>
                 </div>
@@ -137,18 +158,29 @@
         </div>
     </div>
 
+    <!-- ================== HEADER CHÍNH CÓ MENU ĐIỀU HƯỚNG ================== -->
     <header>
         <div class="logo-area" onclick="window.handleLogoClick()">
             <h1>THI THỬ ONLINE</h1>
         </div>
         
+        <!-- Thanh menu Tab -->
+        <nav class="top-menu" id="top-menu">
+            <a href="#" class="menu-item active" onclick="window.switchTab('luyenthi', this)">📝 Luyện thi</a>
+            <a href="#" class="menu-item" onclick="window.switchTab('tailieu', this)">📚 Tài liệu</a>
+            <a href="#" class="menu-item" onclick="window.switchTab('ontap', this)">🎯 Ôn tập</a>
+            <a href="#" class="menu-item" onclick="window.switchTab('tintuc', this)">📰 Tin tức</a>
+        </nav>
+
         <div class="header-right">
+            <!-- Bộ đếm giờ -->
             <div class="header-timer-box" id="header-timer-box">
                 <span style="font-size: 11px; color: #64748b; font-weight: bold; margin-right: 5px;">TIME</span>
                 <span class="time-left" id="global-timer">--:--</span>
             </div>
             <button class="exit-btn" id="btn-exit-exam" style="display:none;" onclick="window.openModal('exit')">Thoát Đề</button>
             
+            <!-- Menu góc phải người dùng -->
             <div class="user-info" id="header-user-info">
                 <div class="user-profile-dropdown" id="user-dropdown-container">
                     <div class="avatar-trigger" onclick="window.toggleUserMenu(event)">
@@ -165,6 +197,12 @@
                             </div>
                         </div>
                         <div class="dropdown-divider"></div>
+                        
+                        <!-- Nút bật/tắt Dark Mode (Máy tính) -->
+                        <button class="dropdown-item" onclick="window.toggleTheme()">
+                            <span class="dropdown-icon" id="theme-icon-desktop">🌙</span> <span id="theme-text-desktop">Chế độ tối</span>
+                        </button>
+                        
                         <button class="dropdown-item" onclick="window.openProfileModal()">
                             <span class="dropdown-icon">👤</span> Thông tin cá nhân
                         </button>
@@ -178,41 +216,68 @@
         </div>
     </header>
 
+    <!-- Menu Hamburger trên điện thoại -->
     <div id="mobile-dropdown" class="mobile-dropdown">
         <div class="user-name-mobile" id="mobile-user-info">
             Chào, <span id="display-username-mobile" style="color: var(--thpt-main);">User</span>
         </div>
+        
+        <!-- Tab menu cho Mobile -->
+        <div class="mobile-menu-links">
+            <a href="#" class="m-menu-item active" onclick="window.switchTab('luyenthi', this)">📝 Luyện thi</a>
+            <a href="#" class="m-menu-item" onclick="window.switchTab('tailieu', this)">📚 Tài liệu</a>
+            <a href="#" class="m-menu-item" onclick="window.switchTab('ontap', this)">🎯 Ôn tập</a>
+            <a href="#" class="m-menu-item" onclick="window.switchTab('tintuc', this)">📰 Tin tức</a>
+        </div>
+        <hr style="border: 0; border-top: 1px solid #e2e8f0; margin: 10px 0;">
+
+        <!-- Nút bật/tắt Dark Mode (Điện thoại) -->
+        <button class="logout-btn" onclick="window.toggleTheme()" style="width: 100%; margin-bottom: 10px; display: flex; justify-content: center; gap: 8px;">
+            <span id="theme-icon-mobile">🌙</span> <span id="theme-text-mobile">Chế độ tối</span>
+        </button>
+
         <button class="logout-btn" onclick="window.openProfileModal(); window.toggleMobileMenu();" style="width: 100%; margin-bottom: 10px; background: #e0f2fe; color: var(--thpt-main);">👤 Thông tin cá nhân</button>
         <button class="logout-btn" onclick="window.handleLogout()" style="width: 100%;">Đăng xuất</button>
     </div>
 
+    <!-- ================== TRANG CHỦ (DANH SÁCH ĐỀ) ================== -->
     <div id="home-screen" class="fade-in">
-        <h2 class="page-title" id="main-page-title">Kho Đề Thi & Ôn Luyện 2K8</h2>
+        <h2 class="page-title" id="main-page-title">Kho Đề Thi & Ôn Luyện 2K9</h2>
         <div class="cohort-selector">
-            <button class="cohort-btn active" onclick="window.handleCohort('2k8', this)">🔥 Khóa 2k8</button>
-            <button class="cohort-btn" onclick="window.handleCohort('2k9', this)">🚀 Khóa 2k9</button>
+            <button class="cohort-btn" onclick="window.handleCohort('2k8', this)">🔥 Khóa 2k8</button>
+            
+            <button class="cohort-btn active" onclick="window.handleCohort('2k9', this)">🚀 Khóa 2k9</button>
         </div>
+        
         <div class="banner-container">
             <span class="banner-label">🔥 Gợi ý tài liệu ôn thi chuẩn</span>
             <div class="banner-content">
                 <a href="https://shopee.vn" target="_blank">👉 [Shopee Affiliate] Sách Tổng Ôn Toán Học - Tặng kèm khóa luyện đề chi tiết (Giảm 30% hôm nay)</a>
             </div>
         </div>
+        
         <div class="search-filter-box">
             <div class="search-bar-wrapper">
                 <span class="search-icon">🔍</span>
                 <input type="text" id="search-exam-input" class="search-input" placeholder="Nhập tên trường, Sở GD (VD: Nghệ An, Ninh Bình, Hà Nội...)" oninput="window.handleSearchExam()">
             </div>
             <div class="filter-tags">
-                <button class="filter-btn active" onclick="window.handleFilterExam('all', this)">🌟 Tất cả</button>
-                <button class="filter-btn" onclick="window.handleFilterExam('so', this)">🏛️ Đề Sở & Tỉnh</button>
-            </div>
+    <button class="filter-btn active" onclick="window.handleFilterExam('all', this)">🌟 Tất cả</button>
+    <button class="filter-btn" onclick="window.handleFilterExam('so', this)">🏛️ Đề Sở & Tỉnh</button>
+    
+    <button class="filter-btn" onclick="window.handleFilterExam('bookmarked', this)">🔖 Đề đã lưu</button>
+</div>
         </div>
+        
         <div class="exam-grid" id="exam-list"></div>
     </div>
 
+    <!-- ================== KHU VỰC PHÒNG THI ================== -->
     <div class="workspace" id="exam-workspace">
+        
+        <!-- Khung xem PDF & Vẽ tay -->
         <div class="left-panel">
+            <!-- Thanh công cụ vẽ -->
             <div class="toolbar-wrapper" id="toolbar-wrapper" style="display: none;">
                 <div class="pdf-toolbar" id="custom-toolbar">
                     <button class="tool-btn" id="tool-pen">🖊️ Bút vẽ</button>
@@ -220,6 +285,7 @@
                     <button class="tool-btn" id="tool-eraser">🗑️ Cục tẩy</button>
                     <button class="tool-btn" id="tool-pan" style="display: none;">🖐️ Di chuyển</button>
                     <div style="width: 1px; height: 20px; background: #cbd5e1; margin: 0 5px; flex-shrink: 0;"></div>
+                    
                     <div class="tool-group" id="color-palette">
                         <div class="color-swatch active" style="background: #0f172a;" data-color="#0f172a"></div>
                         <div class="color-swatch" style="background: #2563eb;" data-color="#2563eb"></div>
@@ -227,6 +293,7 @@
                         <div class="color-swatch" style="background: #facc15;" data-color="#facc15"></div>
                         <div class="color-swatch" style="background: #16a34a;" data-color="#16a34a"></div>
                     </div>
+                    
                     <div style="width: 1px; height: 20px; background: #cbd5e1; margin: 0 5px; flex-shrink: 0;"></div>
                     <div class="brush-controls">
                         <span style="font-size: 16px;">📏</span>
@@ -235,10 +302,13 @@
                     <button class="btn-action-sm btn-undo" id="btn-undo" title="Phím tắt: Ctrl + Z">↩️ Hoàn tác</button>
                     <button class="btn-action-sm btn-clear" id="btn-clear-canvas">Xóa Tất Cả</button>
                 </div>
+                
                 <div class="toolbar-toggle-container" onclick="window.toggleToolbar()">
                     <span class="toggle-arrow" id="toggle-arrow">▲</span>
                 </div>
             </div>
+
+            <!-- Canvas render PDF -->
             <div id="pdf-render-wrapper">
                 <div id="pdf-zoom-container">
                     <div id="pdf-scroll-content">
@@ -247,6 +317,8 @@
                     </div>
                 </div>
             </div>
+
+            <!-- Nút điều khiển Zoom -->
             <div class="zoom-controls" id="zoom-controls" style="display: none;">
                 <button class="zoom-btn" onclick="window.changeZoom(-0.1)">-</button>
                 <span id="zoom-text" onclick="window.changeZoom(1, true)" style="cursor: pointer;" title="Bấm để reset">100%</span>
@@ -257,6 +329,7 @@
         
         <div id="drawer-backdrop" class="drawer-backdrop" onclick="window.toggleMobileSheet()"></div>
 
+        <!-- Khung điền đáp án (Bên phải) -->
         <div class="right-panel" id="right-panel-drawer" style="position: relative;">
             <div class="timer-header" id="control-header">
                 <button class="btn-close-panel" onclick="window.toggleMobileSheet()">✖ Đóng</button>
@@ -270,6 +343,7 @@
 
             <div id="sheets-container"></div>
             
+            <!-- Màn hình kết quả (Ẩn đi khi chưa làm xong) -->
             <div id="summary-screen" class="fade-in">
                 <div class="summary-card">
                     <h2 style="color: var(--thpt-dark); font-weight: 900;">KẾT QUẢ</h2>
@@ -291,8 +365,9 @@
         </div>
     </div>
 
-    <div class="modal-overlay" id="custom-modal">
-        <div class="custom-modal-content">
+    <!-- ================== CÁC MODAL HỖ TRỢ ================== -->
+ <div class="modal-overlay" id="custom-modal" onclick="window.handleBackdropClick(event, 'custom-modal')">
+        <div class="custom-modal-content" onclick="event.stopPropagation()">
             <div class="modal-title" id="modal-title">Xác nhận</div>
             <div class="modal-msg" id="modal-message">Nội dung...</div>
             <div class="history-list" id="modal-history-list" style="display: none;"></div>
@@ -303,12 +378,14 @@
         </div>
     </div>
 
-    <div class="modal-overlay" id="profile-modal">
-        <div class="custom-modal-content profile-modal-content">
+
+    <div class="modal-overlay" id="profile-modal" onclick="window.handleBackdropClick(event, 'profile-modal')">
+        <div class="custom-modal-content profile-modal-content" onclick="event.stopPropagation()">
             <div class="modal-header">
                 <h2>HỒ SƠ CÁ NHÂN</h2>
                 <button class="close-modal-btn" onclick="window.closeProfileModal()">✖</button>
             </div>
+
             <div class="profile-card-body">
                 <div class="profile-avatar-big" id="profile-big-initial">U</div>
                 <h3 id="profile-modal-username">User</h3>
@@ -332,14 +409,16 @@
                     </div>
                 </div>
             </div>
+
             <div class="modal-actions" style="margin-top: 20px;">
                 <button class="btn-cancel" style="width: 100%;" onclick="window.closeProfileModal()">Đóng</button>
             </div>
         </div>
     </div>
 
-    <div id="notification-modal" class="modal-overlay" style="display: none;">
-        <div class="modal-box">
+
+    <div id="notification-modal" class="modal-overlay" onclick="window.handleBackdropClick(event, 'notification-modal')">
+        <div class="modal-box" onclick="event.stopPropagation()">
             <h3 id="notif-title">Thông báo</h3>
             <p id="notif-message">Nội dung thông báo...</p>
             <button id="notif-close-btn" onclick="window.closeNotificationModal()">Xác nhận</button>
@@ -347,6 +426,5 @@
     </div>
 
     <script type="module" src="script.js"></script>
-
 </body>
 </html>
