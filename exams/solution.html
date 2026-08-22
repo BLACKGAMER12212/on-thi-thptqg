@@ -1,0 +1,802 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lời Giải Chi Tiết - Hệ Thống Thi Thử THPTQG</title>
+    
+    <style>
+        /* =========================================================
+           1. CẤU HÌNH MÀU SẮC VÀ GIAO DIỆN CƠ BẢN
+        ========================================================= */
+        :root {
+            --bg-main: #f8fafc;
+            --card-bg: #ffffff;
+            --text-main: #0f172a;
+            --text-sub: #64748b;
+            --border-color: #cbd5e1;
+            --primary: #0284c7;
+            --correct-bg: #dcfce7;
+            --correct-color: #15803d;
+            --wrong-bg: #fee2e2;
+            --wrong-color: #b91c1c;
+        }
+
+        /* Chế độ Dark Mode */
+        [data-theme="dark"] {
+            --bg-main: #0f172a;
+            --card-bg: #1e293b;
+            --text-main: #f8fafc;
+            --text-sub: #94a3b8;
+            --border-color: #334155;
+            --primary: #38bdf8;
+            --correct-bg: rgba(22, 163, 74, 0.2);
+            --correct-color: #4ade80;
+            --wrong-bg: rgba(220, 38, 38, 0.2);
+            --wrong-color: #f87171;
+        }
+
+        body {
+            background-color: var(--bg-main);
+            color: var(--text-main);
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            margin: 0;
+            padding: 0;
+            line-height: 1.5;
+        }
+
+
+        /* =========================================================
+           2. THANH HEADER THÔNG TIN
+        ========================================================= */
+        .sol-header-bar {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            background: var(--card-bg);
+            border-bottom: 1px solid var(--border-color);
+            padding: 15px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        }
+
+        .sol-title-area h1 { 
+            margin: 0; 
+            font-size: 18px; 
+            font-weight: 800; 
+            color: var(--text-main); 
+        }
+
+        .sol-title-area p { 
+            margin: 4px 0 0 0; 
+            font-size: 13px; 
+            color: var(--text-sub); 
+        }
+
+        .sol-actions { 
+            display: flex; 
+            gap: 12px; 
+            align-items: center; 
+        }
+
+        .btn-header {
+            padding: 9px 18px; 
+            border-radius: 8px; 
+            font-weight: 700; 
+            font-size: 13px; 
+            cursor: pointer; 
+            border: none; 
+            transition: all 0.2s;
+        }
+
+        .btn-home { 
+            background: var(--primary); 
+            color: #ffffff; 
+        }
+
+        .btn-home:hover { 
+            opacity: 0.9; 
+            transform: translateY(-2px);
+            box-shadow: 0 4px 10px rgba(2, 132, 199, 0.3);
+        }
+
+
+        /* =========================================================
+           3. CONTAINER CHÍNH
+        ========================================================= */
+        .sol-container { 
+            max-width: 850px; 
+            margin: 30px auto 60px auto; 
+            padding: 0 20px; 
+        }
+
+        .score-summary-card {
+            background: var(--card-bg); 
+            border: 1px solid var(--border-color); 
+            border-radius: 12px; 
+            padding: 20px; 
+            margin-bottom: 25px;
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            flex-wrap: wrap; 
+            gap: 15px;
+        }
+
+        .score-box-big { 
+            font-size: 32px; 
+            font-weight: 900; 
+            color: var(--primary); 
+        }
+
+        .section-header-title {
+            font-size: 16px; 
+            font-weight: 800; 
+            color: var(--primary); 
+            border-left: 5px solid var(--primary); 
+            padding-left: 12px; 
+            margin: 30px 0 15px 0;
+            text-transform: uppercase;
+        }
+
+
+        /* =========================================================
+           4. THẺ CÂU HỎI VÀ ĐÁP ÁN (CARD)
+        ========================================================= */
+        .q-sol-card {
+            background: var(--card-bg); 
+            border: 1px solid var(--border-color); 
+            border-radius: 12px; 
+            padding: 18px 20px; 
+            margin-bottom: 18px; 
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.02);
+        }
+
+        .q-sol-top { 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            margin-bottom: 15px; 
+            flex-wrap: wrap; 
+            gap: 10px; 
+        }
+
+        .q-badge-label { 
+            background: #e0f2fe; 
+            color: #0284c7; 
+            font-size: 14px; 
+            font-weight: 800; 
+            padding: 5px 12px; 
+            border-radius: 6px; 
+        }
+        
+        .status-badge { 
+            font-size: 13px; 
+            font-weight: 700; 
+            padding: 4px 12px; 
+            border-radius: 20px; 
+        }
+
+        .status-badge.correct { background: var(--correct-bg); color: var(--correct-color); }
+        .status-badge.wrong { background: var(--wrong-bg); color: var(--wrong-color); }
+
+
+        /* =========================================================
+           5. ẢNH CÂU HỎI VÀ TƯƠNG TÁC
+        ========================================================= */
+        .q-img-attached {
+            display: block;
+            max-width: 100%;
+            height: auto;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            margin-bottom: 15px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            cursor: zoom-in; 
+            transition: opacity 0.2s, transform 0.2s;
+        }
+
+        .q-img-attached:hover {
+            opacity: 0.9;
+            transform: scale(1.01);
+            border-color: var(--primary);
+        }
+
+        .options-row { 
+            display: flex; gap: 12px; margin-bottom: 15px; flex-wrap: wrap; 
+        }
+
+        .opt-circle {
+            width: 40px; height: 40px; border-radius: 50%; border: 2px solid var(--border-color); 
+            display: inline-flex; justify-content: center; align-items: center; 
+            font-weight: 800; font-size: 15px; color: var(--text-sub); background: var(--bg-main);
+        }
+
+        .opt-circle.user-wrong { 
+            background: #ef4444 !important; 
+            border-color: #ef4444 !important; 
+            color: #ffffff !important; 
+        }
+        
+        .opt-circle.is-correct-key { 
+            background: #10b981 !important; 
+            border-color: #10b981 !important; 
+            color: #ffffff !important; 
+            box-shadow: 0 4px 10px rgba(16, 185, 129, 0.3); 
+        }
+
+
+        /* =========================================================
+           6. HƯỚNG DẪN GIẢI CHI TIẾT
+        ========================================================= */
+        .btn-toggle-exp {
+            background: transparent; border: 1px solid var(--border-color); color: var(--primary); 
+            padding: 8px 14px; border-radius: 6px; font-size: 13px; font-weight: 700; cursor: pointer; 
+            display: inline-flex; align-items: center; gap: 6px; transition: all 0.2s;
+        }
+
+        .btn-toggle-exp:hover { 
+            background: rgba(2, 132, 199, 0.08); 
+        }
+
+        .exp-collapsible-box { 
+            display: none; margin-top: 15px; padding: 14px 16px; background: var(--bg-main); 
+            border: 1px solid var(--border-color); border-radius: 8px; 
+        }
+
+        .exp-collapsible-box.show { 
+            display: block; animation: fadeIn 0.3s ease; 
+        }
+
+        .exp-title-head { 
+            font-size: 13px; font-weight: 800; color: var(--primary); margin-bottom: 8px; 
+        }
+
+        .exp-body-text { 
+            font-size: 14px; color: var(--text-main); white-space: pre-wrap; line-height: 1.6; 
+        }
+
+        .tf-grid-view { 
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 10px; margin-bottom: 15px; 
+        }
+        
+        .tf-card-view { 
+            background: var(--bg-main); border: 1px solid var(--border-color); padding: 10px; border-radius: 8px; text-align: center; 
+        }
+        
+        .tf-sub-title { 
+            font-size: 13px; font-weight: 700; display: block; margin-bottom: 4px; 
+        }
+        
+        .tf-res-tag { 
+            font-size: 13px; font-weight: 800; 
+        }
+        
+        .tf-res-tag.ok { color: #16a34a; }
+        .tf-res-tag.bad { color: #dc2626; }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-5px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+
+        /* =========================================================
+           7. GIAO DIỆN POPUP PHÓNG TO ẢNH (IMAGE VIEWER)
+        ========================================================= */
+        .img-viewer-overlay {
+            position: fixed; 
+            top: 0; 
+            left: 0; 
+            width: 100vw; 
+            height: 100vh;
+            background: rgba(15, 23, 42, 0.85); 
+            backdrop-filter: blur(5px);
+            -webkit-backdrop-filter: blur(5px);
+            z-index: 999999; 
+            display: none; 
+            justify-content: center; 
+            align-items: center;
+            opacity: 0; 
+            transition: opacity 0.3s ease;
+        }
+
+        .img-viewer-overlay.active { 
+            display: flex; 
+            opacity: 1; 
+        }
+
+        .img-viewer-container {
+            position: relative; 
+            width: 95vw; 
+            height: 85vh;
+            display: flex; 
+            justify-content: center; 
+            align-items: center;
+            overflow: hidden; 
+        }
+
+        .img-viewer-img {
+            max-width: 100%; 
+            max-height: 100%; 
+            object-fit: contain;
+            transition: transform 0.1s ease-out; 
+            cursor: grab;
+            border-radius: 8px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+        }
+
+        .img-viewer-img:active {
+            cursor: grabbing;
+        }
+
+        .img-viewer-close {
+            position: absolute; 
+            top: 25px; 
+            right: 25px;
+            background: rgba(255,255,255,0.2); 
+            color: white; 
+            border: none;
+            width: 40px; 
+            height: 40px; 
+            border-radius: 50%; 
+            font-size: 20px;
+            font-weight: bold;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer; 
+            z-index: 10; 
+            transition: 0.2s;
+            backdrop-filter: blur(4px);
+        }
+
+        .img-viewer-close:hover { 
+            background: #ef4444; 
+            transform: scale(1.1);
+        }
+
+        .zoom-controls-panel {
+            position: absolute; 
+            bottom: 25px; 
+            left: 50%; 
+            transform: translateX(-50%);
+            display: flex; 
+            gap: 15px; 
+            background: rgba(15, 23, 42, 0.6); 
+            padding: 10px 20px; 
+            border-radius: 30px;
+            backdrop-filter: blur(4px);
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .zoom-btn { 
+            background: #ffffff; 
+            color: #0f172a;
+            border: none; 
+            width: 36px; 
+            height: 36px; 
+            border-radius: 50%; 
+            cursor: pointer; 
+            font-weight: bold;
+            font-size: 18px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: 0.2s;
+        }
+
+        .zoom-btn:hover {
+            background: #0284c7;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+
+    <header class="sol-header-bar">
+        <div class="sol-title-area">
+            <h1 id="sol-exam-title">Đang tải tên đề thi...</h1>
+            <p id="sol-exam-sub">Mã đề: --- • Lần thi: ---</p>
+        </div>
+        <div class="sol-actions">
+            <!-- 👉 NÚT ĐÃ ĐƯỢC FIX: LUÔN TRỞ VỀ ĐÚNG BẢNG ĐIỂM Ở INDEX.HTML -->
+            <button class="btn-header btn-home" onclick="window.location.href='index.html';"> QUAY LẠI BẢNG ĐIỂM</button>
+        </div>
+    </header>
+
+
+    <div class="sol-container">
+        <div class="score-summary-card">
+            <div>
+                <span style="font-size: 13px; color: var(--text-sub); font-weight: 700; text-transform: uppercase;">KẾT QUẢ ĐẠT ĐƯỢC</span>
+                <div class="score-box-big" id="sol-final-score">0.00 <span style="font-size: 16px; color: var(--text-sub);">/ 10 điểm</span></div>
+            </div>
+            <div id="sol-stats-detail" style="font-size: 13px; color: var(--text-main); font-weight: 600;"></div>
+        </div>
+
+        <div class="section-header-title">PHẦN I: CÂU TRẮC NGHIỆM NHIỀU PHƯƠNG ÁN (12 CÂU)</div>
+        <div id="sol-p1-container"></div>
+
+        <div class="section-header-title">PHẦN II: CÂU TRẮC NGHIỆM ĐÚNG / SAI (4 CÂU)</div>
+        <div id="sol-p2-container"></div>
+
+        <div class="section-header-title">PHẦN III: CÂU TRẮC NGHIỆM TRẢ LỜI NGẮN (6 CÂU)</div>
+        <div id="sol-p3-container"></div>
+    </div>
+
+
+    <!-- =========================================================
+         BẢNG POPUP XEM VÀ PHÓNG TO ẢNH CÂU HỎI
+    ========================================================= -->
+    <div class="img-viewer-overlay" id="img-viewer-modal" onclick="window.closeImageViewer(event)">
+        <!-- Nút Tắt -->
+        <button class="img-viewer-close" onclick="window.closeImageViewer(event)">✖</button>
+        
+        <!-- Khung chứa ảnh -->
+        <div class="img-viewer-container" id="img-viewer-container" onclick="event.stopPropagation()">
+            <img id="img-viewer-target" class="img-viewer-img">
+        </div>
+        
+        <!-- Bộ nút điều khiển Zoom -->
+        <div class="zoom-controls-panel" onclick="event.stopPropagation()">
+            <button class="zoom-btn" onclick="window.zoomImage(-0.25)" title="Thu nhỏ">➖</button>
+            <button class="zoom-btn" onclick="window.resetZoom()" title="Mặc định">⟲</button>
+            <button class="zoom-btn" onclick="window.zoomImage(0.25)" title="Phóng to">➕</button>
+        </div>
+    </div>
+
+
+    <!-- =========================================================
+         JAVASCRIPT XỬ LÝ DỮ LIỆU VÀ ZOOM ẢNH
+    ========================================================= -->
+    <script type="module">
+        import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm";
+
+        // Khởi tạo Supabase
+        const supabaseUrl = 'https://foujvxpzsilshacrpslu.supabase.co';
+        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZvdWp2eHB6c2lsc2hhY3Jwc2x1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODY0MzYyMzQsImV4cCI6MjEwMjAxMjIzNH0.K8_zJZjKkmU-_WdaXowkM7dLhVBP5GpMRPAsbiiDLb4';
+        const supabase = createClient(supabaseUrl, supabaseKey);
+
+        if (localStorage.getItem('thpt_theme') === 'dark') {
+            document.body.setAttribute('data-theme', 'dark');
+        }
+
+        const urlParams = new URLSearchParams(window.location.search);
+        const examId = urlParams.get('examId');
+        
+        // Mặc định lấy attempt từ URL, nếu không có sẽ tự tính toán
+        let attemptIdx = parseInt(urlParams.get('attempt'), 10);
+
+
+        // =========================================================
+        // HỆ THỐNG PHÓNG TO ẢNH (ZOOM / DRAG PAN)
+        // =========================================================
+        let currentScale = 1;
+        let translateX = 0;
+        let translateY = 0;
+        let isDragging = false;
+        let startX, startY;
+
+        const viewerModal = document.getElementById('img-viewer-modal');
+        const viewerImg = document.getElementById('img-viewer-target');
+
+        // Hàm mở Popup Ảnh
+        window.openImageViewer = (src) => {
+            viewerImg.src = src;
+            window.resetZoom(); 
+            viewerModal.style.display = 'flex';
+            requestAnimationFrame(() => viewerModal.classList.add('active'));
+        };
+
+        // Hàm tắt Popup Ảnh
+        window.closeImageViewer = (event) => {
+            if (event) event.stopPropagation();
+            viewerModal.classList.remove('active');
+            setTimeout(() => { 
+                viewerModal.style.display = 'none'; 
+                viewerImg.src = '';
+            }, 300);
+        };
+
+        // Hàm áp dụng CSS Transform
+        const applyTransform = () => {
+            viewerImg.style.transform = `translate(${translateX}px, ${translateY}px) scale(${currentScale})`;
+        };
+
+        // Nút Bấm Phóng To / Thu Nhỏ
+        window.zoomImage = (delta) => {
+            currentScale += delta;
+            // Giới hạn zoom từ 0.5x đến 5x
+            if (currentScale < 0.5) currentScale = 0.5;
+            if (currentScale > 5) currentScale = 5;
+            applyTransform();
+        };
+
+        // Nút Bấm Khôi Phục Mặc Định
+        window.resetZoom = () => {
+            currentScale = 1;
+            translateX = 0;
+            translateY = 0;
+            applyTransform();
+        };
+
+        // Xử lý Lăn Chuột để Phóng to Thu nhỏ
+        viewerImg.addEventListener('wheel', (e) => {
+            e.preventDefault();
+            if (e.deltaY < 0) {
+                window.zoomImage(0.1); 
+            } else {
+                window.zoomImage(-0.1); 
+            }
+        });
+
+        // Xử lý Cầm Chuột Kéo Ảnh (Panning)
+        viewerImg.addEventListener('mousedown', (e) => {
+            e.preventDefault();
+            isDragging = true;
+            startX = e.clientX - translateX;
+            startY = e.clientY - translateY;
+        });
+
+        window.addEventListener('mousemove', (e) => {
+            if (!isDragging) return;
+            translateX = e.clientX - startX;
+            translateY = e.clientY - startY;
+            applyTransform();
+        });
+
+        window.addEventListener('mouseup', () => {
+            isDragging = false;
+        });
+
+        // Hỗ trợ cảm ứng kéo thả trên Điện thoại
+        viewerImg.addEventListener('touchstart', (e) => {
+            if (e.touches.length === 1) {
+                isDragging = true;
+                startX = e.touches[0].clientX - translateX;
+                startY = e.touches[0].clientY - translateY;
+            }
+        }, {passive: false});
+
+        window.addEventListener('touchmove', (e) => {
+            if (!isDragging) return;
+            // Chỉ kéo khi zoom > 1 để chống lỗi trượt màn hình
+            if (currentScale > 1) {
+                e.preventDefault();
+                translateX = e.touches[0].clientX - startX;
+                translateY = e.touches[0].clientY - startY;
+                applyTransform();
+            }
+        }, {passive: false});
+
+        window.addEventListener('touchend', () => {
+            isDragging = false;
+        });
+
+
+        // =========================================================
+        // HỆ THỐNG TẢI DỮ LIỆU TỪ SUPABASE
+        // =========================================================
+
+        async function loadSolutionData() {
+            if (!examId) {
+                alert("Không tìm thấy mã đề thi!");
+                window.location.href = 'index.html';
+                return;
+            }
+
+            try {
+                // Tải Đáp án & Ảnh từ DB
+                const { data: examData, error: examErr } = await supabase
+                    .from('exams')
+                    .select('*')
+                    .eq('id', examId)
+                    .single();
+
+                if (examErr || !examData) throw new Error("Không tải được dữ liệu đề thi!");
+
+                document.getElementById('sol-exam-title').innerText = examData.title;
+
+                // Tải Lịch sử làm bài
+                const { data: { session } } = await supabase.auth.getSession();
+                let userHistory = [];
+
+                if (session && session.user) {
+                    const { data: profile } = await supabase
+                        .from('user_profiles')
+                        .select('history')
+                        .eq('id', session.user.id)
+                        .single();
+                    
+                    if (profile && profile.history && profile.history[examId]) {
+                        userHistory = profile.history[examId];
+                    }
+                }
+
+                // Nếu không truyền attempt vào URL thì tự lấy lần thi cuối cùng
+                if (isNaN(attemptIdx)) {
+                    attemptIdx = userHistory.length > 0 ? userHistory.length - 1 : 0;
+                }
+
+                const attemptData = userHistory[attemptIdx] || { score: 0, answers: {}, date: "Chưa ghi nhận" };
+                
+                document.getElementById('sol-exam-sub').innerText = `Mã đề: ${examId} • Lần thi thứ ${attemptIdx + 1} (${attemptData.date})`;
+                document.getElementById('sol-final-score').innerHTML = `${attemptData.score.toFixed(2)} <span style="font-size: 16px; color: var(--text-sub);">/ 10 điểm</span>`;
+
+                const userAns = attemptData.answers || {};
+                const keys = examData.answers || {};
+
+                renderP1Solutions(keys.P1 || {}, userAns);
+                renderP2Solutions(keys.P2 || {}, userAns);
+                renderP3Solutions(keys.P3 || {}, userAns);
+
+            } catch (err) {
+                console.error(err);
+                alert("Lỗi tải thông tin đáp án: " + err.message);
+            }
+        }
+
+        window.toggleExpBox = (id) => {
+            const box = document.getElementById(id);
+            if (box) box.classList.toggle('show');
+        };
+
+        // Render Phần 1
+        function renderP1Solutions(keysP1, userAns) {
+            const container = document.getElementById('sol-p1-container');
+            container.innerHTML = '';
+
+            for (let i = 1; i <= 12; i++) {
+                const keyObj = keysP1[i.toString()] || {};
+                const correctKey = typeof keyObj === 'object' ? keyObj.ans : keyObj;
+                const expText = typeof keyObj === 'object' ? (keyObj.exp || '') : '';
+                const imgUrl = typeof keyObj === 'object' ? (keyObj.img || '') : ''; 
+                
+                const myAns = userAns[`ans_P1_${i}`];
+                const isCorrect = (myAns === correctKey);
+
+                let choicesHtml = '';
+                ['A', 'B', 'C', 'D'].forEach(opt => {
+                    let cls = '';
+                    if (opt === correctKey) cls = 'is-correct-key';
+                    if (opt === myAns && !isCorrect) cls = 'user-wrong';
+                    choicesHtml += `<div class="opt-circle ${cls}">${opt}</div>`;
+                });
+
+                container.innerHTML += `
+                    <div class="q-sol-card">
+                        <div class="q-sol-top">
+                            <span class="q-badge-label">Câu ${i}</span>
+                            <span class="status-badge ${isCorrect ? 'correct' : 'wrong'}">
+                                ${isCorrect ? 'Đúng (+0.25đ)' : `Sai (Chọn: ${myAns || 'Bỏ trống'})`}
+                            </span>
+                        </div>
+                        
+                        ${imgUrl ? `<img src="${imgUrl}" class="q-img-attached" alt="Ảnh câu hỏi" onclick="window.openImageViewer('${imgUrl}')" title="Bấm để phóng to">` : ''}
+
+                        <div class="options-row">${choicesHtml}</div>
+
+                        ${expText ? `
+                            <button class="btn-toggle-exp" onclick="window.toggleExpBox('exp_p1_${i}')">
+                                Xem lời giải chi tiết
+                            </button>
+                            <div class="exp-collapsible-box" id="exp_p1_${i}">
+                                <div class="exp-title-head">HƯỚNG DẪN GIẢI CÂU ${i}:</div>
+                                <div class="exp-body-text">${expText}</div>
+                            </div>
+                        ` : ''}
+                    </div>
+                `;
+            }
+        }
+
+        // Render Phần 2
+        function renderP2Solutions(keysP2, userAns) {
+            const container = document.getElementById('sol-p2-container');
+            container.innerHTML = '';
+
+            for (let i = 1; i <= 4; i++) {
+                const keyObj = keysP2[i.toString()] || {};
+                const expText = keyObj.exp || '';
+                const imgUrl = keyObj.img || ''; 
+
+                let tfGridHtml = '';
+                let correctCount = 0;
+
+                ['a', 'b', 'c', 'd'].forEach(sub => {
+                    const correctVal = keyObj[sub] || 'T';
+                    const myVal = userAns[`ans_P2_${i}${sub}`];
+                    const isSubOk = (myVal === correctVal);
+                    if (isSubOk) correctCount++;
+
+                    tfGridHtml += `
+                        <div class="tf-card-view">
+                            <span class="tf-sub-title">Ý ${sub})</span>
+                            <div class="tf-res-tag ${isSubOk ? 'ok' : 'bad'}">
+                                Chuẩn: ${correctVal === 'T' ? 'Đ' : 'S'}<br/>
+                                <span style="font-size:11px; font-weight:normal;">(Bạn chọn: ${myVal ? (myVal === 'T' ? 'Đ' : 'S') : '---'})</span>
+                            </div>
+                        </div>
+                    `;
+                });
+
+                const isAllCorrect = (correctCount === 4);
+
+                container.innerHTML += `
+                    <div class="q-sol-card">
+                        <div class="q-sol-top">
+                            <span class="q-badge-label">Câu ${i} (Đúng / Sai)</span>
+                            <span class="status-badge ${isAllCorrect ? 'correct' : 'wrong'}">
+                                ${isAllCorrect ? 'Đúng cả 4 ý (+1.0đ)' : `Đúng ${correctCount}/4 ý`}
+                            </span>
+                        </div>
+                        
+                        ${imgUrl ? `<img src="${imgUrl}" class="q-img-attached" alt="Ảnh câu hỏi" onclick="window.openImageViewer('${imgUrl}')" title="Bấm để phóng to">` : ''}
+
+                        <div class="tf-grid-view">${tfGridHtml}</div>
+
+                        ${expText ? `
+                            <button class="btn-toggle-exp" onclick="window.toggleExpBox('exp_p2_${i}')">
+                                Xem lời giải chi tiết
+                            </button>
+                            <div class="exp-collapsible-box" id="exp_p2_${i}">
+                                <div class="exp-title-head">HƯỚNG DẪN GIẢI CÂU ${i}:</div>
+                                <div class="exp-body-text">${expText}</div>
+                            </div>
+                        ` : ''}
+                    </div>
+                `;
+            }
+        }
+
+        // Render Phần 3
+        function renderP3Solutions(keysP3, userAns) {
+            const container = document.getElementById('sol-p3-container');
+            container.innerHTML = '';
+
+            for (let i = 1; i <= 6; i++) {
+                const keyObj = keysP3[i.toString()] || {};
+                const correctAns = typeof keyObj === 'object' ? keyObj.ans : keyObj;
+                const expText = typeof keyObj === 'object' ? (keyObj.exp || '') : '';
+                const imgUrl = typeof keyObj === 'object' ? (keyObj.img || '') : ''; 
+                
+                const myAns = (userAns[`ans_P3_${i}`] || '').trim();
+                const isCorrect = (myAns === String(correctAns || '').trim());
+
+                container.innerHTML += `
+                    <div class="q-sol-card">
+                        <div class="q-sol-top">
+                            <span class="q-badge-label">Câu ${i}</span>
+                            <span class="status-badge ${isCorrect ? 'correct' : 'wrong'}">
+                                ${isCorrect ? 'Đúng (+0.5đ)' : 'Sai'}
+                            </span>
+                        </div>
+                        
+                        ${imgUrl ? `<img src="${imgUrl}" class="q-img-attached" alt="Ảnh câu hỏi" onclick="window.openImageViewer('${imgUrl}')" title="Bấm để phóng to">` : ''}
+
+                        <div style="font-size:14px; margin-bottom:12px; font-weight:700;">
+                            Đáp án chuẩn: <span style="color:#10b981; font-size:16px;">${correctAns || '?'}</span> 
+                            <span style="font-size:13px; color:var(--text-sub); margin-left:15px;">(Bạn nhập: ${myAns || 'Bỏ trống'})</span>
+                        </div>
+
+                        ${expText ? `
+                            <button class="btn-toggle-exp" onclick="window.toggleExpBox('exp_p3_${i}')">
+                                Xem lời giải chi tiết
+                            </button>
+                            <div class="exp-collapsible-box" id="exp_p3_${i}">
+                                <div class="exp-title-head">HƯỚNG DẪN GIẢI CÂU ${i}:</div>
+                                <div class="exp-body-text">${expText}</div>
+                            </div>
+                        ` : ''}
+                    </div>
+                `;
+            }
+        }
+
+        loadSolutionData();
+    </script>
+</body>
+</html>
