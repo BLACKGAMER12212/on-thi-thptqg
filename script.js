@@ -117,15 +117,17 @@ style.innerHTML = `
             background: #0f172a !important; 
         }
         
+        /* ĐÃ FIX: CHỐNG CẮT ĐỀ (CUTOFF) Ở ĐÁY MÀN HÌNH ĐIỆN THOẠI */
         #pdf-render-wrapper {
             width: 100% !important;
             max-width: 100% !important;
-            height: 100vh !important;
+            height: 100% !important; /* Dùng 100% thay vì 100vh để thích ứng thanh URL */
             overflow-y: auto !important;
             overflow-x: hidden !important; 
-            padding: 0 !important;
+            padding: 0 0 150px 0 !important; /* Bù đệm 150px dưới đáy để vuốt xuống kịch kim */
             margin: 0 !important;
             background: #ffffff !important; 
+            box-sizing: border-box !important;
         }
 
         [data-theme="dark"] #pdf-render-wrapper {
@@ -152,16 +154,18 @@ style.innerHTML = `
             display: block !important;
         }
 
+        /* Ẩn thanh vẽ Note trên Mobile để vuốt PDF mượt hơn */
         #toolbar-wrapper, #zoom-controls, #static-layer, #draw-layer {
             display: none !important;
         }
 
+        /* ẨN VĨNH VIỄN CÁI NÚT ĐIỀN ĐÁP ÁN CŨ Ở GÓC TRÁI DƯỚI */
         button[onclick*="toggleMobileSheet"]:not(#mobile-fab-answer),
         .btn-mobile-answer, #btn-open-sheet {
             display: none !important;
         }
 
-        /* 👉 NÚT ĐIỀN ĐÁP ÁN NỔI (FAB) - LUÔN LUÔN NỔI Ở TRÊN CÙNG KỂ CẢ KHI MỞ BẢNG */
+        /* NÚT ĐIỀN ĐÁP ÁN NỔI (FAB) - BẤT TỬ Ở GÓC PHẢI DƯỚI */
         .mobile-fab-answer {
             position: fixed !important;
             bottom: 25px !important;
@@ -175,15 +179,15 @@ style.innerHTML = `
             border: 2px solid rgba(255,255,255,0.2) !important;
             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3) !important;
             
-            /* Lớp 100002 đảm bảo Nút nổi trên tất cả mọi thứ (Bảng là 100000) */
-            z-index: 100002 !important;
+            /* Lớp 100005 cao nhất để luôn đè lên bảng đáp án */
+            z-index: 100005 !important;
             
-            display: none; 
+            display: none; /* Khởi tạo ẩn, JS sẽ gắn lệnh Inline Flex */
             align-items: center !important;
             justify-content: center !important;
             
-            opacity: 0.85; 
-            transition: opacity 0.3s ease, transform 0.2s ease, background 0.3s ease !important;
+            opacity: 0.95 !important; 
+            transition: transform 0.2s ease, background 0.3s ease !important;
             cursor: pointer;
             color: white !important;
         }
@@ -193,7 +197,7 @@ style.innerHTML = `
             opacity: 1 !important; 
         }
 
-        /* BẢNG ĐIỀN ĐÁP ÁN TRƯỢT TỪ DƯỚI LÊN */
+        /* BẢNG ĐIỀN ĐÁP ÁN TRƯỢT TỪ DƯỚI LÊN (CỬA CUỐN) */
         #right-panel-drawer {
             position: fixed !important;
             top: auto !important;  
@@ -312,6 +316,7 @@ style.innerHTML = `
             z-index: 10 !important;
         }
 
+        /* Đồng hồ đếm ngược trôi nổi ở Mobile */
         body.is-taking-exam #header-timer-box {
             position: fixed !important;
             top: 15px !important;
@@ -323,6 +328,7 @@ style.innerHTML = `
             backdrop-filter: blur(5px);
         }
 
+        /* SỬA LỖI MENU ĐIỆN THOẠI */
         #mobile-dropdown {
             position: absolute !important;
             top: 60px !important;
@@ -401,14 +407,14 @@ if (!currentSessionId) {
 
 
 // ==============================================================================
-// 4. 👉 TRUNG TÂM KIỂM SOÁT NÚT NỔI (FAB CONTROLLER) HOÀN HẢO
+// 4. 👉 TRUNG TÂM KIỂM SOÁT NÚT NỔI (FAB CONTROLLER) THÔNG MINH NHẤT
 // ==============================================================================
 window.initDrawerHandle = () => {
     const drawer = document.getElementById('right-panel-drawer');
     if (drawer && !document.getElementById('drawer-handle-zone')) {
         const handle = document.createElement('div');
         handle.id = 'drawer-handle-zone';
-        // Chèn vào đầu bảng
+        // Luôn chèn vạch cảm ứng vuốt lên trên cùng của bảng
         drawer.insertBefore(handle, drawer.firstChild);
     }
 };
@@ -416,43 +422,38 @@ window.initDrawerHandle = () => {
 window.updateFabVisibility = () => {
     let fab = document.getElementById('mobile-fab-answer');
     
-    // Nếu chưa có, tạo Nút
+    // Nếu nút chưa tồn tại thì tạo mới tự động. Dùng thẻ div để tránh kẹt event
     if (!fab) {
-        fab = document.createElement('button');
+        fab = document.createElement('div');
         fab.id = 'mobile-fab-answer';
         fab.className = 'mobile-fab-answer';
         fab.onclick = (e) => { e.stopPropagation(); window.toggleMobileSheet(); };
         document.body.appendChild(fab);
     }
     
-    // Xóa tất cả thuộc tính giấu nút lởm khởm
-    fab.style.display = ''; 
-    
-    // Ẩn nếu là màn hình PC/Laptop lớn
+    // Nếu là Máy tính/Tablet to -> Giấu luôn
     if (window.innerWidth > 1024) {
         fab.style.display = 'none';
         return;
     }
     
-    // Xác định đang ở trang nào
     const isHomeScreen = document.getElementById('home-screen').style.display !== 'none';
     const inExam = sessionStorage.getItem('thpt_in_exam') === 'true';
 
-    // LUẬT SỐ 1: Bất cứ khi nào ở trang chủ thì ẨN NÚT.
+    // ĐIỀU KIỆN 1: Đang ở Trang Chủ -> TẮT NÚT
     if (isHomeScreen) {
         fab.style.display = 'none';
     } 
-    // LUẬT SỐ 2: Bất cứ khi nào ở trong PHÒNG THI hoặc ĐANG XEM ĐIỂM -> HIỆN NÚT LÊN (Kể cả khi bảng đóng hay mở)
+    // ĐIỀU KIỆN 2: Đang làm bài HOẶC Đang xem lại điểm -> LUÔN HIỆN NÚT (Dù mở bảng hay không)
     else if (inExam || isReviewMode) {
-        fab.style.display = 'flex'; // Dùng thẳng inline style để đè mọi thứ
+        fab.style.display = 'flex';
         
-        // Đổi màu thông minh
         if (isReviewMode) {
-            // Đã nộp bài -> Nút Xanh Lá (Xem điểm)
-            fab.style.background = 'linear-gradient(135deg, #10b981, #047857)';
+            // Xem Điểm -> Nút Xanh Lá (Biểu đồ)
+            fab.style.background = 'linear-gradient(135deg, #10b981, #047857)'; 
             fab.innerHTML = `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg>`;
         } else {
-            // Đang thi -> Nút Xanh Dương (Điền đáp án)
+            // Điền Đáp Án -> Nút Xanh Dương (Cây Bút)
             fab.style.background = 'linear-gradient(135deg, #0ea5e9, #0284c7)';
             fab.innerHTML = `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"></path></svg>`;
         }
@@ -461,7 +462,7 @@ window.updateFabVisibility = () => {
     }
 };
 
-// Gọi ngay lập tức để khởi tạo cấu trúc
+// Gọi ngay khi file chạy
 window.initDrawerHandle();
 window.updateFabVisibility();
 
@@ -1067,14 +1068,12 @@ window.toggleMobileMenu = () => {
     document.getElementById('mobile-dropdown').classList.toggle('show'); 
 };
 
-
-// 👉 BẬT TẮT BẢNG ĐÁP ÁN BÊN ĐIỆN THOẠI. GỠ BỎ TOÀN BỘ CÁC LỆNH ẨN/HIỆN NÚT FAB Ở ĐÂY.
+// 👉 TRUNG TÂM BẬT TẮT BẢNG ĐÁP ÁN BÊN ĐIỆN THOẠI
 window.toggleMobileSheet = (e) => {
     if (e) e.stopPropagation();
     const panel = document.getElementById('right-panel-drawer'); 
     const backdrop = document.getElementById('drawer-backdrop');
 
-    // Dọn dẹp css rác của vuốt lò xo
     if (panel) {
         panel.style.transition = '';
         panel.style.transform = '';
@@ -2387,7 +2386,7 @@ window.handleBackdropClick = (e, modalId) => {
 
 
 // ==============================================================================
-// 13. TÍNH NĂNG VUỐT (SWIPE TO DISMISS) & LÀM RÕ NỀN (PEEK BACKGROUND)
+// 13. TÍNH NĂNG VUỐT BẢNG MƯỢT MÀ CHUẨN XÁC 100% (SWIPE TO DISMISS)
 // ==============================================================================
 let sheetStartY = 0;
 let sheetCurrentY = 0;
@@ -2449,10 +2448,12 @@ document.addEventListener('touchend', (e) => {
         activeDrawer.style.transition = 'transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1), visibility 0.4s';
         if (activeBackdrop) activeBackdrop.style.transition = 'opacity 0.3s ease';
         
-        activeDrawer.style.transform = '';
-        if (activeBackdrop) activeBackdrop.style.opacity = '';
-        
         window.toggleMobileSheet();
+        
+        setTimeout(() => {
+            if (activeDrawer) activeDrawer.style.transform = '';
+            if (activeBackdrop) activeBackdrop.style.opacity = '';
+        }, 400);
         
     } else {
         activeDrawer.style.transition = 'transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1)';
