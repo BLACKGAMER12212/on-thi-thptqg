@@ -14,6 +14,17 @@ style.innerHTML = `
         0% { transform: translateY(10px); opacity: 0; color: #0284c7; } 
         100% { transform: translateY(0); opacity: 1; color: inherit; } 
     }
+
+    /* 👉 HIỆU ỨNG POP ANIMATION KHI BẤM NÚT (ĐÁP ÁN, NỘP BÀI) */
+    .mcq-label:active .mcq-box, .tf-label:active .tf-box {
+        transform: scale(0.8) !important;
+        transition: transform 0.1s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    }
+    
+    .submit-btn:active, .btn-play:active, .btn-more-pro:active, .zoom-btn:active, .btn-header:active {
+        transform: scale(0.92) !important;
+        transition: transform 0.1s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    }
     
     .prof-icon { 
         vertical-align: middle; 
@@ -44,7 +55,7 @@ style.innerHTML = `
     [data-theme="dark"] .correct-text .exp-text-block { color: #38bdf8 !important; }
 
     #exam-workspace.fullscreen-active { 
-        height: 100vh !important; 
+        height: 100dvh !important; /* Dùng 100dvh để khít tuyệt đối với màn hình điện thoại */
         z-index: 9999; 
     }
 
@@ -110,7 +121,7 @@ style.innerHTML = `
             display: block !important; 
             padding: 0 !important;
             width: 100% !important; 
-            background: #ffffff !important; 
+            background: #e2e8f0 !important; /* Xám chống chói để ẩn đi khoảng trắng dư */
         }
 
         [data-theme="dark"] #exam-workspace {
@@ -124,9 +135,9 @@ style.innerHTML = `
             height: 100dvh !important; 
             overflow-y: auto !important;
             overflow-x: hidden !important; 
-            padding: 0 !important;
-            margin: 0 auto !important;
-            background: #ffffff !important; 
+            padding: 0 0 100px 0 !important; /* Bù đệm 100px dưới đáy để vuốt kịch kim kéo giãn đề */
+            margin: 0 !important;
+            background: #e2e8f0 !important; 
             box-sizing: border-box !important;
         }
 
@@ -154,18 +165,16 @@ style.innerHTML = `
             display: block !important;
         }
 
-        /* Ẩn thanh vẽ Note trên Mobile để vuốt PDF mượt hơn */
         #toolbar-wrapper, #zoom-controls, #static-layer, #draw-layer {
             display: none !important;
         }
 
-        /* ẨN VĨNH VIỄN CÁI NÚT ĐIỀN ĐÁP ÁN CŨ Ở GÓC TRÁI DƯỚI */
         button[onclick*="toggleMobileSheet"]:not(#mobile-fab-answer),
         .btn-mobile-answer, #btn-open-sheet {
             display: none !important;
         }
 
-        /* 👉 NÚT ĐIỀN ĐÁP ÁN NỔI (FAB) - LUÔN Ở TRÊN CÙNG (100005) */
+        /* NÚT ĐIỀN ĐÁP ÁN NỔI (FAB) - BẤT TỬ Ở GÓC PHẢI DƯỚI */
         .mobile-fab-answer {
             position: fixed !important;
             bottom: 25px !important;
@@ -179,24 +188,25 @@ style.innerHTML = `
             border: 2px solid rgba(255,255,255,0.2) !important;
             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3) !important;
             
-            z-index: 100005 !important; /* Đè lên tất cả kể cả bảng đáp án */
+            /* Lớp 100005 cao nhất để luôn đè lên bảng đáp án */
+            z-index: 100005 !important;
             
             display: none; 
             align-items: center !important;
             justify-content: center !important;
             
-            opacity: 0.9 !important; 
-            transition: opacity 0.3s ease, transform 0.2s ease, background 0.3s ease !important;
+            opacity: 0.95 !important; 
+            transition: transform 0.2s ease, background 0.3s ease !important;
             cursor: pointer;
             color: white !important;
         }
-        
+
         .mobile-fab-answer.show {
             display: flex !important;
         }
 
         .mobile-fab-answer:active, .mobile-fab-answer:hover {
-            transform: scale(0.92) !important;
+            transform: scale(0.85) !important;
             opacity: 1 !important; 
         }
 
@@ -291,7 +301,7 @@ style.innerHTML = `
             top: 0 !important;
             left: 0 !important;
             width: 100vw !important;
-            height: 100vh !important;
+            height: 100dvh !important;
             background: rgba(15, 23, 42, 0.6) !important;
             backdrop-filter: blur(3px) !important;
             -webkit-backdrop-filter: blur(3px) !important;
@@ -424,9 +434,9 @@ window.initDrawerHandle = () => {
 window.updateFabVisibility = () => {
     let fab = document.getElementById('mobile-fab-answer');
     
-    // Nếu nút chưa tồn tại thì tạo mới tự động
+    // Nếu nút chưa tồn tại thì tạo mới tự động. Dùng thẻ div để tránh kẹt event
     if (!fab) {
-        fab = document.createElement('div'); // Dùng thẻ DIV tránh xung đột form
+        fab = document.createElement('div');
         fab.id = 'mobile-fab-answer';
         fab.className = 'mobile-fab-answer';
         fab.onclick = (e) => { e.stopPropagation(); window.toggleMobileSheet(); };
@@ -1072,12 +1082,13 @@ window.toggleMobileMenu = () => {
     document.getElementById('mobile-dropdown').classList.toggle('show'); 
 };
 
-// BẬT TẮT BẢNG ĐÁP ÁN
+// 👉 TRUNG TÂM BẬT TẮT BẢNG ĐÁP ÁN BÊN ĐIỆN THOẠI
 window.toggleMobileSheet = (e) => {
     if (e) e.stopPropagation();
     const panel = document.getElementById('right-panel-drawer'); 
     const backdrop = document.getElementById('drawer-backdrop');
 
+    // Dọn dẹp css rác của vuốt lò xo
     if (panel) {
         panel.style.transition = '';
         panel.style.transform = '';
@@ -1552,6 +1563,7 @@ window.startExam = async (eId, mode, attIdx = null) => {
             timerBox.style.display = 'inline-flex';
         }
         
+        window.updateFabVisibility();
         requestFullScreen();
     } else { 
         document.body.classList.remove('is-taking-exam'); 
@@ -1624,6 +1636,8 @@ window.startExam = async (eId, mode, attIdx = null) => {
         if (panel) { panel.classList.add('open'); }
         if (backdrop) { backdrop.style.display = 'block'; backdrop.classList.add('show'); }
         
+        window.updateFabVisibility();
+        
         loadPdfToCanvas(currentExam.pdfUrl, true).catch(e => console.error(e));
         
     } else {
@@ -1651,9 +1665,6 @@ window.startExam = async (eId, mode, attIdx = null) => {
         
         startTimer();
     }
-    
-    // Đảm bảo FAB hiện lên sau khi mọi DOM đã cập nhật xong
-    window.updateFabVisibility();
 };
 
 
@@ -2479,7 +2490,7 @@ document.addEventListener('touchend', (e) => {
             }
         }, 400);
     }
-      
+    
     activeDrawer = null;
     activeBackdrop = null;
 });
