@@ -152,18 +152,16 @@ style.innerHTML = `
             display: block !important;
         }
 
-        /* Ẩn thanh vẽ Note trên Mobile để vuốt PDF mượt hơn */
         #toolbar-wrapper, #zoom-controls, #static-layer, #draw-layer {
             display: none !important;
         }
 
-        /* ẨN VĨNH VIỄN CÁI NÚT ĐIỀN ĐÁP ÁN CŨ Ở GÓC TRÁI DƯỚI */
         button[onclick*="toggleMobileSheet"]:not(#mobile-fab-answer),
         .btn-mobile-answer, #btn-open-sheet {
             display: none !important;
         }
 
-        /* NÚT ĐIỀN ĐÁP ÁN NỔI (FAB) - GÓC PHẢI DƯỚI LUN LUN NỔI Ở TRÊN CÙNG */
+        /* 👉 NÚT ĐIỀN ĐÁP ÁN NỔI (FAB) - LUÔN LUÔN NỔI Ở TRÊN CÙNG KỂ CẢ KHI MỞ BẢNG */
         .mobile-fab-answer {
             position: fixed !important;
             bottom: 25px !important;
@@ -176,9 +174,11 @@ style.innerHTML = `
             border-radius: 50% !important;
             border: 2px solid rgba(255,255,255,0.2) !important;
             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3) !important;
-            z-index: 100001 !important; /* Đảm bảo nó đè lên tất cả kể cả drawer */
             
-            display: none !important; /* Khởi tạo là ẩn, được class .show đè lên */
+            /* Lớp 100002 đảm bảo Nút nổi trên tất cả mọi thứ (Bảng là 100000) */
+            z-index: 100002 !important;
+            
+            display: none; 
             align-items: center !important;
             justify-content: center !important;
             
@@ -187,18 +187,13 @@ style.innerHTML = `
             cursor: pointer;
             color: white !important;
         }
-        
-        /* CHỈ HIỆN LÊN KHI CÓ CLASS SHOW TỪ JAVASCRIPT */
-        .mobile-fab-answer.show {
-            display: flex !important;
-        }
 
         .mobile-fab-answer:active, .mobile-fab-answer:hover {
             transform: scale(0.92) !important;
             opacity: 1 !important; 
         }
 
-        /* BẢNG ĐIỀN ĐÁP ÁN TRƯỢT TỪ DƯỚI LÊN (CỬA CUỐN) */
+        /* BẢNG ĐIỀN ĐÁP ÁN TRƯỢT TỪ DƯỚI LÊN */
         #right-panel-drawer {
             position: fixed !important;
             top: auto !important;  
@@ -317,7 +312,6 @@ style.innerHTML = `
             z-index: 10 !important;
         }
 
-        /* Đồng hồ đếm ngược trôi nổi ở Mobile */
         body.is-taking-exam #header-timer-box {
             position: fixed !important;
             top: 15px !important;
@@ -329,7 +323,6 @@ style.innerHTML = `
             backdrop-filter: blur(5px);
         }
 
-        /* SỬA LỖI MENU ĐIỆN THOẠI */
         #mobile-dropdown {
             position: absolute !important;
             top: 60px !important;
@@ -408,14 +401,14 @@ if (!currentSessionId) {
 
 
 // ==============================================================================
-// 4. 👉 TRUNG TÂM KIỂM SOÁT NÚT NỔI (FAB CONTROLLER) THÔNG MINH NHẤT
+// 4. 👉 TRUNG TÂM KIỂM SOÁT NÚT NỔI (FAB CONTROLLER) HOÀN HẢO
 // ==============================================================================
 window.initDrawerHandle = () => {
     const drawer = document.getElementById('right-panel-drawer');
     if (drawer && !document.getElementById('drawer-handle-zone')) {
         const handle = document.createElement('div');
         handle.id = 'drawer-handle-zone';
-        // Luôn chèn vạch cảm ứng vuốt lên trên cùng của bảng
+        // Chèn vào đầu bảng
         drawer.insertBefore(handle, drawer.firstChild);
     }
 };
@@ -423,7 +416,7 @@ window.initDrawerHandle = () => {
 window.updateFabVisibility = () => {
     let fab = document.getElementById('mobile-fab-answer');
     
-    // Nếu nút chưa tồn tại thì tạo mới tự động
+    // Nếu chưa có, tạo Nút
     if (!fab) {
         fab = document.createElement('button');
         fab.id = 'mobile-fab-answer';
@@ -432,39 +425,43 @@ window.updateFabVisibility = () => {
         document.body.appendChild(fab);
     }
     
-    // Nếu là Máy tính/Tablet to -> Giấu luôn
+    // Xóa tất cả thuộc tính giấu nút lởm khởm
+    fab.style.display = ''; 
+    
+    // Ẩn nếu là màn hình PC/Laptop lớn
     if (window.innerWidth > 1024) {
-        fab.classList.remove('show');
+        fab.style.display = 'none';
         return;
     }
     
+    // Xác định đang ở trang nào
     const isHomeScreen = document.getElementById('home-screen').style.display !== 'none';
     const inExam = sessionStorage.getItem('thpt_in_exam') === 'true';
 
-    // ĐIỀU KIỆN 1: Nếu đang ở Trang Chủ thì ẨN nút đi
+    // LUẬT SỐ 1: Bất cứ khi nào ở trang chủ thì ẨN NÚT.
     if (isHomeScreen) {
-        fab.classList.remove('show');
+        fab.style.display = 'none';
     } 
-    // ĐIỀU KIỆN 2: Trong phòng thi HOẶC Đang xem lại điểm -> LUÔN HIỆN NÚT
+    // LUẬT SỐ 2: Bất cứ khi nào ở trong PHÒNG THI hoặc ĐANG XEM ĐIỂM -> HIỆN NÚT LÊN (Kể cả khi bảng đóng hay mở)
     else if (inExam || isReviewMode) {
-        fab.classList.add('show');
+        fab.style.display = 'flex'; // Dùng thẳng inline style để đè mọi thứ
         
-        // Đổi màu giao diện nút theo ngữ cảnh
+        // Đổi màu thông minh
         if (isReviewMode) {
-            // Xem Điểm -> Màu Xanh Lá 
+            // Đã nộp bài -> Nút Xanh Lá (Xem điểm)
             fab.style.background = 'linear-gradient(135deg, #10b981, #047857)';
             fab.innerHTML = `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg>`;
         } else {
-            // Điền Đáp Án -> Màu Xanh Dương
+            // Đang thi -> Nút Xanh Dương (Điền đáp án)
             fab.style.background = 'linear-gradient(135deg, #0ea5e9, #0284c7)';
             fab.innerHTML = `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"></path></svg>`;
         }
     } else {
-        fab.classList.remove('show');
+        fab.style.display = 'none';
     }
 };
 
-// Gọi ngay lập tức để bảo đảm khởi tạo
+// Gọi ngay lập tức để khởi tạo cấu trúc
 window.initDrawerHandle();
 window.updateFabVisibility();
 
@@ -1070,12 +1067,14 @@ window.toggleMobileMenu = () => {
     document.getElementById('mobile-dropdown').classList.toggle('show'); 
 };
 
-// 👉 BẬT TẮT BẢNG ĐÁP ÁN BÊN ĐIỆN THOẠI
+
+// 👉 BẬT TẮT BẢNG ĐÁP ÁN BÊN ĐIỆN THOẠI. GỠ BỎ TOÀN BỘ CÁC LỆNH ẨN/HIỆN NÚT FAB Ở ĐÂY.
 window.toggleMobileSheet = (e) => {
     if (e) e.stopPropagation();
     const panel = document.getElementById('right-panel-drawer'); 
     const backdrop = document.getElementById('drawer-backdrop');
 
+    // Dọn dẹp css rác của vuốt lò xo
     if (panel) {
         panel.style.transition = '';
         panel.style.transform = '';
@@ -1098,9 +1097,6 @@ window.toggleMobileSheet = (e) => {
             setTimeout(() => backdrop.classList.add('show'), 10); 
         }
     }
-    
-    // Gọi hàm kiểm soát nút sau mỗi lần ẩn/hiện bảng
-    window.updateFabVisibility();
 };
 
 
@@ -1160,7 +1156,6 @@ window.showHome = (force = false) => {
     
     document.querySelectorAll('.ad-banner-side').forEach(el => el.style.display = '');
     
-    // Khi ra ngoài Trang chủ thì tắt hẳn nút FAB
     window.updateFabVisibility();
     
     currentExam = null; 
@@ -1554,7 +1549,6 @@ window.startExam = async (eId, mode, attIdx = null) => {
             timerBox.style.display = 'inline-flex';
         }
         
-        // Gọi FAB update
         window.updateFabVisibility();
         requestFullScreen();
     } else { 
@@ -1628,7 +1622,6 @@ window.startExam = async (eId, mode, attIdx = null) => {
         if (panel) { panel.classList.add('open'); }
         if (backdrop) { backdrop.style.display = 'block'; backdrop.classList.add('show'); }
         
-        // Cập nhật hiển thị nút Xanh Lá
         window.updateFabVisibility();
         
         loadPdfToCanvas(currentExam.pdfUrl, true).catch(e => console.error(e));
@@ -1839,7 +1832,6 @@ window.submitAndGrade = async () => {
         setTimeout(() => { backdrop.classList.add('show'); }, 10); 
     }
     
-    // Cập nhật lại nút
     window.updateFabVisibility();
     
     const ans = getAllCurrentAnswers(); 
@@ -2023,7 +2015,7 @@ window.confirmAction = () => {
 
 
 // ==============================================================================
-// 11. HỆ THỐNG ZOOM & DRAW PDF
+// 11. HỆ THỐNG ZOOM TỰ ĐỘNG & VẼ PDF
 // ==============================================================================
 
 let currentZoom = 1;
@@ -2395,7 +2387,7 @@ window.handleBackdropClick = (e, modalId) => {
 
 
 // ==============================================================================
-// 13. TÍNH NĂNG VUỐT BẢNG MƯỢT MÀ CHUẨN XÁC 100% (SWIPE TO DISMISS)
+// 13. TÍNH NĂNG VUỐT (SWIPE TO DISMISS) & LÀM RÕ NỀN (PEEK BACKGROUND)
 // ==============================================================================
 let sheetStartY = 0;
 let sheetCurrentY = 0;
@@ -2424,7 +2416,6 @@ document.addEventListener('touchstart', (e) => {
     
 }, { passive: true });
 
-
 document.addEventListener('touchmove', (e) => {
     if (!isSheetDragging || !activeDrawer) return;
     
@@ -2447,7 +2438,6 @@ document.addEventListener('touchmove', (e) => {
         e.preventDefault(); 
     }
 }, { passive: false });
-
 
 document.addEventListener('touchend', (e) => {
     if (!isSheetDragging || !activeDrawer) return;
