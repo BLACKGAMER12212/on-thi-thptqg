@@ -15,7 +15,7 @@ style.innerHTML = `
         100% { transform: translateY(0); opacity: 1; color: inherit; } 
     }
 
-    /* 👉 HIỆU ỨNG POP ANIMATION NẢY LÒ XO KHI BẤM NÚT (IOS STYLE) */
+    /* 👉 HIỆU ỨNG POP ANIMATION MƯỢT MÀ KHI BẤM NÚT (IOS STYLE) */
     .mcq-box, .tf-box, .submit-btn, .btn-play, .btn-more-pro, .zoom-btn, .btn-header {
         transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease, transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
         will-change: transform;
@@ -65,7 +65,7 @@ style.innerHTML = `
         left: 0 !important;
         right: 0 !important;
         bottom: 0 !important;
-        height: auto !important; 
+        height: 100% !important; 
         width: 100vw !important;
         z-index: 9999; 
     }
@@ -134,28 +134,28 @@ style.innerHTML = `
             left: 0 !important;
             right: 0 !important;
             bottom: 0 !important;
-            height: auto !important;
+            height: 100dvh !important; /* Dùng 100dvh để tự căn theo màn hình */
             width: 100% !important; 
-            background: #ffffff !important; /* Đổi về màu trắng để hòa vào nền PDF */
+            background: #e2e8f0 !important; 
         }
 
         [data-theme="dark"] #exam-workspace {
             background: #0f172a !important; 
         }
         
-        /* 👉 ĐÃ FIX: CHỐNG CẮT ĐỀ VÀ BỎ KHOẢNG TRẮNG DƯ THỪA (DÙNG ABSOLUTE POSITION) */
+        /* 👉 ĐÃ FIX TUYỆT ĐỐI CẮT ĐỀ: ÉP TRÌNH DUYỆT TỰ CHIA KHUNG, KHÔNG DÙNG JS */
         #pdf-render-wrapper {
             position: absolute !important;
             top: 0 !important;
             left: 0 !important;
             right: 0 !important;
             bottom: 0 !important;
-            height: auto !important; 
+            height: 100% !important; 
             overflow-y: auto !important;
             overflow-x: hidden !important; 
-            padding: 0 0 20px 0 !important; /* Chỉ để 20px dưới đáy cho khít, không bị cục trắng to đùng */
-            margin: 0 auto !important;
-            background: #ffffff !important; /* Nền trắng tệp với PDF */
+            padding: 10px 10px 120px 10px !important; /* Đệm đáy 120px thoải mái không bị nút che */
+            margin: 0 !important;
+            background: #e2e8f0 !important; 
             box-sizing: border-box !important;
         }
 
@@ -163,24 +163,23 @@ style.innerHTML = `
             background: #0f172a !important; 
         }
 
-        #pdf-zoom-container {
+        /* Vô hiệu hóa JS ép khung */
+        #pdf-zoom-container, #pdf-scroll-content {
             width: 100% !important; 
             height: auto !important;
             margin: 0 !important;
             display: block !important; 
+            transform: none !important; /* Bỏ transform scale để Mobile tự do 100% */
         }
 
-        #pdf-scroll-content {
-            transform-origin: top left !important; 
-        }
-
+        /* ẢNH PDF TRÀN 100% KHUNG DỌC - CHẮC CHẮN KHÔNG BỊ CẮT */
         .pdf-page-canvas {
-            width: auto !important;
-            max-width: none !important;
+            width: 100% !important;
+            max-width: 100% !important;
             height: auto !important; 
-            margin: 0 0 5px 0 !important;
-            box-shadow: none !important; 
-            border-radius: 0 !important;
+            margin: 0 0 10px 0 !important;
+            border-radius: 8px !important;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08) !important; 
             display: block !important;
         }
 
@@ -224,13 +223,13 @@ style.innerHTML = `
             display: flex !important;
         }
 
-        /* Pop Animation Mượt Mà Khi Bấm Nút Bút Xanh */
+        /* Hiệu ứng nảy lò xo khi bấm bút */
         .mobile-fab-answer:active {
             transform: scale(0.85) !important;
             transition: transform 0.1s ease-out !important;
         }
 
-        /* BẢNG ĐIỀN ĐÁP ÁN TRƯỢT TỪ DƯỚI LÊN (CỬA CUỐN) */
+        /* BẢNG ĐIỀN ĐÁP ÁN TRƯỢT TỪ DƯỚI LÊN */
         #right-panel-drawer {
             position: fixed !important;
             top: auto !important;  
@@ -351,7 +350,6 @@ style.innerHTML = `
             z-index: 10 !important;
         }
 
-        /* Đồng hồ đếm ngược trôi nổi ở Mobile */
         body.is-taking-exam #header-timer-box {
             position: fixed !important;
             top: 15px !important;
@@ -363,7 +361,6 @@ style.innerHTML = `
             backdrop-filter: blur(5px);
         }
 
-        /* SỬA LỖI MENU ĐIỆN THOẠI */
         #mobile-dropdown {
             position: absolute !important;
             top: 60px !important;
@@ -474,7 +471,7 @@ window.updateFabVisibility = () => {
     const workspace = document.getElementById('exam-workspace');
     const isWorkspaceVisible = workspace && (workspace.style.display === 'flex' || workspace.classList.contains('fullscreen-active'));
 
-    // ĐÃ FIX: NÚT BẤT TỬ KHI Ở TRONG PHÒNG THI (BẤT KỂ BẢNG ĐÓNG HAY MỞ)
+    // ĐÃ FIX: NÚT BẤT TỬ KHI Ở TRONG PHÒNG THI
     if (isWorkspaceVisible) {
         fab.classList.add('show');
         
@@ -536,11 +533,6 @@ window.showNotification = (title, message) => {
 window.closeNotificationModal = () => {
     const notifModal = document.getElementById('notification-modal');
     if (!notifModal) return;
-    
-    // Đã xóa lệnh gọi requestFullScreen trên điện thoại để loại bỏ thông báo đen
-    if (window.innerWidth > 1024 && sessionStorage.getItem('thpt_in_exam') === 'true' && !document.fullscreenElement) {
-        requestFullScreen();
-    }
     
     notifModal.classList.remove('active'); 
     setTimeout(() => notifModal.style.display = 'none', 300);
@@ -1480,7 +1472,11 @@ async function loadPdfToCanvas(pdfUrl, disableLoader = false) {
     }
 }
 
+// 👉 ĐÃ FIX: HÀM NÀY CHỈ CÓ TÁC DỤNG TRÊN MÁY TÍNH ĐỂ TRÁNH THÔNG BÁO ĐEN TRÊN MOBILE
 function requestFullScreen() {
+    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || window.innerWidth <= 1024;
+    if (isMobile) return; 
+
     const elem = document.documentElement;
     if (elem.requestFullscreen) { 
         elem.requestFullscreen().catch(err => console.log(err)); 
@@ -1490,14 +1486,6 @@ function requestFullScreen() {
         elem.msRequestFullscreen(); 
     }
 }
-
-// 👉 ĐÃ FIX: Không gọi thông báo phạt trên mobile để tránh che mất nút
-document.addEventListener('fullscreenchange', () => {
-    if (window.innerWidth > 1024 && !document.fullscreenElement && sessionStorage.getItem('thpt_in_exam') === 'true') {
-        window.showNotification("Cảnh báo vi phạm", "Bạn vừa thoát khỏi chế độ làm bài toàn màn hình!\nHệ thống yêu cầu làm bài nghiêm túc. Vui lòng bấm tắt thông báo này để quay lại chế độ thi.");
-    }
-});
-
 
 window.startExam = async (eId, mode, attIdx = null) => {
     document.getElementById('right-panel-drawer').classList.remove('open');
@@ -1577,10 +1565,7 @@ window.startExam = async (eId, mode, attIdx = null) => {
             timerBox.style.display = 'inline-flex';
         }
         
-        // 👉 ĐÃ FIX: CHỈ KÍCH HOẠT FULLSCREEN TRÊN MÁY TÍNH ĐỂ CHỐNG LỖI HIỆN BẢNG ĐEN
-        if (window.innerWidth > 1024) {
-            requestFullScreen();
-        }
+        requestFullScreen();
     } else { 
         document.body.classList.remove('is-taking-exam'); 
         document.title = `Lịch sử: ${currentExam.title}`; 
@@ -1652,6 +1637,8 @@ window.startExam = async (eId, mode, attIdx = null) => {
         if (panel) { panel.classList.add('open'); }
         if (backdrop) { backdrop.style.display = 'block'; backdrop.classList.add('show'); }
         
+        window.updateFabVisibility();
+        
         loadPdfToCanvas(currentExam.pdfUrl, true).catch(e => console.error(e));
         
     } else {
@@ -1678,9 +1665,8 @@ window.startExam = async (eId, mode, attIdx = null) => {
         }
         
         startTimer();
+        window.updateFabVisibility();
     }
-    
-    window.updateFabVisibility();
 };
 
 
@@ -2062,31 +2048,30 @@ window.changeZoom = (amount, isAbsolute = false) => {
     if (currentZoom < 0.2) currentZoom = 0.2; 
     if (currentZoom > 5.0) currentZoom = 5.0;
     
+    const scaledWidth = originalPdfWidth * currentZoom; 
+    const scaledHeight = originalPdfHeight * currentZoom;
     const scrollContent = document.getElementById('pdf-scroll-content'); 
-    if (scrollContent) { 
+    
+    // 👉 ĐÃ FIX: Không ép Height/Scale bằng Javascript đối với Màn hình Mobile
+    if (window.innerWidth > 1024 && scrollContent) { 
         scrollContent.style.transform = `scale(${currentZoom})`; 
-        
-        // 👉 ĐÃ FIX: Tính toán chiều cao Container cực chuẩn bằng scrollHeight của PDF (Chống cắt đề)
-        const scaledWidth = originalPdfWidth * currentZoom; 
-        const scaledHeight = scrollContent.scrollHeight * currentZoom;
-        
-        const container = document.getElementById('pdf-zoom-container'); 
-        if (container) { 
+    }
+    
+    const container = document.getElementById('pdf-zoom-container'); 
+    const wrapper = document.getElementById('pdf-render-wrapper');
+    
+    if (wrapper && container) { 
+        if (window.innerWidth <= 1024) {
+            container.style.marginLeft = '0px';
+            // Không set Height tĩnh trên mobile để CSS lo (chống hụt đáy)
+        } else {
             container.style.width = scaledWidth + 'px'; 
             container.style.height = scaledHeight + 'px'; 
-        }
-        
-        const wrapper = document.getElementById('pdf-render-wrapper');
-        if (wrapper && container) { 
-            if (window.innerWidth <= 1024) {
-                container.style.marginLeft = '0px';
-            } else {
-                if (scaledWidth < wrapper.clientWidth - 40) { 
-                    container.style.marginLeft = ((wrapper.clientWidth - scaledWidth) / 2) + 'px'; 
-                } else { 
-                    container.style.marginLeft = '20px'; 
-                } 
-            }
+            if (scaledWidth < wrapper.clientWidth - 40) { 
+                container.style.marginLeft = ((wrapper.clientWidth - scaledWidth) / 2) + 'px'; 
+            } else { 
+                container.style.marginLeft = '20px'; 
+            } 
         }
     }
     
@@ -2145,7 +2130,7 @@ pdfWrapper.addEventListener('touchstart', (e) => {
 }, { passive: false });
 
 pdfWrapper.addEventListener('touchmove', (e) => { 
-    if (e.touches.length === 2) { 
+    if (e.touches.length === 2 && window.innerWidth > 1024) { 
         e.preventDefault(); 
         const scale = Math.hypot(e.touches[0].pageX - e.touches[1].pageX, e.touches[0].pageY - e.touches[1].pageY) / initDist; 
         let newZoom = initZoom * scale; 
