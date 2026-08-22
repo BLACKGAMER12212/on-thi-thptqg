@@ -402,7 +402,7 @@
             <p id="sol-exam-sub">Mã đề: --- • Lần thi: ---</p>
         </div>
         <div class="sol-actions">
-            <!-- 👉 NÚT ĐÃ ĐƯỢC FIX: LUÔN TRỞ VỀ ĐÚNG BẢNG ĐIỂM Ở INDEX.HTML -->
+            <!-- ĐÃ ĐƯỢC FIX LẠI CHUẨN KHI QUAY LẠI TRANG CHỦ HOẶC BẢNG ĐIỂM -->
             <button class="btn-header btn-home" onclick="window.location.href='index.html';"> QUAY LẠI BẢNG ĐIỂM</button>
         </div>
     </header>
@@ -431,19 +431,20 @@
     <!-- =========================================================
          BẢNG POPUP XEM VÀ PHÓNG TO ẢNH CÂU HỎI
     ========================================================= -->
+    <!-- ĐÃ FIX: Click ra nền ngoài màng đen cũng sẽ gọi lệnh đóng -->
     <div class="img-viewer-overlay" id="img-viewer-modal" onclick="window.closeImageViewer(event)">
         <!-- Nút Tắt -->
         <button class="img-viewer-close" onclick="window.closeImageViewer(event)">✖</button>
         
-        <!-- Khung chứa ảnh -->
-        <div class="img-viewer-container" id="img-viewer-container" onclick="event.stopPropagation()">
-            <img id="img-viewer-target" class="img-viewer-img">
+        <!-- ĐÃ FIX: Bỏ event.stopPropagation() khỏi vùng chứa to đùng này để bấm viền ngoài thoải mái -->
+        <div class="img-viewer-container" id="img-viewer-container">
+            <!-- ĐÃ FIX: Đặt chặn click (stopPropagation) trực tiếp vào bức ảnh để ấn vào hình không bị tắt -->
+            <img id="img-viewer-target" class="img-viewer-img" onclick="event.stopPropagation()">
         </div>
         
-        <!-- Bộ nút điều khiển Zoom -->
+        <!-- Bộ nút điều khiển Zoom (Đã xóa nút Mặc Định ở giữa) -->
         <div class="zoom-controls-panel" onclick="event.stopPropagation()">
             <button class="zoom-btn" onclick="window.zoomImage(-0.25)" title="Thu nhỏ">➖</button>
-            <button class="zoom-btn" onclick="window.resetZoom()" title="Mặc định">⟲</button>
             <button class="zoom-btn" onclick="window.zoomImage(0.25)" title="Phóng to">➕</button>
         </div>
     </div>
@@ -515,7 +516,7 @@
             applyTransform();
         };
 
-        // Nút Bấm Khôi Phục Mặc Định
+        // Hàm ngầm khôi phục thông số
         window.resetZoom = () => {
             currentScale = 1;
             translateX = 0;
@@ -635,7 +636,7 @@
 
             } catch (err) {
                 console.error(err);
-                alert("Lỗi tải thông tin đáp án: " + err.message);
+                alert("Lỗi tải thông tiết đáp án: " + err.message);
             }
         }
 
