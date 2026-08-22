@@ -15,7 +15,7 @@ style.innerHTML = `
         100% { transform: translateY(0); opacity: 1; color: inherit; } 
     }
 
-    /* 👉 HIỆU ỨNG POP ANIMATION MƯỢT MÀ KHI BẤM NÚT CỦA IOS */
+    /* 👉 HIỆU ỨNG POP ANIMATION NẢY LÒ XO KHI BẤM NÚT (IOS STYLE) */
     .mcq-box, .tf-box, .submit-btn, .btn-play, .btn-more-pro, .zoom-btn, .btn-header {
         transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease, transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
         will-change: transform;
@@ -59,7 +59,6 @@ style.innerHTML = `
     [data-theme="dark"] .correct-text .ans-highlight { color: #4ade80 !important; }
     [data-theme="dark"] .correct-text .exp-text-block { color: #38bdf8 !important; }
 
-    /* 👉 CHỐNG LỖI CẮT ĐỀ TRÊN ĐIỆN THOẠI BẰNG ABSOLUTE POSITION */
     #exam-workspace.fullscreen-active { 
         position: fixed !important;
         top: 0 !important;
@@ -137,14 +136,14 @@ style.innerHTML = `
             bottom: 0 !important;
             height: auto !important;
             width: 100% !important; 
-            background: #e2e8f0 !important; 
+            background: #ffffff !important; /* Đổi về màu trắng để hòa vào nền PDF */
         }
 
         [data-theme="dark"] #exam-workspace {
             background: #0f172a !important; 
         }
         
-        /* ĐÃ FIX: CHỐNG CẮT ĐỀ VÀ BỎ KHOẢNG TRẮNG DƯ THỪA (DÙNG ABSOLUTE POSITION) */
+        /* 👉 ĐÃ FIX: CHỐNG CẮT ĐỀ VÀ BỎ KHOẢNG TRẮNG DƯ THỪA (DÙNG ABSOLUTE POSITION) */
         #pdf-render-wrapper {
             position: absolute !important;
             top: 0 !important;
@@ -154,9 +153,9 @@ style.innerHTML = `
             height: auto !important; 
             overflow-y: auto !important;
             overflow-x: hidden !important; 
-            padding: 0 0 30px 0 !important; 
+            padding: 0 0 20px 0 !important; /* Chỉ để 20px dưới đáy cho khít, không bị cục trắng to đùng */
             margin: 0 auto !important;
-            background: #e2e8f0 !important; 
+            background: #ffffff !important; /* Nền trắng tệp với PDF */
             box-sizing: border-box !important;
         }
 
@@ -166,6 +165,7 @@ style.innerHTML = `
 
         #pdf-zoom-container {
             width: 100% !important; 
+            height: auto !important;
             margin: 0 !important;
             display: block !important; 
         }
@@ -224,6 +224,7 @@ style.innerHTML = `
             display: flex !important;
         }
 
+        /* Pop Animation Mượt Mà Khi Bấm Nút Bút Xanh */
         .mobile-fab-answer:active {
             transform: scale(0.85) !important;
             transition: transform 0.1s ease-out !important;
@@ -319,8 +320,10 @@ style.innerHTML = `
             position: fixed !important;
             top: 0 !important;
             left: 0 !important;
+            right: 0 !important;
+            bottom: 0 !important;
+            height: auto !important;
             width: 100vw !important;
-            height: 100dvh !important;
             background: rgba(15, 23, 42, 0.6) !important;
             backdrop-filter: blur(3px) !important;
             -webkit-backdrop-filter: blur(3px) !important;
@@ -471,6 +474,7 @@ window.updateFabVisibility = () => {
     const workspace = document.getElementById('exam-workspace');
     const isWorkspaceVisible = workspace && (workspace.style.display === 'flex' || workspace.classList.contains('fullscreen-active'));
 
+    // ĐÃ FIX: NÚT BẤT TỬ KHI Ở TRONG PHÒNG THI (BẤT KỂ BẢNG ĐÓNG HAY MỞ)
     if (isWorkspaceVisible) {
         fab.classList.add('show');
         
@@ -533,7 +537,7 @@ window.closeNotificationModal = () => {
     const notifModal = document.getElementById('notification-modal');
     if (!notifModal) return;
     
-    // Đã loại bỏ lệnh requestFullScreen trên điện thoại
+    // Đã xóa lệnh gọi requestFullScreen trên điện thoại để loại bỏ thông báo đen
     if (window.innerWidth > 1024 && sessionStorage.getItem('thpt_in_exam') === 'true' && !document.fullscreenElement) {
         requestFullScreen();
     }
@@ -1487,7 +1491,7 @@ function requestFullScreen() {
     }
 }
 
-// Bỏ chức năng gọi Cảnh báo vi phạm trên mobile để tránh thanh đen
+// 👉 ĐÃ FIX: Không gọi thông báo phạt trên mobile để tránh che mất nút
 document.addEventListener('fullscreenchange', () => {
     if (window.innerWidth > 1024 && !document.fullscreenElement && sessionStorage.getItem('thpt_in_exam') === 'true') {
         window.showNotification("Cảnh báo vi phạm", "Bạn vừa thoát khỏi chế độ làm bài toàn màn hình!\nHệ thống yêu cầu làm bài nghiêm túc. Vui lòng bấm tắt thông báo này để quay lại chế độ thi.");
@@ -1573,7 +1577,7 @@ window.startExam = async (eId, mode, attIdx = null) => {
             timerBox.style.display = 'inline-flex';
         }
         
-        // Không gọi Fullscreen trên thiết bị di động để tránh thông báo đen
+        // 👉 ĐÃ FIX: CHỈ KÍCH HOẠT FULLSCREEN TRÊN MÁY TÍNH ĐỂ CHỐNG LỖI HIỆN BẢNG ĐEN
         if (window.innerWidth > 1024) {
             requestFullScreen();
         }
@@ -1676,7 +1680,6 @@ window.startExam = async (eId, mode, attIdx = null) => {
         startTimer();
     }
     
-    // ĐẢM BẢO CHẠY UPDATE FAB CUỐI CÙNG TRONG MỌI TRƯỜNG HỢP SAU KHI VÀO PHÒNG
     window.updateFabVisibility();
 };
 
@@ -1859,6 +1862,8 @@ window.submitAndGrade = async () => {
         setTimeout(() => { backdrop.classList.add('show'); }, 10); 
     }
     
+    window.updateFabVisibility();
+    
     const ans = getAllCurrentAnswers(); 
     const score = runGradingLogic(ans); 
     const id = currentExam.id; 
@@ -1893,9 +1898,6 @@ window.submitAndGrade = async () => {
         } 
         await supabase.rpc('increment_view', { exam_id_param: id }); 
     } catch (e) { }
-    
-    // LUÔN UPDATE FAB LẠI SAU KHI NỘP BÀI
-    window.updateFabVisibility();
 };
 
 function runGradingLogic(ans, attempt = null) {
@@ -2060,30 +2062,31 @@ window.changeZoom = (amount, isAbsolute = false) => {
     if (currentZoom < 0.2) currentZoom = 0.2; 
     if (currentZoom > 5.0) currentZoom = 5.0;
     
-    const scaledWidth = originalPdfWidth * currentZoom; 
-    const scaledHeight = originalPdfHeight * currentZoom;
     const scrollContent = document.getElementById('pdf-scroll-content'); 
-    
     if (scrollContent) { 
         scrollContent.style.transform = `scale(${currentZoom})`; 
-    }
-    
-    const container = document.getElementById('pdf-zoom-container'); 
-    if (container) { 
-        container.style.width = scaledWidth + 'px'; 
-        container.style.height = scaledHeight + 'px'; 
-    }
-    
-    const wrapper = document.getElementById('pdf-render-wrapper');
-    if (wrapper && container) { 
-        if (window.innerWidth <= 1024) {
-            container.style.marginLeft = '0px';
-        } else {
-            if (scaledWidth < wrapper.clientWidth - 40) { 
-                container.style.marginLeft = ((wrapper.clientWidth - scaledWidth) / 2) + 'px'; 
-            } else { 
-                container.style.marginLeft = '20px'; 
-            } 
+        
+        // 👉 ĐÃ FIX: Tính toán chiều cao Container cực chuẩn bằng scrollHeight của PDF (Chống cắt đề)
+        const scaledWidth = originalPdfWidth * currentZoom; 
+        const scaledHeight = scrollContent.scrollHeight * currentZoom;
+        
+        const container = document.getElementById('pdf-zoom-container'); 
+        if (container) { 
+            container.style.width = scaledWidth + 'px'; 
+            container.style.height = scaledHeight + 'px'; 
+        }
+        
+        const wrapper = document.getElementById('pdf-render-wrapper');
+        if (wrapper && container) { 
+            if (window.innerWidth <= 1024) {
+                container.style.marginLeft = '0px';
+            } else {
+                if (scaledWidth < wrapper.clientWidth - 40) { 
+                    container.style.marginLeft = ((wrapper.clientWidth - scaledWidth) / 2) + 'px'; 
+                } else { 
+                    container.style.marginLeft = '20px'; 
+                } 
+            }
         }
     }
     
@@ -2444,7 +2447,6 @@ document.addEventListener('touchstart', (e) => {
     
 }, { passive: true });
 
-
 document.addEventListener('touchmove', (e) => {
     if (!isSheetDragging || !activeDrawer) return;
     
@@ -2467,7 +2469,6 @@ document.addEventListener('touchmove', (e) => {
         e.preventDefault(); 
     }
 }, { passive: false });
-
 
 document.addEventListener('touchend', (e) => {
     if (!isSheetDragging || !activeDrawer) return;
