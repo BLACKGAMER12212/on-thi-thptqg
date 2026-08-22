@@ -100,6 +100,7 @@ style.innerHTML = `
         display: none !important; 
     }
 
+
     /* ==========================================================
        🚀 TỐI ƯU CỰC ĐỈNH CHO ĐIỆN THOẠI & TABLET (MOBILE UX ENGINE)
        ========================================================== */
@@ -151,15 +152,18 @@ style.innerHTML = `
             display: block !important;
         }
 
+        /* Ẩn thanh vẽ Note trên Mobile để vuốt PDF mượt hơn */
         #toolbar-wrapper, #zoom-controls, #static-layer, #draw-layer {
             display: none !important;
         }
 
+        /* ẨN VĨNH VIỄN CÁI NÚT ĐIỀN ĐÁP ÁN CŨ Ở GÓC TRÁI DƯỚI */
         button[onclick*="toggleMobileSheet"]:not(#mobile-fab-answer),
         .btn-mobile-answer, #btn-open-sheet {
             display: none !important;
         }
 
+        /* NÚT ĐIỀN ĐÁP ÁN NỔI (FAB) - GÓC PHẢI DƯỚI LUN LUN NỔI Ở TRÊN CÙNG */
         .mobile-fab-answer {
             position: fixed !important;
             bottom: 25px !important;
@@ -167,29 +171,34 @@ style.innerHTML = `
             left: auto !important;
             transform: none !important;
             
-            background: #0284c7 !important;
-            color: #ffffff !important;
             width: 56px !important;
             height: 56px !important;
             border-radius: 50% !important;
             border: 2px solid rgba(255,255,255,0.2) !important;
-            box-shadow: 0 4px 15px rgba(2, 132, 199, 0.4) !important;
-            z-index: 99998 !important;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3) !important;
+            z-index: 100001 !important; /* Đảm bảo nó đè lên tất cả kể cả drawer */
             
-            display: flex; 
+            display: none !important; /* Khởi tạo là ẩn, được class .show đè lên */
             align-items: center !important;
             justify-content: center !important;
             
             opacity: 0.85; 
             transition: opacity 0.3s ease, transform 0.2s ease, background 0.3s ease !important;
             cursor: pointer;
+            color: white !important;
         }
         
+        /* CHỈ HIỆN LÊN KHI CÓ CLASS SHOW TỪ JAVASCRIPT */
+        .mobile-fab-answer.show {
+            display: flex !important;
+        }
+
         .mobile-fab-answer:active, .mobile-fab-answer:hover {
             transform: scale(0.92) !important;
             opacity: 1 !important; 
         }
 
+        /* BẢNG ĐIỀN ĐÁP ÁN TRƯỢT TỪ DƯỚI LÊN (CỬA CUỐN) */
         #right-panel-drawer {
             position: fixed !important;
             top: auto !important;  
@@ -208,9 +217,9 @@ style.innerHTML = `
             background: #ffffff !important;
             z-index: 100000 !important;
             
-            transform: translateY(120%) !important; 
+            transform: translateY(120%); 
             visibility: hidden;
-            transition: transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1), visibility 0.4s !important;
+            transition: transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1), visibility 0.4s;
             
             border-radius: 24px 24px 0 0 !important;
             box-shadow: 0 -10px 40px rgba(0,0,0,0.2) !important;
@@ -225,19 +234,40 @@ style.innerHTML = `
         }
 
         #right-panel-drawer.open {
-            transform: translateY(0) !important;
+            transform: translateY(0); 
             visibility: visible;
         }
 
-        #right-panel-drawer::before {
+        /* VÙNG CHỨA CÁI GẠCH NGANG ĐỂ CẢM ỨNG VUỐT XUỐNG */
+        #drawer-handle-zone {
+            width: 100%;
+            height: 45px;
+            flex-shrink: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: grab;
+            background: transparent;
+            touch-action: none; 
+            z-index: 100001;
+            position: relative;
+        }
+
+        #drawer-handle-zone:active {
+            cursor: grabbing;
+        }
+
+        #drawer-handle-zone::after {
             content: '';
             display: block;
-            width: 40px;
+            width: 50px;
             height: 6px;
             background: #cbd5e1;
             border-radius: 10px;
-            margin: 15px auto;
-            flex-shrink: 0;
+        }
+
+        [data-theme="dark"] #drawer-handle-zone::after {
+            background: #475569;
         }
 
         #sheets-container, #summary-screen {
@@ -248,8 +278,12 @@ style.innerHTML = `
             padding-bottom: 100px !important; 
             width: 100% !important;
             box-sizing: border-box !important;
+            user-select: auto;
+            -webkit-user-select: auto;
+            touch-action: pan-y !important;
         }
 
+        /* Lớp màng đen mờ che đề thi */
         #drawer-backdrop {
             position: fixed !important;
             top: 0 !important;
@@ -261,13 +295,13 @@ style.innerHTML = `
             -webkit-backdrop-filter: blur(3px) !important;
             z-index: 99999 !important;
             opacity: 0;
-            transition: opacity 0.4s ease !important;
+            transition: opacity 0.4s ease;
             display: none;
         }
 
         #drawer-backdrop.show {
             display: block !important;
-            opacity: 1 !important;
+            opacity: 1;
         }
         
         #btn-submit-exam {
@@ -283,6 +317,7 @@ style.innerHTML = `
             z-index: 10 !important;
         }
 
+        /* Đồng hồ đếm ngược trôi nổi ở Mobile */
         body.is-taking-exam #header-timer-box {
             position: fixed !important;
             top: 15px !important;
@@ -294,6 +329,7 @@ style.innerHTML = `
             backdrop-filter: blur(5px);
         }
 
+        /* SỬA LỖI MENU ĐIỆN THOẠI */
         #mobile-dropdown {
             position: absolute !important;
             top: 60px !important;
@@ -372,8 +408,18 @@ if (!currentSessionId) {
 
 
 // ==============================================================================
-// 4. 👉 TRUNG TÂM KIỂM SOÁT NÚT NỔI (FAB CONTROLLER)
+// 4. 👉 TRUNG TÂM KIỂM SOÁT NÚT NỔI (FAB CONTROLLER) THÔNG MINH NHẤT
 // ==============================================================================
+window.initDrawerHandle = () => {
+    const drawer = document.getElementById('right-panel-drawer');
+    if (drawer && !document.getElementById('drawer-handle-zone')) {
+        const handle = document.createElement('div');
+        handle.id = 'drawer-handle-zone';
+        // Luôn chèn vạch cảm ứng vuốt lên trên cùng của bảng
+        drawer.insertBefore(handle, drawer.firstChild);
+    }
+};
+
 window.updateFabVisibility = () => {
     let fab = document.getElementById('mobile-fab-answer');
     
@@ -388,36 +434,39 @@ window.updateFabVisibility = () => {
     
     // Nếu là Máy tính/Tablet to -> Giấu luôn
     if (window.innerWidth > 1024) {
-        fab.style.display = 'none';
+        fab.classList.remove('show');
         return;
     }
     
     const isHomeScreen = document.getElementById('home-screen').style.display !== 'none';
-    const panel = document.getElementById('right-panel-drawer');
-    const isPanelOpen = panel && panel.classList.contains('open');
     const inExam = sessionStorage.getItem('thpt_in_exam') === 'true';
 
-    // Đang ở Trang Chủ HOẶC Bảng kéo đang Mở -> Giấu nút đi
-    if (isHomeScreen || isPanelOpen) {
-        fab.style.display = 'none';
+    // ĐIỀU KIỆN 1: Nếu đang ở Trang Chủ thì ẨN nút đi
+    if (isHomeScreen) {
+        fab.classList.remove('show');
     } 
-    // Trong phòng thi HOẶC Đang xem lại điểm -> Bật nút lên
+    // ĐIỀU KIỆN 2: Trong phòng thi HOẶC Đang xem lại điểm -> LUÔN HIỆN NÚT
     else if (inExam || isReviewMode) {
-        fab.style.display = 'flex';
+        fab.classList.add('show');
         
+        // Đổi màu giao diện nút theo ngữ cảnh
         if (isReviewMode) {
-            // Xem Điểm (Đã nộp) -> Màu Xanh Lá 
-            fab.style.background = 'linear-gradient(135deg, #10b981, #047857)'; 
+            // Xem Điểm -> Màu Xanh Lá 
+            fab.style.background = 'linear-gradient(135deg, #10b981, #047857)';
             fab.innerHTML = `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg>`;
         } else {
-            // Điền Đáp Án (Chưa nộp) -> Màu Xanh Dương
+            // Điền Đáp Án -> Màu Xanh Dương
             fab.style.background = 'linear-gradient(135deg, #0ea5e9, #0284c7)';
             fab.innerHTML = `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"></path></svg>`;
         }
     } else {
-        fab.style.display = 'none';
+        fab.classList.remove('show');
     }
 };
+
+// Gọi ngay lập tức để bảo đảm khởi tạo
+window.initDrawerHandle();
+window.updateFabVisibility();
 
 
 // ==============================================================================
@@ -918,6 +967,7 @@ function updateThemeUI(theme) {
 
 document.addEventListener('DOMContentLoaded', () => { 
     updateThemeUI(savedTheme); 
+    window.initDrawerHandle();
     window.updateFabVisibility();
 });
 
@@ -1016,18 +1066,16 @@ window.openProfileModal = () => {
     requestAnimationFrame(() => modal.classList.add('active'));
 };
 
-// MỞ ĐÓNG MENU HAMBURGER BÊN ĐIỆN THOẠI
 window.toggleMobileMenu = () => { 
     document.getElementById('mobile-dropdown').classList.toggle('show'); 
 };
 
-// BẬT TẮT BẢNG ĐÁP ÁN & HIỆN LẠI NÚT FAB
+// 👉 BẬT TẮT BẢNG ĐÁP ÁN BÊN ĐIỆN THOẠI
 window.toggleMobileSheet = (e) => {
     if (e) e.stopPropagation();
     const panel = document.getElementById('right-panel-drawer'); 
     const backdrop = document.getElementById('drawer-backdrop');
 
-    // Dọn dẹp tàn dư CSS của thao tác kéo thả tay
     if (panel) {
         panel.style.transition = '';
         panel.style.transform = '';
@@ -1051,7 +1099,7 @@ window.toggleMobileSheet = (e) => {
         }
     }
     
-    // Gọi hàm trung tâm để xem xét có nên hiện nút bấm FAB lên không
+    // Gọi hàm kiểm soát nút sau mỗi lần ẩn/hiện bảng
     window.updateFabVisibility();
 };
 
@@ -1112,6 +1160,7 @@ window.showHome = (force = false) => {
     
     document.querySelectorAll('.ad-banner-side').forEach(el => el.style.display = '');
     
+    // Khi ra ngoài Trang chủ thì tắt hẳn nút FAB
     window.updateFabVisibility();
     
     currentExam = null; 
@@ -1333,7 +1382,7 @@ window.toggleLike = async (examId, element) => {
 
 
 // ==============================================================================
-// 10. PHÒNG THI: TẢI ĐỀ, CHẤM ĐIỂM (ĐÃ TỐI ƯU CỰC MƯỢT CHO ĐIỆN THOẠI)
+// 10. PHÒNG THI: TẢI ĐỀ, CHẤM ĐIỂM 
 // ==============================================================================
 
 async function loadPdfToCanvas(pdfUrl, disableLoader = false) {
@@ -1411,7 +1460,6 @@ async function loadPdfToCanvas(pdfUrl, disableLoader = false) {
 
 function requestFullScreen() {
     const elem = document.documentElement;
-    
     if (elem.requestFullscreen) { 
         elem.requestFullscreen().catch(err => console.log(err)); 
     } else if (elem.webkitRequestFullscreen) { 
@@ -1506,8 +1554,8 @@ window.startExam = async (eId, mode, attIdx = null) => {
             timerBox.style.display = 'inline-flex';
         }
         
+        // Gọi FAB update
         window.updateFabVisibility();
-        
         requestFullScreen();
     } else { 
         document.body.classList.remove('is-taking-exam'); 
@@ -1580,6 +1628,7 @@ window.startExam = async (eId, mode, attIdx = null) => {
         if (panel) { panel.classList.add('open'); }
         if (backdrop) { backdrop.style.display = 'block'; backdrop.classList.add('show'); }
         
+        // Cập nhật hiển thị nút Xanh Lá
         window.updateFabVisibility();
         
         loadPdfToCanvas(currentExam.pdfUrl, true).catch(e => console.error(e));
@@ -1790,6 +1839,7 @@ window.submitAndGrade = async () => {
         setTimeout(() => { backdrop.classList.add('show'); }, 10); 
     }
     
+    // Cập nhật lại nút
     window.updateFabVisibility();
     
     const ans = getAllCurrentAnswers(); 
@@ -1973,7 +2023,7 @@ window.confirmAction = () => {
 
 
 // ==============================================================================
-// 11. HỆ THỐNG ZOOM TỰ ĐỘNG & VẼ PDF
+// 11. HỆ THỐNG ZOOM & DRAW PDF
 // ==============================================================================
 
 let currentZoom = 1;
@@ -2324,6 +2374,7 @@ document.getElementById('btn-clear-canvas')?.addEventListener('click', () => {
     window.openModal('clear_canvas'); 
 });
 
+
 // ==============================================================================
 // 12. XỬ LÝ CLICK RA NGOÀI ĐỂ TẮT POPUP CHÍNH XÁC
 // ==============================================================================
@@ -2342,6 +2393,7 @@ window.handleBackdropClick = (e, modalId) => {
     } 
 };
 
+
 // ==============================================================================
 // 13. TÍNH NĂNG VUỐT BẢNG MƯỢT MÀ CHUẨN XÁC 100% (SWIPE TO DISMISS)
 // ==============================================================================
@@ -2353,26 +2405,25 @@ let activeBackdrop = null;
 let drawerHeight = 0;
 
 document.addEventListener('touchstart', (e) => {
+    const handle = e.target.closest('#drawer-handle-zone');
+    if (!handle) return; 
+    
     const drawer = document.getElementById('right-panel-drawer');
     if (!drawer || !drawer.classList.contains('open')) return;
 
-    const rect = drawer.getBoundingClientRect();
-    const touchY = e.touches[0].clientY;
-
-    // VÙNG CHẠM: Bắt chính xác 60 pixel từ Đỉnh Bảng trở xuống
-    if (touchY >= rect.top && touchY <= rect.top + 60) {
-        isSheetDragging = true;
-        sheetStartY = touchY;
-        sheetCurrentY = touchY;
-        
-        activeDrawer = drawer;
-        activeBackdrop = document.getElementById('drawer-backdrop');
-        drawerHeight = rect.height;
-        
-        activeDrawer.style.transition = 'none';
-        if (activeBackdrop) activeBackdrop.style.transition = 'none';
-    }
+    isSheetDragging = true;
+    sheetStartY = e.touches[0].clientY;
+    sheetCurrentY = sheetStartY;
+    
+    activeDrawer = drawer;
+    activeBackdrop = document.getElementById('drawer-backdrop');
+    drawerHeight = activeDrawer.getBoundingClientRect().height;
+    
+    activeDrawer.style.transition = 'none';
+    if (activeBackdrop) activeBackdrop.style.transition = 'none';
+    
 }, { passive: true });
+
 
 document.addEventListener('touchmove', (e) => {
     if (!isSheetDragging || !activeDrawer) return;
@@ -2397,44 +2448,37 @@ document.addEventListener('touchmove', (e) => {
     }
 }, { passive: false });
 
+
 document.addEventListener('touchend', (e) => {
     if (!isSheetDragging || !activeDrawer) return;
     isSheetDragging = false;
     
     let deltaY = sheetCurrentY - sheetStartY;
     
-    // Vuốt xuống quá 35% chiều cao bảng -> Lệnh đóng cửa cuốn
     if (deltaY > drawerHeight * 0.35) {
         activeDrawer.style.transition = 'transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1), visibility 0.4s';
         if (activeBackdrop) activeBackdrop.style.transition = 'opacity 0.3s ease';
         
+        activeDrawer.style.transform = '';
+        if (activeBackdrop) activeBackdrop.style.opacity = '';
+        
         window.toggleMobileSheet();
         
-        const tempD = activeDrawer;
-        const tempB = activeBackdrop;
-        setTimeout(() => {
-            if (tempD) tempD.style.transform = '';
-            if (tempB) tempB.style.opacity = '';
-        }, 400);
-        
     } else {
-        // Nhả tay sớm -> Bật nảy lò xo trở lại vị trí cũ
         activeDrawer.style.transition = 'transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1)';
         if (activeBackdrop) activeBackdrop.style.transition = 'opacity 0.4s ease';
         
         activeDrawer.style.transform = 'translateY(0)';
         if (activeBackdrop) activeBackdrop.style.opacity = '1';
         
-        const tempD = activeDrawer;
-        const tempB = activeBackdrop;
         setTimeout(() => {
-            if (tempD && tempD.classList.contains('open')) {
-                tempD.style.transition = '';
-                tempD.style.transform = '';
+            if (activeDrawer && activeDrawer.classList.contains('open')) {
+                activeDrawer.style.transition = '';
+                activeDrawer.style.transform = '';
             }
-            if (tempB && document.getElementById('drawer-backdrop').classList.contains('show')) {
-                tempB.style.transition = '';
-                tempB.style.opacity = '';
+            if (activeBackdrop && document.getElementById('drawer-backdrop').classList.contains('show')) {
+                activeBackdrop.style.transition = '';
+                activeBackdrop.style.opacity = '';
             }
         }, 400);
     }
