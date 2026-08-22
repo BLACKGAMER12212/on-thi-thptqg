@@ -15,17 +15,15 @@ style.innerHTML = `
         100% { transform: translateY(0); opacity: 1; color: inherit; } 
     }
 
-    /* 👉 BỘ ĐỘNG CƠ POP ANIMATION MƯỢT MÀ 2 CHIỀU KHI BẤM NÚT ĐÁP ÁN */
+    /* 👉 HIỆU ỨNG POP ANIMATION MƯỢT MÀ KHI BẤM NÚT CỦA IOS */
     .mcq-box, .tf-box, .submit-btn, .btn-play, .btn-more-pro, .zoom-btn, .btn-header {
-        /* Trạng thái gốc: Khai báo lò xo nảy lên siêu mượt khi nhả tay ra */
         transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease, transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
-        will-change: transform; /* Ép điện thoại dùng GPU để chống giật lag */
+        will-change: transform;
     }
 
-    /* Trạng thái: Khi ngón tay đang bấm giữ -> Tụt xuống nhanh */
     .mcq-label:active .mcq-box, .tf-label:active .tf-box {
         transform: scale(0.82) !important;
-        transition: transform 0.1s ease-out !important; /* Lún xuống trong 0.1s */
+        transition: transform 0.1s ease-out !important;
     }
     
     .submit-btn:active, .btn-play:active, .btn-more-pro:active, .zoom-btn:active, .btn-header:active {
@@ -61,8 +59,15 @@ style.innerHTML = `
     [data-theme="dark"] .correct-text .ans-highlight { color: #4ade80 !important; }
     [data-theme="dark"] .correct-text .exp-text-block { color: #38bdf8 !important; }
 
+    /* 👉 CHỐNG LỖI CẮT ĐỀ TRÊN ĐIỆN THOẠI BẰNG ABSOLUTE POSITION */
     #exam-workspace.fullscreen-active { 
-        height: 100vh !important; 
+        position: fixed !important;
+        top: 0 !important;
+        left: 0 !important;
+        right: 0 !important;
+        bottom: 0 !important;
+        height: auto !important; 
+        width: 100vw !important;
         z-index: 9999; 
     }
 
@@ -125,8 +130,12 @@ style.innerHTML = `
     @media (max-width: 1024px) {
         
         #exam-workspace {
-            display: block !important; 
-            padding: 0 !important;
+            position: fixed !important;
+            top: 0 !important;
+            left: 0 !important;
+            right: 0 !important;
+            bottom: 0 !important;
+            height: auto !important;
             width: 100% !important; 
             background: #e2e8f0 !important; 
         }
@@ -135,14 +144,17 @@ style.innerHTML = `
             background: #0f172a !important; 
         }
         
-        /* CHỐNG CẮT ĐỀ VÀ BỎ KHOẢNG TRẮNG DƯ THỪA (100dvh) */
+        /* ĐÃ FIX: CHỐNG CẮT ĐỀ VÀ BỎ KHOẢNG TRẮNG DƯ THỪA (DÙNG ABSOLUTE POSITION) */
         #pdf-render-wrapper {
-            width: 100% !important;
-            max-width: 100% !important;
-            height: 100dvh !important; 
+            position: absolute !important;
+            top: 0 !important;
+            left: 0 !important;
+            right: 0 !important;
+            bottom: 0 !important;
+            height: auto !important; 
             overflow-y: auto !important;
             overflow-x: hidden !important; 
-            padding: 0 0 100px 0 !important; 
+            padding: 0 0 30px 0 !important; 
             margin: 0 auto !important;
             background: #e2e8f0 !important; 
             box-sizing: border-box !important;
@@ -217,7 +229,7 @@ style.innerHTML = `
             transition: transform 0.1s ease-out !important;
         }
 
-        /* BẢNG ĐIỀN ĐÁP ÁN TRƯỢT TỪ DƯỚI LÊN */
+        /* BẢNG ĐIỀN ĐÁP ÁN TRƯỢT TỪ DƯỚI LÊN (CỬA CUỐN) */
         #right-panel-drawer {
             position: fixed !important;
             top: auto !important;  
@@ -302,6 +314,7 @@ style.innerHTML = `
             touch-action: pan-y !important;
         }
 
+        /* Lớp màng đen mờ che đề thi */
         #drawer-backdrop {
             position: fixed !important;
             top: 0 !important;
@@ -335,6 +348,7 @@ style.innerHTML = `
             z-index: 10 !important;
         }
 
+        /* Đồng hồ đếm ngược trôi nổi ở Mobile */
         body.is-taking-exam #header-timer-box {
             position: fixed !important;
             top: 15px !important;
@@ -346,6 +360,7 @@ style.innerHTML = `
             backdrop-filter: blur(5px);
         }
 
+        /* SỬA LỖI MENU ĐIỆN THOẠI */
         #mobile-dropdown {
             position: absolute !important;
             top: 60px !important;
@@ -518,7 +533,8 @@ window.closeNotificationModal = () => {
     const notifModal = document.getElementById('notification-modal');
     if (!notifModal) return;
     
-    if (sessionStorage.getItem('thpt_in_exam') === 'true' && !document.fullscreenElement) {
+    // Đã loại bỏ lệnh requestFullScreen trên điện thoại
+    if (window.innerWidth > 1024 && sessionStorage.getItem('thpt_in_exam') === 'true' && !document.fullscreenElement) {
         requestFullScreen();
     }
     
@@ -1076,7 +1092,7 @@ window.toggleMobileMenu = () => {
     document.getElementById('mobile-dropdown').classList.toggle('show'); 
 };
 
-// 👉 TRUNG TÂM BẬT TẮT BẢNG ĐÁP ÁN BÊN ĐIỆN THOẠI
+// BẬT TẮT BẢNG ĐÁP ÁN
 window.toggleMobileSheet = (e) => {
     if (e) e.stopPropagation();
     const panel = document.getElementById('right-panel-drawer'); 
@@ -1104,9 +1120,6 @@ window.toggleMobileSheet = (e) => {
             setTimeout(() => backdrop.classList.add('show'), 10); 
         }
     }
-    
-    // Gọi hàm kiểm soát nút
-    window.updateFabVisibility();
 };
 
 
@@ -1474,8 +1487,9 @@ function requestFullScreen() {
     }
 }
 
+// Bỏ chức năng gọi Cảnh báo vi phạm trên mobile để tránh thanh đen
 document.addEventListener('fullscreenchange', () => {
-    if (!document.fullscreenElement && sessionStorage.getItem('thpt_in_exam') === 'true') {
+    if (window.innerWidth > 1024 && !document.fullscreenElement && sessionStorage.getItem('thpt_in_exam') === 'true') {
         window.showNotification("Cảnh báo vi phạm", "Bạn vừa thoát khỏi chế độ làm bài toàn màn hình!\nHệ thống yêu cầu làm bài nghiêm túc. Vui lòng bấm tắt thông báo này để quay lại chế độ thi.");
     }
 });
@@ -1559,7 +1573,10 @@ window.startExam = async (eId, mode, attIdx = null) => {
             timerBox.style.display = 'inline-flex';
         }
         
-        requestFullScreen();
+        // Không gọi Fullscreen trên thiết bị di động để tránh thông báo đen
+        if (window.innerWidth > 1024) {
+            requestFullScreen();
+        }
     } else { 
         document.body.classList.remove('is-taking-exam'); 
         document.title = `Lịch sử: ${currentExam.title}`; 
@@ -1659,7 +1676,7 @@ window.startExam = async (eId, mode, attIdx = null) => {
         startTimer();
     }
     
-    // Gọi lệnh chắc chắn để hiển thị nút
+    // ĐẢM BẢO CHẠY UPDATE FAB CUỐI CÙNG TRONG MỌI TRƯỜNG HỢP SAU KHI VÀO PHÒNG
     window.updateFabVisibility();
 };
 
@@ -1757,9 +1774,6 @@ window.backToSummary = () => {
     document.getElementById('sheets-container').style.display = 'none';
     document.getElementById('btn-back-summary').style.display = 'none';
     document.getElementById('summary-screen').style.display = 'block';
-    
-    // Khi quay lại từ xem đáp án, bảo đảm update nút
-    window.updateFabVisibility();
 };
 
 function getAllCurrentAnswers() {
@@ -1880,7 +1894,7 @@ window.submitAndGrade = async () => {
         await supabase.rpc('increment_view', { exam_id_param: id }); 
     } catch (e) { }
     
-    // Gọi cập nhật trạng thái nút sau khi tính điểm
+    // LUÔN UPDATE FAB LẠI SAU KHI NỘP BÀI
     window.updateFabVisibility();
 };
 
@@ -2430,6 +2444,7 @@ document.addEventListener('touchstart', (e) => {
     
 }, { passive: true });
 
+
 document.addEventListener('touchmove', (e) => {
     if (!isSheetDragging || !activeDrawer) return;
     
@@ -2452,6 +2467,7 @@ document.addEventListener('touchmove', (e) => {
         e.preventDefault(); 
     }
 }, { passive: false });
+
 
 document.addEventListener('touchend', (e) => {
     if (!isSheetDragging || !activeDrawer) return;
