@@ -75,7 +75,20 @@ html, body {
 .auth-input::placeholder { color: #94a3b8; font-style: italic; }
 .password-wrapper .auth-input { padding-right: 40px; }
 .auth-input:focus { border-color: var(--thpt-main); background: white; box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.1); }
-.toggle-password { position: absolute; right: 12px; cursor: pointer; font-size: 18px; user-select: none; opacity: 0.5; transition: 0.2s; }
+.toggle-password { 
+    position: absolute; 
+    right: 15px; 
+    top: 50%;
+    transform: translateY(-50%);
+    cursor: pointer; 
+    user-select: none; 
+    opacity: 0.5; 
+    transition: 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #475569;
+}
 .toggle-password:hover { opacity: 1; }
 input[type="password"]::-ms-reveal, input[type="password"]::-ms-clear { display: none; }
 .auth-btn { 
@@ -437,6 +450,9 @@ body.is-taking-exam #header-timer-box::before {
     .mobile-fab { display: flex; } 
     .mcq-grid, .tf-grid-compact, .short-grid { grid-template-columns: 1fr; }
     .top-menu { display: none; }
+    /* Ép hiện nút Hamburger và ẩn khung Avatar máy tính để nhường chỗ */
+    .hamburger-btn { display: block !important; }
+    .user-info { display: none !important; }
 }
 
 @media (max-width: 767px) {
@@ -1451,4 +1467,306 @@ body.is-taking-exam #header-timer-box::before {
 
 [data-theme="dark"] .sol-tf-sublabel {
     color: #f8fafc;
+}
+
+/* =========================================================
+   GIAO DIỆN TRANG THÔNG TIN CÁ NHÂN (BLUE THEME)
+========================================================= */
+.profile-layout {
+    display: grid;
+    grid-template-columns: 300px 1fr;
+    gap: 30px;
+    align-items: start;
+}
+
+.profile-sidebar {
+    background: var(--card-bg, #ffffff);
+    border-radius: 12px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.03);
+    overflow: hidden;
+    border: 1px solid var(--border-color, #e2e8f0);
+}
+
+.profile-user-card {
+    text-align: center;
+    padding: 30px 20px;
+    border-bottom: 1px solid var(--border-color, #e2e8f0);
+}
+
+/* Đổi Avatar thành màu Xanh */
+.profile-avatar-large {
+    width: 80px;
+    height: 80px;
+    background: #0ea5e9; 
+    color: white;
+    font-size: 32px;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    margin: 0 auto 15px auto;
+}
+
+.profile-user-card h3 {
+    margin: 0 0 5px 0;
+    font-size: 18px;
+    color: var(--text-main, #0f172a);
+}
+
+/* Đổi Badge thành màu Xanh nhạt */
+.prof-badge {
+    font-size: 12px;
+    background: #e0f2fe;
+    color: #0284c7;
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-weight: 600;
+}
+
+.profile-menu {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.profile-menu li a {
+    display: block;
+    padding: 16px 20px;
+    color: var(--text-main, #334155);
+    text-decoration: none;
+    font-weight: 600;
+    border-left: 3px solid transparent;
+    transition: all 0.2s;
+}
+
+.profile-menu li a:hover {
+    background: #f8fafc;
+}
+
+/* Tab active đổi thành Xanh */
+.profile-menu li.active a {
+    color: #0ea5e9;
+    background: #f0f9ff;
+    border-left-color: #0ea5e9;
+}
+
+.profile-main-content {
+    background: var(--card-bg, #ffffff);
+    border-radius: 12px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.03);
+    padding: 30px;
+    border: 1px solid var(--border-color, #e2e8f0);
+}
+
+.profile-section-title {
+    margin-top: 0;
+    margin-bottom: 25px;
+    font-size: 20px;
+    color: var(--text-main, #0f172a);
+    border-bottom: 2px solid #f1f5f9;
+    padding-bottom: 15px;
+}
+
+.profile-form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.form-group label {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--text-sub, #475569);
+}
+
+.form-group input {
+    padding: 12px 15px;
+    border-radius: 8px;
+    border: 1px solid #cbd5e1;
+    font-size: 14px;
+    transition: border-color 0.2s;
+    outline: none;
+    font-family: inherit;
+}
+
+/* Đổi viền Input khi click vào thành Xanh */
+.form-group input:focus {
+    border-color: #0ea5e9;
+    box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.1);
+}
+
+/* Đổi nút Lưu thay đổi thành Xanh */
+.btn-save-profile {
+    background: #0ea5e9;
+    color: white;
+    border: none;
+    padding: 12px 25px;
+    border-radius: 8px;
+    font-weight: bold;
+    font-size: 15px;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.btn-save-profile:hover {
+    background: #0284c7;
+    transform: translateY(-2px);
+}
+
+@media (max-width: 768px) {
+    .profile-layout { grid-template-columns: 1fr; }
+    .profile-form-grid { grid-template-columns: 1fr; }
+}
+
+/* Nút bấm xác thực OTP */
+.btn-verify-otp {
+    background: #0ea5e9;
+    color: white;
+    border: none;
+    padding: 0 15px;
+    border-radius: 8px;
+    font-weight: 700;
+    font-size: 13px;
+    cursor: pointer;
+    transition: 0.2s;
+    white-space: nowrap;
+}
+
+.btn-verify-otp:hover {
+    background: #0284c7;
+}
+
+.btn-verify-otp:active {
+    transform: scale(0.95);
+}
+
+/* Hiệu ứng khung đổi Avatar (Đã phóng to và căn chỉnh chữ) */
+.profile-avatar-wrapper {
+    position: relative;
+    width: 110px; /* Phóng to từ 80px lên 110px */
+    height: 110px;
+    margin: 0 auto 15px auto;
+    cursor: pointer;
+    border-radius: 50%;
+    overflow: hidden;
+    background: #0ea5e9;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+}
+.profile-avatar-large {
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    font-size: 40px; /* Phóng to chữ cái đại diện */
+}
+.avatar-edit-overlay {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 30%; /* Dải đen mỏng lại để chữ không bị kéo quá sâu xuống đáy */
+    background: rgba(15, 23, 42, 0.7);
+    color: white;
+    font-size: 12px;
+    font-weight: 700;
+    display: flex;
+    align-items: flex-start; /* Ép chữ bám lên mép trên của dải đen */
+    padding-top: 5px; /* Đẩy chữ xuống một xíu cho cân đối */
+    justify-content: center;
+    opacity: 0;
+    transition: 0.2s ease-in-out;
+}
+.profile-avatar-wrapper:hover .avatar-edit-overlay {
+    opacity: 1;
+}
+
+/* ==========================================================
+   TỐI ƯU DARK MODE CHO TRANG THÔNG TIN CÁ NHÂN
+========================================================== */
+[data-theme="dark"] .profile-sidebar,
+[data-theme="dark"] .profile-main-content {
+    background-color: #1e293b !important;
+    border-color: #334155 !important;
+}
+
+[data-theme="dark"] .profile-user-card {
+    border-bottom-color: #334155 !important;
+}
+
+[data-theme="dark"] .profile-user-card h3,
+[data-theme="dark"] .profile-section-title {
+    color: #f8fafc !important;
+    border-bottom-color: #334155 !important;
+}
+
+[data-theme="dark"] .profile-menu li a {
+    color: #cbd5e1 !important;
+}
+
+[data-theme="dark"] .profile-menu li a:hover {
+    background-color: #334155 !important;
+}
+
+[data-theme="dark"] .profile-menu li.active a {
+    color: #38bdf8 !important;
+    background-color: rgba(2, 132, 199, 0.2) !important;
+    border-left-color: #38bdf8 !important;
+}
+
+[data-theme="dark"] .form-group label {
+    color: #94a3b8 !important;
+}
+
+[data-theme="dark"] .form-group input {
+    background-color: #0f172a !important;
+    border-color: #334155 !important;
+    color: #f8fafc !important;
+}
+
+[data-theme="dark"] .form-group input:disabled {
+    background-color: #1e293b !important;
+    color: #64748b !important;
+}
+
+[data-theme="dark"] .form-group input:focus {
+    border-color: #38bdf8 !important;
+    box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.1) !important;
+}
+
+/* ==========================================================
+   TỐI ƯU DARK MODE: MÀU NÚT ĐÚNG/SAI VÀ ĐIỂM SỐ CHUẨN UX
+========================================================== */
+
+/* 1. Đổi màu điểm số cuối cùng cho nổi bật (Màu vàng Gold sáng) */
+[data-theme="dark"] #final-score-text {
+    color: #facc15 !important; 
+    text-shadow: 0 4px 15px rgba(250, 204, 21, 0.3) !important;
+}
+
+/* 2. Tách riêng màu nút ĐÚNG (Đ) -> Xanh biển */
+[data-theme="dark"] input[type="radio"]:checked + .tf-box.true-box {
+    background-color: #0ea5e9 !important; 
+    border-color: #0ea5e9 !important;
+    color: #ffffff !important;
+    box-shadow: 0 4px 10px rgba(14, 165, 233, 0.3) !important;
+}
+
+/* 3. Tách riêng màu nút SAI (S) -> Đỏ rực */
+[data-theme="dark"] input[type="radio"]:checked + .tf-box.false-box {
+    background-color: #ef4444 !important; 
+    border-color: #ef4444 !important;
+    color: #ffffff !important;
+    box-shadow: 0 4px 10px rgba(239, 68, 68, 0.3) !important;
 }
