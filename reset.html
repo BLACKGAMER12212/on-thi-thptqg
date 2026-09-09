@@ -135,11 +135,11 @@
     <div id="form-area">
         <div class="input-group">
             <label>MẬT KHẨU MỚI</label>
-            <input type="password" id="new-password" class="auth-input" placeholder="••••••••••••">
+            <input type="password" id="new-password" class="auth-input" placeholder="..........." onkeypress="if(event.key === 'Enter') document.getElementById('btn-reset').click()">
         </div>
         <div class="input-group">
             <label>XÁC NHẬN MẬT KHẨU MỚI</label>
-            <input type="password" id="confirm-password" class="auth-input" placeholder="••••••••••••">
+            <input type="password" id="confirm-password" class="auth-input" placeholder="..........." onkeypress="if(event.key === 'Enter') document.getElementById('btn-reset').click()">
         </div>
         
         <button id="btn-reset" class="btn-primary">LƯU MẬT KHẨU & ĐĂNG NHẬP</button>
@@ -155,115 +155,77 @@
 </div>
 
 <script type="module">
-    import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm";
+        import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm";
 
-    const supabaseUrl = 'https://foujvxpzsilshacrpslu.supabase.co';
-    // Đã thay khóa API chuẩn
-    const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZvdWp2eHB6c2lsc2hhY3Jwc2x1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODY0MzYyMzQsImV4cCI6MjEwMjAxMjIzNH0.K8_zJZjKkmU-_WdaXowkM7dLhVBP5GpMRPAsbiiDLb4';
-    const supabase = createClient(supabaseUrl, supabaseKey);
+        const supabaseUrl = 'https://foujvxpzsilshacrpslu.supabase.co';
+        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZvdWp2eHB6c2lsc2hhY3Jwc2x1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODY0MzYyMzQsImV4cCI6MjEwMjAxMjIzNH0.K8_zJZjKkmU-_WdaXowkM7dLhVBP5GpMRPAsbiiDLb4';
 
-    const formArea = document.getElementById('form-area');
-    const errorEl = document.getElementById('error-message');
-    const successArea = document.getElementById('success-area');
-    const btnReset = document.getElementById('btn-reset');
-    
-    window.showNotification = (title, message) => {
-        document.getElementById('notif-title').innerText = title;
-        document.getElementById('notif-message').innerText = message;
-        document.getElementById('notification-modal').style.display = 'flex';
-        setTimeout(() => document.getElementById('notification-modal').classList.add('show'), 10);
-    };
+        const supabase = createClient(supabaseUrl, supabaseKey, {
+            auth: {
+                storage: window.sessionStorage,
+                storageKey: 'thpt_reset_temp_key' 
+            }
+        });
 
-    window.closeNotificationModal = () => {
-        const modal = document.getElementById('notification-modal');
-        modal.classList.remove('show');
-        setTimeout(() => modal.style.display = 'none', 300);
-    };
-    
-    document.addEventListener("DOMContentLoaded", () => {
-        const hashParams = new URLSearchParams(window.location.hash.substring(1));
-        const error = hashParams.get("error");
-        const errorCode = hashParams.get("error_code");
+        const formArea = document.getElementById('form-area');
+        const errorEl = document.getElementById('error-message');
+        const successArea = document.getElementById('success-area');
+        const btnReset = document.getElementById('btn-reset');
+        const newPassInput = document.getElementById('new-password');
+        const confirmPassInput = document.getElementById('confirm-password');
 
-        if (error === "access_denied" || errorCode === "otp_expired") {
-            if (formArea) formArea.style.display = 'none';
-            if (errorEl) {
-                window.showNotification("Link không hợp lệ", "Lỗi bảo mật! Link có thể đã hết hạn hoặc không tồn tại, vui lòng yêu cầu link mới.");
-                errorEl.innerText = "Link đã hết hạn. Vui lòng quay lại màn hình đăng nhập!";
+        btnReset.addEventListener('click', async () => {
+            const newPass = newPassInput.value.trim();
+            const confirmPass = confirmPassInput.value.trim();
+
+            errorEl.style.display = 'none';
+
+            if (!newPass || !confirmPass) {
+                errorEl.innerText = "Vui lòng nhập đầy đủ mật khẩu!";
                 errorEl.style.display = 'block';
+                return;
             }
-            window.history.replaceState(null, null, window.location.pathname);
-        }
-    });
-
-    btnReset.addEventListener('click', async () => {
-        // Cho phép ấn Enter để lưu
-        const handleEnter = (e) => {
-            if (e.key === 'Enter') btnReset.click(); 
-        };
-        document.getElementById('new-password').addEventListener('keypress', handleEnter);
-        document.getElementById('confirm-password').addEventListener('keypress', handleEnter);
-        
-        // Lấy dữ liệu
-        const p1 = document.getElementById('new-password').value;
-        const p2 = document.getElementById('confirm-password').value;
-
-        errorEl.style.display = 'none';
-
-        // Kiểm tra cơ bản
-        if (!p1 || !p2) {
-            errorEl.innerText = "Vui lòng nhập đầy đủ mật khẩu!";
-            errorEl.style.display = 'block';
-            return;
-        }
-
-        if (p1 !== p2) {
-            errorEl.innerText = "Mật khẩu xác nhận không khớp! Vui lòng kiểm tra lại.";
-            errorEl.style.display = 'block';
-            return;
-        }
-
-        if (p1.length < 6) {
-            errorEl.innerText = "Mật khẩu phải có ít nhất 6 ký tự!";
-            errorEl.style.display = 'block';
-            return;
-        }
-
-        btnReset.innerText = "ĐANG LƯU...";
-        btnReset.disabled = true;
-
-        // Cập nhật lên Supabase
-        try {
-            const { data, error } = await supabase.auth.updateUser({ password: p1 });
-            if (error) throw error; 
-            
-            // Thành công thì hiện thông báo xanh
-            formArea.style.display = 'none';
-            successArea.style.display = 'block';
-
-        } catch (err) {
-            console.error("Lỗi: ", err);
-            
-            // ==========================================
-            // XỬ LÝ LỖI TRÙNG MẬT KHẨU VÀ LINK HẾT HẠN
-            // ==========================================
-            if (err.message && err.message.toLowerCase().includes('different')) {
-                errorEl.innerText = "Mật khẩu mới không được trùng với mật khẩu hiện tại!";
-            } else if (err.message && (err.message.includes('expired') || err.message.includes('invalid'))) {
-                errorEl.innerText = "Link này đã hết hạn. Vui lòng yêu cầu link mới!";
-            } else {
-                errorEl.innerText = "Đã xảy ra lỗi hệ thống hoặc link hết hạn. Vui lòng thử lại!";
+            if (newPass.length < 6) {
+                errorEl.innerText = "Mật khẩu phải từ 6 ký tự trở lên!";
+                errorEl.style.display = 'block';
+                return;
             }
-            errorEl.style.display = 'block';
+            if (newPass !== confirmPass) {
+                errorEl.innerText = "Xác nhận mật khẩu không khớp!";
+                errorEl.style.display = 'block';
+                return;
+            }
 
-        } finally {
-            // Mở lại nút bấm nếu có lỗi
-            if (formArea.style.display !== 'none') {
+            btnReset.innerText = "ĐANG LƯU MẬT KHẨU...";
+            btnReset.disabled = true;
+            btnReset.style.opacity = '0.7';
+
+            try {
+                const { error } = await supabase.auth.updateUser({ password: newPass });
+                if (error) throw error;
+
+                await supabase.auth.signOut();
+
+                formArea.style.display = 'none';
+                successArea.style.display = 'block';
+
+            } catch (err) {
+                // 👉 ĐÃ FIX: Bắt bệnh chính xác từng loại lỗi của Supabase
+                let errorMsg = "Lỗi: Link khôi phục đã hết hạn hoặc không hợp lệ!";
+                
+                if (err.message && (err.message.toLowerCase().includes('different') || err.message.toLowerCase().includes('same'))) {
+                    errorMsg = "Mật khẩu mới không được trùng với mật khẩu hiện tại!";
+                } else if (err.message && err.message.toLowerCase().includes('weak')) {
+                    errorMsg = "Mật khẩu quá yếu, vui lòng chọn mật khẩu khác!";
+                }
+                
+                errorEl.innerText = errorMsg;
+                errorEl.style.display = 'block';
                 btnReset.innerText = "LƯU MẬT KHẨU & ĐĂNG NHẬP";
                 btnReset.disabled = false;
+                btnReset.style.opacity = '1';
             }
-        }
-    });
-</script>
+        });
+    </script>
 </body>
 </html>
