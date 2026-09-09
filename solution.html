@@ -401,9 +401,9 @@
             <h1 id="sol-exam-title">Đang tải tên đề thi...</h1>
             <p id="sol-exam-sub">Mã đề: --- • Lần thi: ---</p>
         </div>
-        <div class="sol-actions">
-            <!-- ĐÃ ĐƯỢC FIX LẠI CHUẨN KHI QUAY LẠI TRANG CHỦ HOẶC BẢNG ĐIỂM -->
-            <button class="btn-header btn-home" onclick="window.location.href='index.html';"> QUAY LẠI BẢNG ĐIỂM</button>
+        <div class="sol-actions" style="display: flex; gap: 12px;">
+            <button class="btn-header btn-home" id="btn-back-exam"> QUAY LẠI ĐỀ THI</button>
+            <button class="btn-header btn-home" id="btn-exit-home" style="background-color: #ef4444; box-shadow: 0 4px 15px rgba(239, 68, 68, 0.3);"> THOÁT TRANG CHỦ</button>
         </div>
     </header>
 
@@ -471,6 +471,17 @@
         // Mặc định lấy attempt từ URL, nếu không có sẽ tự tính toán
         let attemptIdx = parseInt(urlParams.get('attempt'), 10);
 
+                // 👉 CHỨC NĂNG MỚI: Bấm quay lại truyền lệnh về index.html để mở Bảng điểm & Nét vẽ
+        document.getElementById('btn-back-exam').addEventListener('click', () => {
+            window.location.href = `index.html?action=review&examId=${examId}&attempt=${attemptIdx}`;
+        }); // <--- Đóng ngoặc kết thúc nút Quay Lại ở đây!
+
+        // 👉 CHỨC NĂNG MỚI: Bấm thoát về thẳng trang chủ
+        document.getElementById('btn-exit-home').addEventListener('click', () => {
+            // Xóa bộ nhớ đang xem lại đề để về thẳng màn hình chính sạch sẽ
+            sessionStorage.removeItem('thpt_review_state');
+            window.location.href = 'index.html';
+        }); // <--- Kết thúc nút Thoát ở đây!
 
         // =========================================================
         // HỆ THỐNG PHÓNG TO ẢNH (ZOOM / DRAG PAN)
