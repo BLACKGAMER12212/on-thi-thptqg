@@ -1,443 +1,1362 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="vi">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+    />
     <title>Hệ thống thi thử THPTQG - Luyện đề</title>
-    
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
-    <link rel="stylesheet" href="style.css">
-</head>
-<body>
 
-    <div class="ad-banner-side ad-left">
-        <div>
-            <p>Vị trí Đặt Quảng Cáo</p>
-            <p style="font-size: 10px; font-weight: normal;">(160x600 px)</p>
-        </div>
+    <script>
+      try {
+        if (localStorage.getItem("thpt_theme") === "dark") {
+          document.documentElement.setAttribute("data-theme", "dark");
+        }
+      } catch (_error) {}
+    </script>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <div
+      class="ad-banner-side ad-left"
+      data-ad-slot="side-left"
+      data-ad-format="160x600"
+      aria-label="Vị trí quảng cáo bên trái"
+    >
+      <div class="ad-slot-copy" aria-hidden="true">
+        <span class="ad-slot-visual">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H18a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6.5A2.5 2.5 0 0 1 4 18.5z"></path><path d="M8 7h8M8 11h6M8 15h4"></path><path d="m16 14 1 2 2 .4-1.5 1.5.3 2.1-1.8-1-1.8 1 .3-2.1-1.5-1.5 2-.4z"></path></svg>
+        </span>
+        <span class="ad-slot-kicker">QUẢNG CÁO</span>
+        <strong>Vị trí đối tác</strong>
+        <small>160 × 600</small>
+        <span class="ad-slot-status"><i></i>Sẵn sàng kết nối</span>
+      </div>
     </div>
 
-    <div class="ad-banner-side ad-right">
-        <div>
-            <p>Vị trí Đặt Quảng Cáo</p>
-            <p style="font-size: 10px; font-weight: normal;">(160x600 px)</p>
-        </div>
+    <div
+      class="ad-banner-side ad-right"
+      data-ad-slot="side-right"
+      data-ad-format="160x600"
+      aria-label="Vị trí quảng cáo bên phải"
+    >
+      <div class="ad-slot-copy" aria-hidden="true">
+        <span class="ad-slot-visual">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H18a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6.5A2.5 2.5 0 0 1 4 18.5z"></path><path d="M8 7h8M8 11h6M8 15h4"></path><path d="m16 14 1 2 2 .4-1.5 1.5.3 2.1-1.8-1-1.8 1 .3-2.1-1.5-1.5 2-.4z"></path></svg>
+        </span>
+        <span class="ad-slot-kicker">QUẢNG CÁO</span>
+        <strong>Vị trí đối tác</strong>
+        <small>160 × 600</small>
+        <span class="ad-slot-status"><i></i>Sẵn sàng kết nối</span>
+      </div>
     </div>
 
-    <div class="ad-popup-corner" id="corner-ad">
-        <div class="ad-popup-header">
-            <span>TÀI TRỢ BỞI ĐỐI TÁC</span>
-            <button class="ad-popup-close" onclick="document.getElementById('corner-ad').style.display='none'">X</button>
+    <aside
+      class="ad-popup-corner"
+      id="corner-ad"
+      data-ad-slot="corner"
+      data-ad-format="300x150"
+      aria-label="Quảng cáo của đối tác"
+    >
+      <div class="ad-popup-header">
+        <span>NỘI DUNG ĐƯỢC TÀI TRỢ</span>
+        <button
+          type="button"
+          class="ad-popup-close"
+          onclick="window.closeCornerAd()"
+          aria-label="Đóng quảng cáo"
+        >
+          <span aria-hidden="true">×</span>
+        </button>
+      </div>
+      <div class="ad-popup-content">
+        <div class="ad-creative-placeholder" aria-hidden="true">
+          <span class="ad-creative-icon">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6.5 12 3l9 3.5-9 3.5z"></path><path d="M6 8.5V15c3.4 2.7 8.6 2.7 12 0V8.5"></path><path d="M21 7v7"></path></svg>
+          </span>
+          <span class="ad-creative-eyebrow">ĐỐI TÁC HỌC TẬP</span>
+          <strong>Không gian quảng cáo</strong>
+          <small>Kết nối thương hiệu với học sinh THPT</small>
+          <div class="ad-creative-meta">
+            <span>300 × 150</span>
+            <span><i></i>Sẵn sàng tích hợp</span>
+          </div>
         </div>
-        <div class="ad-popup-content">
-            <a href="https://shopee.vn" target="_blank">
-                <img src="https://via.placeholder.com/300x150/0284C7/FFFFFF?text=Banner+Khuyến+Mãi+Sách+2K9" alt="Quảng cáo Khóa học">
-            </a>
-            <p style="font-size: 12px; margin: 10px 0 0 0; color: #333; font-weight: bold;">Flash Sale 50% Sách Tự Học Toán 12!</p>
-        </div>
-    </div>
+      </div>
+    </aside>
 
     <div id="global-loader">
-        <div class="spinner"></div>
-        <div id="loader-text">Đang kết nối hệ thống...</div>
+      <div class="spinner"></div>
+      <div id="loader-text">Đang kết nối hệ thống...</div>
     </div>
 
     <div id="auth-screen">
-        <div class="auth-wrapper">
-            <div class="auth-card active" id="login-form">
-                <h1>THI THỬ ONLINE</h1>
-                <p>Hệ thống ôn luyện & thi thử</p>
-                
-                <div class="auth-error" id="login-error"></div>
-                
-                <div class="input-group">
-                    <label>TÀI KHOẢN</label>
-                    <input type="text" id="login-user" class="auth-input" autocomplete="off" placeholder="Tên tài khoản" onkeypress="window.checkEnter(event, 'login')">
-                </div>
-                
-                <div class="input-group" style="margin-bottom: 5px;">
-                    <label>MẬT KHẨU</label>
-                    <div class="password-wrapper">
-                        <input type="password" id="login-pass" class="auth-input" placeholder="Mật khẩu" onkeypress="window.checkEnter(event, 'login')">
-                        <span class="toggle-password" onclick="window.togglePassword('login-pass', this)">
-                           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line></svg>
-                        </span>
-                    </div>
-                </div>
-                
-                <div style="text-align: right; margin-bottom: 15px;">
-                    <span style="font-size: 13px; color: var(--thpt-main); cursor: pointer; font-weight: bold; transition: 0.2s;" onclick="window.toggleAuth('forgot')">Quên mật khẩu?</span>
-                </div>
-                
-                <button class="auth-btn btn-primary" onclick="window.handleLogin()">ĐĂNG NHẬP</button>
-                
-                <div class="auth-switch">
-                    Chưa có tài khoản? <span onclick="window.toggleAuth('register')">Đăng ký ngay</span>
-                </div>
-            </div>
+      <div class="auth-wrapper">
+        <div class="auth-card active" id="login-form">
+          <h1>THI THỬ ONLINE</h1>
+          <p>Hệ thống ôn luyện & thi thử</p>
 
-            <div class="auth-card" id="register-form" style="max-width: 550px;">
-                <h1>TẠO TÀI KHOẢN</h1>
-                <p>Điền thông tin để lưu lịch sử làm bài</p>
-                
-                <div class="auth-error" id="reg-error"></div>
-                <div class="auth-success" id="reg-success"></div>
-                
-                <div class="register-grid">
-                    <div class="input-group full-width">
-                        <label>HỌ VÀ TÊN <span style="color: #EF4444;">*</span></label>
-                        <input type="text" id="reg-fullname" class="auth-input" autocomplete="off" placeholder="Nhập họ và tên của bạn" onkeypress="window.checkEnter(event, 'register')">
-                    </div>
-                    <div class="input-group">
-                        <label>TÀI KHOẢN ĐĂNG NHẬP <span style="color: #EF4444;">*</span></label>
-                        <input type="text" id="reg-user" class="auth-input" autocomplete="off" placeholder="Viết liền không dấu" onkeypress="window.checkEnter(event, 'register')">
-                    </div>
-                    <div class="input-group">
-                        <label>GMAIL LIÊN HỆ <span style="color: #94a3b8; font-size: 11px; font-weight: normal;">(Không bắt buộc)</span></label>
-                        <input type="email" id="reg-email" class="auth-input" autocomplete="off" placeholder="Ví dụ: abc@gmail.com" onkeypress="window.checkEnter(event, 'register')">
-                    </div>
-                    <div class="input-group">
-                        <label>SỐ ĐIỆN THOẠI <span style="color: #94a3b8; font-size: 11px; font-weight: normal;">(Không bắt buộc)</span></label>
-                        <input type="tel" id="reg-phone" class="auth-input" autocomplete="off" placeholder="Nhập số điện thoại" onkeypress="window.checkEnter(event, 'register')">
-                    </div>
-                    <div class="input-group">
-                        <label>NGÀY SINH <span style="color: #EF4444;">*</span></label>
-                        <input type="text" id="reg-dob" class="auth-input" placeholder="VD: 15/08/2009" maxlength="10" oninput="window.formatDOB(this)" onkeypress="window.checkEnter(event, 'register')">
-                    </div>
-                    <div class="input-group full-width">
-                        <label>TRƯỜNG THPT ĐANG HỌC <span style="color: #94a3b8; font-size: 11px; font-weight: normal;">(Không bắt buộc)</span></label>
-                        <input type="text" id="reg-school" class="auth-input" autocomplete="off" placeholder="Nhập tên trường THPT" onkeypress="window.checkEnter(event, 'register')">
-                    </div>
-                    <div class="input-group">
-                        <label>MẬT KHẨU <span style="color: #EF4444;">*</span></label>
-                        <div class="password-wrapper">
-                            <input type="password" id="reg-pass" class="auth-input" placeholder="Tối thiểu 6 ký tự" onkeypress="window.checkEnter(event, 'register')">
-                            <span class="toggle-password" onclick="window.togglePassword('reg-pass', this)">
-                              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line></svg>
-                               
-                            </span>
-                        </div>
-                    </div>
-                    <div class="input-group">
-                        <label>XÁC NHẬN MẬT KHẨU <span style="color: #EF4444;">*</span></label>
-                        <div class="password-wrapper">
-                            <input type="password" id="reg-pass-confirm" class="auth-input" placeholder="Nhập lại mật khẩu" onkeypress="window.checkEnter(event, 'register')">
-                            <span class="toggle-password" onclick="window.togglePassword('reg-pass-confirm', this)">
-                             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line></svg>
+          <div class="auth-error" id="login-error"></div>
 
-                            </span>
-                        </div>
-                    </div>
-                </div>
-                
-                <button class="auth-btn btn-primary" onclick="window.handleRegister()">ĐĂNG KÝ</button>
-                
-                <div class="auth-switch">
-                    Đã có tài khoản? <span onclick="window.toggleAuth('login')">Đăng nhập</span>
-                </div>
-            </div>
+          <div class="input-group">
+            <label>TÀI KHOẢN</label>
+            <input
+              type="text"
+              id="login-user"
+              class="auth-input"
+              autocomplete="off"
+              placeholder="Tên tài khoản"
+              onkeypress="window.checkEnter(event, 'login')"
+            />
+          </div>
 
-            <div class="auth-card" id="forgot-form">
-                <h1>QUÊN MẬT KHẨU</h1>
-                <p>Nhập Gmail bạn đã đăng ký để nhận link tạo MK mới</p>
-                <div class="auth-error" id="forgot-error"></div>
-                <div class="input-group">
-                    <label>GMAIL CỦA BẠN</label>
-                    <input type="email" id="forgot-email" class="auth-input" autocomplete="off" placeholder="Ví dụ: abc@gmail.com" onkeypress="window.checkEnter(event, 'forgot')">
-                </div>
-                <button class="auth-btn btn-primary" id="btn-forgot" style="background: #10B981;" onclick="window.handleForgot()">GỬI LINK ĐẶT LẠI MK</button>
-                <div class="auth-switch">
-                    Nhớ ra mật khẩu rồi? <span onclick="window.toggleAuth('login')">Đăng nhập</span>
-                </div>
+          <div class="input-group" style="margin-bottom: 5px">
+            <label>MẬT KHẨU</label>
+            <div class="password-wrapper">
+              <input
+                type="password"
+                id="login-pass"
+                class="auth-input"
+                placeholder="Mật khẩu"
+                onkeypress="window.checkEnter(event, 'login')"
+              />
+              <span
+                class="toggle-password"
+                onclick="window.togglePassword('login-pass', this)"
+              >
+                <svg
+                  width="18"
+                  height="18"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <path
+                    d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"
+                  ></path>
+                  <line x1="1" y1="1" x2="23" y2="23"></line>
+                </svg>
+              </span>
             </div>
-            
+          </div>
+
+          <div style="text-align: right; margin-bottom: 15px">
+            <span
+              style="
+                font-size: 13px;
+                color: var(--thpt-main);
+                cursor: pointer;
+                font-weight: bold;
+                transition: 0.2s;
+              "
+              onclick="window.toggleAuth('forgot')"
+              >Quên mật khẩu?</span
+            >
+          </div>
+
+          <button class="auth-btn btn-primary" onclick="window.handleLogin()">
+            ĐĂNG NHẬP
+          </button>
+
+          <div class="auth-switch">
+            Chưa có tài khoản?
+            <span onclick="window.toggleAuth('register')">Đăng ký ngay</span>
+          </div>
         </div>
+
+        <div class="auth-card" id="register-form" style="max-width: 550px">
+          <h1>TẠO TÀI KHOẢN</h1>
+          <p>Điền thông tin để lưu lịch sử làm bài</p>
+
+          <div class="auth-error" id="reg-error"></div>
+          <div class="auth-success" id="reg-success"></div>
+
+          <div class="register-grid">
+            <div class="input-group full-width">
+              <label>HỌ VÀ TÊN <span style="color: #ef4444">*</span></label>
+              <input
+                type="text"
+                id="reg-fullname"
+                class="auth-input"
+                autocomplete="off"
+                placeholder="Nhập họ và tên của bạn"
+                onkeypress="window.checkEnter(event, 'register')"
+              />
+            </div>
+            <div class="input-group">
+              <label
+                >TÀI KHOẢN ĐĂNG NHẬP
+                <span style="color: #ef4444">*</span></label
+              >
+              <input
+                type="text"
+                id="reg-user"
+                class="auth-input"
+                autocomplete="off"
+                placeholder="Viết liền không dấu"
+                onkeypress="window.checkEnter(event, 'register')"
+              />
+            </div>
+            <div class="input-group">
+              <label
+                >GMAIL LIÊN HỆ
+                <span
+                  style="color: #94a3b8; font-size: 11px; font-weight: normal"
+                  >(Không bắt buộc)</span
+                ></label
+              >
+              <input
+                type="email"
+                id="reg-email"
+                class="auth-input"
+                autocomplete="off"
+                placeholder="Ví dụ: abc@gmail.com"
+                onkeypress="window.checkEnter(event, 'register')"
+              />
+            </div>
+            <div class="input-group">
+              <label
+                >SỐ ĐIỆN THOẠI
+                <span
+                  style="color: #94a3b8; font-size: 11px; font-weight: normal"
+                  >(Không bắt buộc)</span
+                ></label
+              >
+              <input
+                type="tel"
+                id="reg-phone"
+                class="auth-input"
+                autocomplete="off"
+                placeholder="Nhập số điện thoại"
+                onkeypress="window.checkEnter(event, 'register')"
+              />
+            </div>
+            <div class="input-group">
+              <label>NGÀY SINH <span style="color: #ef4444">*</span></label>
+              <input
+                type="text"
+                id="reg-dob"
+                class="auth-input"
+                placeholder="VD: 15/08/2009"
+                maxlength="10"
+                oninput="window.formatDOB(this)"
+                onkeypress="window.checkEnter(event, 'register')"
+              />
+            </div>
+            <div class="input-group full-width">
+              <label
+                >TRƯỜNG THPT ĐANG HỌC
+                <span
+                  style="color: #94a3b8; font-size: 11px; font-weight: normal"
+                  >(Không bắt buộc)</span
+                ></label
+              >
+              <input
+                type="text"
+                id="reg-school"
+                class="auth-input"
+                autocomplete="off"
+                placeholder="Nhập tên trường THPT"
+                onkeypress="window.checkEnter(event, 'register')"
+              />
+            </div>
+            <div class="input-group">
+              <label>MẬT KHẨU <span style="color: #ef4444">*</span></label>
+              <div class="password-wrapper">
+                <input
+                  type="password"
+                  id="reg-pass"
+                  class="auth-input"
+                  placeholder="Tối thiểu 6 ký tự"
+                  onkeypress="window.checkEnter(event, 'register')"
+                />
+                <span
+                  class="toggle-password"
+                  onclick="window.togglePassword('reg-pass', this)"
+                >
+                  <svg
+                    width="18"
+                    height="18"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  >
+                    <path
+                      d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"
+                    ></path>
+                    <line x1="1" y1="1" x2="23" y2="23"></line>
+                  </svg>
+                </span>
+              </div>
+            </div>
+            <div class="input-group">
+              <label
+                >XÁC NHẬN MẬT KHẨU <span style="color: #ef4444">*</span></label
+              >
+              <div class="password-wrapper">
+                <input
+                  type="password"
+                  id="reg-pass-confirm"
+                  class="auth-input"
+                  placeholder="Nhập lại mật khẩu"
+                  onkeypress="window.checkEnter(event, 'register')"
+                />
+                <span
+                  class="toggle-password"
+                  onclick="window.togglePassword('reg-pass-confirm', this)"
+                >
+                  <svg
+                    width="18"
+                    height="18"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  >
+                    <path
+                      d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"
+                    ></path>
+                    <line x1="1" y1="1" x2="23" y2="23"></line>
+                  </svg>
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <button
+            class="auth-btn btn-primary"
+            onclick="window.handleRegister()"
+          >
+            ĐĂNG KÝ
+          </button>
+
+          <div class="auth-switch">
+            Đã có tài khoản?
+            <span onclick="window.toggleAuth('login')">Đăng nhập</span>
+          </div>
+        </div>
+
+        <div class="auth-card" id="forgot-form">
+          <h1>QUÊN MẬT KHẨU</h1>
+          <p>Nhập Gmail bạn đã đăng ký để nhận link tạo MK mới</p>
+          <div class="auth-error" id="forgot-error"></div>
+          <div class="input-group">
+            <label>GMAIL CỦA BẠN</label>
+            <input
+              type="email"
+              id="forgot-email"
+              class="auth-input"
+              autocomplete="off"
+              placeholder="Ví dụ: abc@gmail.com"
+              onkeypress="window.checkEnter(event, 'forgot')"
+            />
+          </div>
+          <button
+            class="auth-btn btn-primary"
+            id="btn-forgot"
+            style="background: #10b981"
+            onclick="window.handleForgot()"
+          >
+            GỬI LINK ĐẶT LẠI MK
+          </button>
+          <div class="auth-switch">
+            Nhớ ra mật khẩu rồi?
+            <span onclick="window.toggleAuth('login')">Đăng nhập</span>
+          </div>
+        </div>
+      </div>
     </div>
 
     <header>
-        <div class="logo-area" onclick="window.handleLogoClick()">
-            <h1>THI THỬ ONLINE</h1>
-        </div>
-        
-        <nav class="top-menu" id="top-menu">
-            <a href="#" class="menu-item active" onclick="window.switchTab('luyenthi', this)">📝 Luyện thi</a>
-            <a href="#" class="menu-item" onclick="window.switchTab('tailieu', this)">📚 Tài liệu</a>
-            <a href="#" class="menu-item" onclick="window.switchTab('ontap', this)">🎯 Ôn tập</a>
-            <a href="#" class="menu-item" onclick="window.switchTab('tintuc', this)">📰 Tin tức</a>
-        </nav>
+      <div class="logo-area" onclick="window.handleLogoClick()">
+        <h1>THI THỬ ONLINE</h1>
+      </div>
 
-        <div class="header-right">
-            <div class="header-timer-box" id="header-timer-box">
-                <span style="font-size: 11px; color: #64748b; font-weight: bold; margin-right: 5px;">TIME</span>
-                <span class="time-left" id="global-timer">--:--</span>
-            </div>
-            <button class="exit-btn" id="btn-exit-exam" style="display:none;" onclick="window.openModal('exit')">Thoát Đề</button>
-            
-            <div class="user-info" id="header-user-info">
-                <div class="user-profile-dropdown" id="user-dropdown-container">
-                    <div class="avatar-trigger" onclick="window.toggleUserMenu(event)">
-                        <div class="avatar-circle" id="user-avatar-initial">U</div>
-                        <span class="user-name-text" id="display-username">User</span>
-                        <span class="dropdown-arrow">▼</span>
-                    </div>
-                    <div class="profile-dropdown-menu" id="profile-dropdown-menu">
-                        <div class="dropdown-user-header">
-                            <div class="avatar-circle-lg" id="menu-avatar-initial">U</div>
-                            <div class="dropdown-user-details">
-                                <div class="dropdown-username" id="menu-display-username">User</div>
-                                <div class="dropdown-user-email" id="menu-display-email">user@gmail.com</div>
-                            </div>
-                        </div>
-                        <div class="dropdown-divider"></div>
-                        <button class="dropdown-item" onclick="window.toggleTheme()">
-                            <span class="dropdown-icon" id="theme-icon-desktop">🌙</span> <span id="theme-text-desktop">Chế độ tối</span>
-                        </button>
-                        <button class="dropdown-item" onclick="window.showProfilePage()">
-                            <span class="dropdown-icon">👤</span> Thông tin cá nhân
-                        </button>
-                        <button class="dropdown-item danger" onclick="window.handleLogout()">
-                            <span class="dropdown-icon">🚪</span> Đăng xuất
-                        </button>
-                    </div>
-                </div>
-            </div>
-            <button class="hamburger-btn" id="hamburger-btn" onclick="window.toggleMobileMenu()">☰</button>
+      <nav class="top-menu" id="top-menu">
+        <a
+          href="#"
+          class="menu-item active"
+          onclick="window.switchTab('luyenthi', this, event)"
+          ><svg class="ui-icon icon-duotone" viewBox="0 0 24 24" aria-hidden="true"><path class="icon-soft" d="M5 3h10l4 4v14H5z"></path><path d="M5 3h10l4 4v14H5zM15 3v5h4"></path><path class="icon-detail" d="m9 15 2 2 4-5"></path></svg>Luyện thi</a
+        >
+        <a
+          href="#"
+          class="menu-item"
+          onclick="window.switchTab('tailieu', this, event)"
+          ><svg class="ui-icon icon-duotone" viewBox="0 0 24 24" aria-hidden="true"><path class="icon-soft" d="M3 4h5a4 4 0 0 1 4 4v12a3 3 0 0 0-3-3H3z"></path><path d="M3 4h5a4 4 0 0 1 4 4v12a3 3 0 0 0-3-3H3z"></path><path class="icon-detail" d="M21 4h-5a4 4 0 0 0-4 4v12a3 3 0 0 1 3-3h6z"></path></svg>Tài liệu</a
+        >
+        <a
+          href="#"
+          class="menu-item"
+          onclick="window.switchTab('ontap', this, event)"
+          ><svg class="ui-icon icon-duotone" viewBox="0 0 24 24" aria-hidden="true"><circle class="icon-soft" cx="12" cy="12" r="9"></circle><circle cx="12" cy="12" r="8"></circle><circle class="icon-detail" cx="12" cy="12" r="3"></circle><path d="M12 2v2M22 12h-2M12 22v-2M2 12h2"></path></svg>Ôn tập</a
+        >
+        <a
+          href="#"
+          class="menu-item"
+          onclick="window.switchTab('tintuc', this, event)"
+          ><svg class="ui-icon icon-duotone" viewBox="0 0 24 24" aria-hidden="true"><path class="icon-soft" d="M7 3h14v18H5a3 3 0 0 0 2-3z"></path><path d="M7 3h14v18H5a3 3 0 0 1-3-3V6h5v12a3 3 0 0 1-3 3"></path><path class="icon-detail" d="M11 8h6M11 12h6M11 16h4"></path></svg>Tin tức</a
+        >
+      </nav>
+
+      <div class="header-right">
+        <div class="header-timer-box" id="header-timer-box">
+          <svg class="ui-icon timer-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="13" r="8"></circle><path d="M12 9v4l2 2M9 2h6"></path></svg>
+          <span
+            style="
+              font-size: 11px;
+              color: #64748b;
+              font-weight: bold;
+              margin-right: 5px;
+            "
+            >TIME</span
+          >
+          <span class="time-left" id="global-timer">--:--</span>
         </div>
+        <button
+          class="exit-btn"
+          id="btn-exit-exam"
+          style="display: none"
+          onclick="window.openModal('exit')"
+        >
+          Thoát Đề
+        </button>
+
+        <div class="user-info" id="header-user-info">
+          <div class="user-profile-dropdown" id="user-dropdown-container">
+            <div class="avatar-trigger" onclick="window.toggleUserMenu(event)">
+              <div class="avatar-circle" id="user-avatar-initial">U</div>
+              <span class="user-name-text" id="display-username">User</span>
+              <span class="dropdown-arrow">▼</span>
+            </div>
+            <div class="profile-dropdown-menu" id="profile-dropdown-menu">
+              <div class="dropdown-user-header">
+                <div class="avatar-circle-lg" id="menu-avatar-initial">U</div>
+                <div class="dropdown-user-details">
+                  <div class="dropdown-username" id="menu-display-username">
+                    User
+                  </div>
+                  <div class="dropdown-user-email" id="menu-display-email">
+                    user@gmail.com
+                  </div>
+                </div>
+              </div>
+              <div class="dropdown-divider"></div>
+              <button class="dropdown-item" onclick="window.toggleTheme()">
+                <span class="dropdown-icon" id="theme-icon-desktop"></span>
+                <span id="theme-text-desktop">Chế độ tối</span>
+              </button>
+              <button class="dropdown-item" onclick="window.showProfilePage()">
+                <svg class="ui-icon icon-duotone dropdown-icon" viewBox="0 0 24 24" aria-hidden="true"><circle class="icon-soft" cx="12" cy="8" r="5"></circle><circle cx="12" cy="8" r="4"></circle><path class="icon-detail" d="M4 22a8 8 0 0 1 16 0"></path></svg> Thông tin cá nhân
+              </button>
+              <button
+                class="dropdown-item danger"
+                onclick="window.handleLogout()"
+              >
+                <svg class="ui-icon icon-duotone dropdown-icon" viewBox="0 0 24 24" aria-hidden="true"><path class="icon-soft" d="M15 3h6v18h-6z"></path><path class="icon-detail" d="M10 17l5-5-5-5M15 12H3"></path><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"></path></svg> Đăng xuất
+              </button>
+            </div>
+          </div>
+        </div>
+        <button
+          class="hamburger-btn"
+          id="hamburger-btn"
+          onclick="window.toggleMobileMenu()"
+        >
+          ☰
+        </button>
+      </div>
     </header>
 
     <div id="mobile-dropdown" class="mobile-dropdown">
-        <div class="user-name-mobile" id="mobile-user-info">
-            Chào, <span id="display-username-mobile" style="color: var(--thpt-main);">User</span>
-        </div>
-        <div class="mobile-menu-links">
-            <a href="#" class="m-menu-item active" onclick="window.switchTab('luyenthi', this)">📝 Luyện thi</a>
-            <a href="#" class="m-menu-item" onclick="window.switchTab('tailieu', this)">📚 Tài liệu</a>
-            <a href="#" class="m-menu-item" onclick="window.switchTab('ontap', this)">🎯 Ôn tập</a>
-            <a href="#" class="m-menu-item" onclick="window.switchTab('tintuc', this)">📰 Tin tức</a>
-        </div>
-        <hr style="border: 0; border-top: 1px solid #e2e8f0; margin: 10px 0;">
-        <button class="logout-btn" onclick="window.toggleTheme()" style="width: 100%; margin-bottom: 10px; display: flex; justify-content: center; gap: 8px;">
-            <span id="theme-icon-mobile">🌙</span> <span id="theme-text-mobile">Chế độ tối</span>
-        </button>
-        <button class="logout-btn" onclick="window.showProfilePage(); window.toggleMobileMenu();" style="width: 100%; margin-bottom: 10px; background: #e0f2fe; color: var(--thpt-main);">👤 Thông tin cá nhân</button>
-        <button class="logout-btn" onclick="window.handleLogout()" style="width: 100%;">Đăng xuất</button>
+      <div class="user-name-mobile" id="mobile-user-info">
+        Chào,
+        <span id="display-username-mobile" style="color: var(--thpt-main)"
+          >User</span
+        >
+      </div>
+      <div class="mobile-menu-links">
+        <a
+          href="#"
+          class="m-menu-item active"
+          onclick="window.switchTab('luyenthi', this, event)"
+          ><svg class="ui-icon icon-duotone" viewBox="0 0 24 24" aria-hidden="true"><path class="icon-soft" d="M5 3h10l4 4v14H5z"></path><path d="M5 3h10l4 4v14H5zM15 3v5h4"></path><path class="icon-detail" d="m9 15 2 2 4-5"></path></svg>Luyện thi</a
+        >
+        <a
+          href="#"
+          class="m-menu-item"
+          onclick="window.switchTab('tailieu', this, event)"
+          ><svg class="ui-icon icon-duotone" viewBox="0 0 24 24" aria-hidden="true"><path class="icon-soft" d="M3 4h5a4 4 0 0 1 4 4v12a3 3 0 0 0-3-3H3z"></path><path d="M3 4h5a4 4 0 0 1 4 4v12a3 3 0 0 0-3-3H3z"></path><path class="icon-detail" d="M21 4h-5a4 4 0 0 0-4 4v12a3 3 0 0 1 3-3h6z"></path></svg>Tài liệu</a
+        >
+        <a
+          href="#"
+          class="m-menu-item"
+          onclick="window.switchTab('ontap', this, event)"
+          ><svg class="ui-icon icon-duotone" viewBox="0 0 24 24" aria-hidden="true"><circle class="icon-soft" cx="12" cy="12" r="9"></circle><circle cx="12" cy="12" r="8"></circle><circle class="icon-detail" cx="12" cy="12" r="3"></circle><path d="M12 2v2M22 12h-2M12 22v-2M2 12h2"></path></svg>Ôn tập</a
+        >
+        <a
+          href="#"
+          class="m-menu-item"
+          onclick="window.switchTab('tintuc', this, event)"
+          ><svg class="ui-icon icon-duotone" viewBox="0 0 24 24" aria-hidden="true"><path class="icon-soft" d="M7 3h14v18H5a3 3 0 0 0 2-3z"></path><path d="M7 3h14v18H5a3 3 0 0 1-3-3V6h5v12a3 3 0 0 1-3 3"></path><path class="icon-detail" d="M11 8h6M11 12h6M11 16h4"></path></svg>Tin tức</a
+        >
+      </div>
+      <hr style="border: 0; border-top: 1px solid #e2e8f0; margin: 10px 0" />
+      <button
+        class="logout-btn"
+        onclick="window.toggleTheme()"
+        style="
+          width: 100%;
+          margin-bottom: 10px;
+          display: flex;
+          justify-content: center;
+          gap: 8px;
+        "
+      >
+        <span class="dropdown-icon" id="theme-icon-mobile"></span>
+        <span id="theme-text-mobile">Chế độ tối</span>
+      </button>
+      <button
+        class="logout-btn"
+        onclick="window.showProfilePage(); window.toggleMobileMenu();"
+        style="
+          width: 100%;
+          margin-bottom: 10px;
+          background: #e0f2fe;
+          color: var(--thpt-main);
+        "
+      >
+        <svg class="ui-icon icon-duotone" viewBox="0 0 24 24" aria-hidden="true"><circle class="icon-soft" cx="12" cy="8" r="5"></circle><circle cx="12" cy="8" r="4"></circle><path class="icon-detail" d="M4 22a8 8 0 0 1 16 0"></path></svg> Thông tin cá nhân
+      </button>
+      <button
+        class="logout-btn"
+        onclick="window.handleLogout()"
+        style="width: 100%"
+      >
+        <svg class="ui-icon icon-duotone" viewBox="0 0 24 24" aria-hidden="true"><path class="icon-soft" d="M15 3h6v18h-6z"></path><path class="icon-detail" d="M10 17l5-5-5-5M15 12H3"></path><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"></path></svg> Đăng xuất
+      </button>
     </div>
 
     <!-- ================== TRANG THÔNG TIN CÁ NHÂN ================== -->
-    <div id="profile-screen" class="fade-in" style="display: none; padding: 40px 5%; max-width: 1200px; margin: 0 auto;">
-        <div class="profile-layout">
-            <div class="profile-sidebar">
-               <div class="profile-user-card">
-                    <!-- Bọc Avatar lại để làm hiệu ứng Click -->
-                    <div class="profile-avatar-wrapper" onclick="document.getElementById('avatar-upload-input').click()">
-                        <div class="profile-avatar-large" id="prof-page-avatar">U</div>
-                        <div class="avatar-edit-overlay">📷 Thay đổi</div>
-                    </div>
-                    <!-- Input ẩn để chọn file -->
-                    <input type="file" id="avatar-upload-input" accept="image/*" style="display: none;" onchange="window.handleAvatarUpload(this)">
-                    
-                    <h3 id="prof-page-name">Tên Học Viên</h3>
-                    <span class="prof-badge">Học viên tiêu chuẩn</span>
-                </div>
-                <ul class="profile-menu">
-                    <li class="active"><a href="#" onclick="return false;">👤 Thông tin cá nhân</a></li>
-                </ul>
+    <div
+      id="profile-screen"
+      class="fade-in"
+      style="display: none"
+    >
+      <div class="profile-layout">
+        <div class="profile-sidebar">
+          <div class="profile-user-card">
+            <!-- Bọc Avatar lại để làm hiệu ứng Click -->
+            <div
+              class="profile-avatar-wrapper"
+              onclick="document.getElementById('avatar-upload-input').click()"
+            >
+              <div class="profile-avatar-large" id="prof-page-avatar">U</div>
+              <div class="avatar-edit-overlay"><svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M14.5 4 16 6h4a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l1.5-2z"></path><circle cx="12" cy="13" r="3"></circle></svg> Thay đổi</div>
             </div>
+            <!-- Input ẩn để chọn file -->
+            <input
+              type="file"
+              id="avatar-upload-input"
+              accept="image/jpeg,image/png,image/webp"
+              style="display: none"
+              onchange="window.handleAvatarUpload(this)"
+            />
 
-            <div class="profile-main-content">
-                <h2 class="profile-section-title">Thông tin cá nhân</h2>
-                
-                <div class="profile-form-grid">
-                    <div class="form-group">
-                        <label>Họ và tên *</label>
-                        <input type="text" id="prof-input-fullname" placeholder="Nhập họ và tên thật">
-                    </div>
-
-                    <div class="form-group">
-                        <label>Tên tài khoản (Không thể đổi)</label>
-                        <input type="text" id="prof-input-username" disabled style="background: #f1f5f9; cursor: not-allowed;">
-                    </div>
-                    
-                    <div class="form-group" style="grid-column: 1 / -1;">
-                        <label>Email liên hệ</label>
-                        <div id="email-view-mode" style="display: flex; gap: 10px; align-items: center;">
-                            <input type="text" id="prof-display-email" disabled style="flex: 1; background: #f1f5f9; cursor: not-allowed; color: #64748b; font-weight: bold;">
-                            <button id="btn-edit-email-trigger" class="btn-action-sm" onclick="window.enableEmailEdit()" style="display: none; background: #e2e8f0; color: #0f172a; border: none; padding: 12px 15px; border-radius: 8px; font-weight: bold; cursor: pointer; transition: 0.2s; white-space: nowrap;">Thêm/Đổi</button>
-                        </div>
-                        <div id="email-edit-mode" style="display: none; flex-direction: column; gap: 5px;">
-                            <div id="email-input-step" style="display: flex; gap: 10px;">
-                                <input type="email" id="prof-input-email" style="flex: 1;" placeholder="Nhập Gmail mới của bạn">
-                                <button class="btn-action-sm btn-cancel" onclick="window.cancelEmailEdit()" style="padding: 0 15px;">Hủy</button>
-                                <button class="btn-verify-otp" id="btn-send-otp" onclick="window.requestEmailOTP()">Gửi mã</button>
-                            </div>
-                            <div id="otp-input-step" style="display: none; flex-direction: column; gap: 8px; margin-top: 5px;">
-                                <span style="font-size: 12px; color: #64748b; font-weight: 600;">Đang xác minh: <b id="pending-email-text" style="color: #0ea5e9;"></b></span>
-                                <div style="display: flex; gap: 10px;">
-                                    <input type="text" id="otp-inline-input" style="flex: 1; text-align: center; letter-spacing: 5px; font-weight: bold; font-size: 15px;" placeholder="Mã 6 số" autocomplete="off" maxlength="6">
-                                    <button class="btn-action-sm btn-cancel" onclick="window.cancelEmailEdit()" style="padding: 0 15px;">Hủy</button>
-                                    <button class="btn-verify-otp" style="background: #10b981;" onclick="window.verifyEmailOTP()">Xác nhận</button>
-                                </div>
-                            </div>
-                            <div id="otp-status-msg" style="font-size: 13px; font-weight: 600; margin-top: 4px; display: none;"></div>
-                        </div>
-                    </div>
-
-                    <div class="form-group">
-                        <label>Số điện thoại *</label>
-                        <input type="text" id="prof-input-phone" placeholder="VD: 0987654321" maxlength="10" oninput="this.value = this.value.replace(/[^0-9]/g, '');">
-                    </div>
-
-                    <div class="form-group">
-                        <label>Tên trường THPT</label>
-                        <input type="text" id="prof-input-school" placeholder="VD: THPT Thăng Long">
-                    </div>
-
-                    <div class="form-group">
-                        <label>Ngày sinh (dd/mm/yyyy)</label>
-                        <input type="text" id="prof-input-dob" oninput="window.formatDOB(this)" placeholder="VD: 15/08/2009">
-                    </div>
-                </div>
-
-                <div class="profile-actions" style="margin-top: 30px; display: flex; gap: 15px;">
-                    <button class="btn-save-profile" onclick="window.saveProfileData()">Lưu thay đổi</button>
-                </div>
-            </div>
+            <h3 id="prof-page-name">Tên Học Viên</h3>
+            <span class="prof-badge">Học viên tiêu chuẩn</span>
+          </div>
+          <ul class="profile-menu">
+            <li class="active">
+              <a href="#" onclick="return false;"><svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"></circle><path d="M4 22a8 8 0 0 1 16 0"></path></svg> Thông tin cá nhân</a>
+            </li>
+          </ul>
         </div>
+
+        <div class="profile-main-content">
+          <h2 class="profile-section-title">Thông tin cá nhân</h2>
+
+          <div class="profile-form-grid">
+            <div class="form-group">
+              <label>Họ và tên *</label>
+              <input
+                type="text"
+                id="prof-input-fullname"
+                placeholder="Nhập họ và tên thật"
+              />
+            </div>
+
+            <div class="form-group">
+              <label>Tên tài khoản (Không thể đổi)</label>
+              <input
+                type="text"
+                id="prof-input-username"
+                disabled
+                style="background: #f1f5f9; cursor: not-allowed"
+              />
+            </div>
+
+            <div class="form-group" style="grid-column: 1 / -1">
+              <label>Email liên hệ</label>
+              <div
+                id="email-view-mode"
+                style="display: flex; gap: 10px; align-items: center"
+              >
+                <input
+                  type="text"
+                  id="prof-display-email"
+                  disabled
+                  style="
+                    flex: 1;
+                    background: #f1f5f9;
+                    cursor: not-allowed;
+                    color: #64748b;
+                    font-weight: bold;
+                  "
+                />
+                <button
+                  id="btn-edit-email-trigger"
+                  class="btn-action-sm"
+                  onclick="window.enableEmailEdit()"
+                  style="
+                    display: none;
+                    background: #e2e8f0;
+                    color: #0f172a;
+                    border: none;
+                    padding: 12px 15px;
+                    border-radius: 8px;
+                    font-weight: bold;
+                    cursor: pointer;
+                    transition: 0.2s;
+                    white-space: nowrap;
+                  "
+                >
+                  Thêm/Đổi
+                </button>
+              </div>
+              <div
+                id="email-edit-mode"
+                style="display: none; flex-direction: column; gap: 5px"
+              >
+                <div id="email-input-step" style="display: flex; gap: 10px">
+                  <input
+                    type="email"
+                    id="prof-input-email"
+                    style="flex: 1"
+                    placeholder="Nhập Gmail mới của bạn"
+                  />
+                  <button
+                    class="btn-action-sm btn-cancel"
+                    onclick="window.cancelEmailEdit()"
+                    style="padding: 0 15px"
+                  >
+                    Hủy
+                  </button>
+                  <button
+                    class="btn-verify-otp"
+                    id="btn-send-otp"
+                    onclick="window.requestEmailOTP()"
+                  >
+                    Gửi mã
+                  </button>
+                </div>
+                <div
+                  id="otp-input-step"
+                  style="
+                    display: none;
+                    flex-direction: column;
+                    gap: 8px;
+                    margin-top: 5px;
+                  "
+                >
+                  <span
+                    style="font-size: 12px; color: #64748b; font-weight: 600"
+                    >Đang xác minh:
+                    <b id="pending-email-text" style="color: #0ea5e9"></b
+                  ></span>
+                  <div style="display: flex; gap: 10px">
+                    <input
+                      type="text"
+                      id="otp-inline-input"
+                      style="
+                        flex: 1;
+                        text-align: center;
+                        letter-spacing: 5px;
+                        font-weight: bold;
+                        font-size: 15px;
+                      "
+                      placeholder="Mã 6 số"
+                      autocomplete="off"
+                      maxlength="6"
+                    />
+                    <button
+                      class="btn-action-sm btn-cancel"
+                      onclick="window.cancelEmailEdit()"
+                      style="padding: 0 15px"
+                    >
+                      Hủy
+                    </button>
+                    <button
+                      class="btn-verify-otp"
+                      style="background: #10b981"
+                      onclick="window.verifyEmailOTP()"
+                    >
+                      Xác nhận
+                    </button>
+                  </div>
+                </div>
+                <div
+                  id="otp-status-msg"
+                  style="
+                    font-size: 13px;
+                    font-weight: 600;
+                    margin-top: 4px;
+                    display: none;
+                  "
+                ></div>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label>Số điện thoại *</label>
+              <input
+                type="text"
+                id="prof-input-phone"
+                placeholder="VD: 0987654321"
+                maxlength="10"
+                oninput="this.value = this.value.replace(/[^0-9]/g, '');"
+              />
+            </div>
+
+            <div class="form-group">
+              <label>Tên trường THPT</label>
+              <input
+                type="text"
+                id="prof-input-school"
+                placeholder="VD: THPT Thăng Long"
+              />
+            </div>
+
+            <div class="form-group">
+              <label>Ngày sinh (dd/mm/yyyy)</label>
+              <input
+                type="text"
+                id="prof-input-dob"
+                oninput="window.formatDOB(this)"
+                placeholder="VD: 15/08/2009"
+              />
+            </div>
+          </div>
+
+          <div
+            class="profile-actions"
+            style="margin-top: 30px; display: flex; gap: 15px"
+          >
+            <button class="btn-save-profile" onclick="window.saveProfileData()">
+              Lưu thay đổi
+            </button>
+          </div>
+        </div>
+      </div>
     </div>
 
     <!-- ================== TRANG CHỦ (DANH SÁCH ĐỀ) ================== -->
     <div id="home-screen" class="fade-in">
-        <h2 class="page-title" id="main-page-title">Kho Đề Thi & Ôn Luyện 2K9</h2>
-        <div class="cohort-selector">
-            <button class="cohort-btn" onclick="window.handleCohort('2k8', this)">🔥 Khóa 2k8</button>
-            <button class="cohort-btn active" onclick="window.handleCohort('2k9', this)">🚀 Khóa 2k9</button>
-        </div>
-        
-        <div class="banner-container">
-            <span class="banner-label">🔥 Gợi ý tài liệu ôn thi chuẩn</span>
-            <div class="banner-content">
-                <a href="https://shopee.vn" target="_blank">👉 [Shopee Affiliate] Sách Tổng Ôn Toán Học - Tặng kèm khóa luyện đề chi tiết (Giảm 30% hôm nay)</a>
+      <section class="student-dashboard" aria-label="Tổng quan học tập">
+        <div class="dashboard-welcome-row">
+          <div>
+            <span class="dashboard-eyebrow">TỔNG QUAN HỌC TẬP</span>
+            <h2>Chào mừng trở lại, <span id="dashboard-user-name">bạn</span></h2>
+            <p>Duy trì nhịp học mỗi ngày và theo dõi tiến bộ của em tại đây.</p>
+          </div>
+          <div
+            class="dashboard-level"
+            id="dashboard-level"
+            data-rank="starter"
+            aria-label="Hạng hiện tại: Khởi động"
+          >
+            <div class="rank-character-scene" aria-hidden="true">
+              <span class="rank-character-aura"></span>
+              <span class="rank-character-orbit"></span>
+              <svg
+                class="rank-character-figure"
+                viewBox="0 0 80 80"
+                focusable="false"
+              >
+                <ellipse class="rank-character-shadow" cx="40" cy="70" rx="18" ry="4"></ellipse>
+
+                <g class="rank-character-wings">
+                  <path d="M27 43C18 38 13 31 12 22c8 2 14 6 19 13"></path>
+                  <path d="M53 43c9-5 14-12 15-21-8 2-14 6-19 13"></path>
+                  <path d="M25 49c-8-1-14-5-18-11 8-1 14 1 20 6"></path>
+                  <path d="M55 49c8-1 14-5 18-11-8-1-14 1-20 6"></path>
+                </g>
+
+                <g class="rank-character-body">
+                  <path class="rank-character-shoulders" d="M18 60c4-11 12-16 22-16s18 5 22 16l-5 8H23z"></path>
+                  <path class="rank-character-armor" d="M27 46h26l4 21H23z"></path>
+                  <path class="rank-character-helmet" d="M24 31c0-11 7-19 16-19s16 8 16 19v13c-5 5-10 7-16 7s-11-2-16-7z"></path>
+                  <path class="rank-character-face" d="M29 31h22v12c-3 3-7 5-11 5s-8-2-11-5z"></path>
+                  <path class="rank-character-visor" d="M31 33h18l-3 6H34z"></path>
+                  <circle class="rank-character-core" cx="40" cy="57" r="5"></circle>
+                  <path class="rank-character-core-mark" d="m40 53 2 4-2 4-2-4z"></path>
+                </g>
+
+                <path class="rank-character-crest" d="M35 15 40 5l5 10-5 5z"></path>
+                <g class="rank-character-crown">
+                  <path d="m29 14 4-8 7 6 7-6 4 8-3 7H32z"></path>
+                  <circle cx="40" cy="12" r="2"></circle>
+                </g>
+              </svg>
+              <span class="rank-character-spark spark-one"></span>
+              <span class="rank-character-spark spark-two"></span>
+              <span class="rank-character-spark spark-three"></span>
             </div>
-        </div>
-        
-        <div class="search-filter-box">
-            <div class="search-bar-wrapper">
-                <span class="search-icon">🔍</span>
-                <input type="text" id="search-exam-input" class="search-input" placeholder="Nhập tên trường, Sở GD (VD: Nghệ An, Ninh Bình, Hà Nội...)" oninput="window.handleSearchExam()">
+
+            <div class="dashboard-level-copy">
+              <span class="dashboard-level-label">HẠNG HIỆN TẠI</span>
+              <strong data-rank-name>Khởi động</strong>
+              <span class="dashboard-level-progress" data-rank-progress
+                >0/100 điểm</span
+              >
+              <span
+                class="dashboard-level-progress-bar"
+                data-rank-progress-bar
+                aria-hidden="true"
+              ></span>
             </div>
-            <div class="filter-tags">
-                <button class="filter-btn active" onclick="window.handleFilterExam('all', this)">🌟 Tất cả</button>
-                <button class="filter-btn" onclick="window.handleFilterExam('so', this)">🏛️ Đề Sở & Tỉnh</button>
-                <button class="filter-btn" onclick="window.handleFilterExam('bookmarked', this)">🔖 Đề đã lưu</button>
-            </div>
+          </div>
         </div>
+
+        <div class="learning-stat-grid">
+          <article class="learning-stat-card streak">
+            <span class="learning-stat-icon">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 22c4.42 0 8-3.58 8-8 0-5-4-9-4-9s-.5 3-2.5 4.5C12 6 8 2 8 2s1 5-2 8c-1.5 1.5-2 3-2 4a8 8 0 0 0 8 8Z"></path><path d="M9.5 18.5c0-2 2.5-3 2.5-5.5 2 2 2.5 3.5 2.5 5.5"></path></svg>
+            </span>
+            <div><strong id="dashboard-streak">0</strong><span>Ngày liên tiếp</span></div>
+          </article>
+          <article class="learning-stat-card time">
+            <span class="learning-stat-icon">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M12 7v5l3 2"></path></svg>
+            </span>
+            <div><strong id="dashboard-study-time">0 phút</strong><span>Thời gian làm đề</span></div>
+          </article>
+          <article class="learning-stat-card attempts">
+            <span class="learning-stat-icon">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 19.5V4.7A2.7 2.7 0 0 1 6.7 2H20v17H6.5A2.5 2.5 0 0 0 4 21.5"></path><path d="M8 7h8M8 11h6"></path></svg>
+            </span>
+            <div><strong id="dashboard-attempts">0</strong><span>Lượt đề đã hoàn thành</span></div>
+          </article>
+          <article class="learning-stat-card points">
+            <span class="learning-stat-icon">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><circle cx="12" cy="12" r="4"></circle><path d="M12 3v2M21 12h-2M12 21v-2M3 12h2"></path></svg>
+            </span>
+            <div><strong id="dashboard-points">0 điểm</strong><span>Điểm chuyên cần</span></div>
+          </article>
+        </div>
+
+        <div class="dashboard-main-grid">
+          <article class="dashboard-panel attendance-panel">
+            <div class="dashboard-panel-heading">
+              <div>
+                <span class="dashboard-panel-kicker">TUẦN NÀY</span>
+                <h3>Điểm danh học tập</h3>
+              </div>
+              <span class="attendance-rule">+10 điểm/ngày</span>
+            </div>
+            <div class="attendance-week" id="attendance-week" aria-live="polite"></div>
+            <div class="attendance-action-row">
+              <div>
+                <strong id="attendance-message" aria-live="polite">Sẵn sàng cho hôm nay?</strong>
+                <span>Mốc 7 ngày liên tiếp được thưởng thêm 20 điểm.</span>
+              </div>
+              <button class="attendance-checkin-btn" id="attendance-checkin-btn" onclick="window.checkInToday()">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 22c4.42 0 8-3.58 8-8 0-5-4-9-4-9s-.5 3-2.5 4.5C12 6 8 2 8 2s1 5-2 8c-1.5 1.5-2 3-2 4a8 8 0 0 0 8 8Z"></path></svg>
+                <span>Điểm danh</span>
+              </button>
+            </div>
+          </article>
+
+          <article class="dashboard-panel attendance-ranking-panel">
+            <div class="dashboard-panel-heading">
+              <div>
+                <span class="dashboard-panel-kicker">TOÀN HỆ THỐNG</span>
+                <h3>Bảng xếp hạng chuyên cần</h3>
+              </div>
+              <span class="ranking-updated">Top 5</span>
+            </div>
+            <div class="compact-ranking-list" id="attendance-leaderboard" aria-live="polite">
+              <div class="dashboard-loading-row">Đang tải bảng xếp hạng...</div>
+            </div>
+          </article>
+        </div>
+
+      </section>
+
+      <section class="exam-library-section" aria-labelledby="main-page-title">
+        <div class="exam-library-heading">
+          <div>
+            <span class="section-eyebrow">NGÂN HÀNG ĐỀ THI</span>
+            <h2 class="page-title" id="main-page-title">Kho Đề Thi & Ôn Luyện 2K9</h2>
+            <p class="exam-library-subtitle">Chọn đúng khóa học, tìm đề phù hợp và bắt đầu luyện tập ngay.</p>
+          </div>
+          <div class="cohort-selector" aria-label="Chọn khóa học">
+            <button class="cohort-btn" data-cohort="2k8" onclick="window.handleCohort('2k8', this)">
+              <svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"></path></svg> Khóa 2k8
+            </button>
+            <button
+              class="cohort-btn active"
+              data-cohort="2k9"
+              onclick="window.handleCohort('2k9', this)"
+            >
+              <svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"></path></svg> Khóa 2k9
+            </button>
+          </div>
+        </div>
+
+      <div class="banner-container">
+        <span class="banner-label"><svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path></svg> Gợi ý tài liệu ôn thi chuẩn</span>
+        <div class="banner-content">
+          <a href="https://shopee.vn" target="_blank"
+            ><svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M15 3h6v6M10 14 21 3M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path></svg> [Shopee Affiliate] Sách Tổng Ôn Toán Học - Tặng kèm khóa luyện đề chi tiết (Giảm 30% hôm nay)</a
+          >
+        </div>
+      </div>
+
+      <div class="search-filter-box">
+        <div class="search-bar-wrapper">
+          <span class="search-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+              <circle cx="11" cy="11" r="7"></circle>
+              <path d="m20 20-3.5-3.5"></path>
+            </svg>
+          </span>
+          <input
+            type="text"
+            id="search-exam-input"
+            class="search-input"
+            placeholder="Nhập tên trường, Sở GD (VD: Nghệ An, Ninh Bình, Hà Nội...)"
+            oninput="window.handleSearchExam()"
+          />
+        </div>
+        <div class="filter-tags">
+          <button
+            class="filter-btn filter-all active"
+            onclick="window.handleFilterExam('all', this)"
+          >
+            <svg class="ui-icon icon-duotone" viewBox="0 0 24 24" aria-hidden="true"><rect class="icon-soft" x="2" y="2" width="9" height="9" rx="3"></rect><rect x="3" y="3" width="7" height="7" rx="2"></rect><rect class="icon-detail" x="14" y="3" width="7" height="7" rx="2"></rect><rect class="icon-detail" x="3" y="14" width="7" height="7" rx="2"></rect><rect x="14" y="14" width="7" height="7" rx="2"></rect></svg> Tất cả
+          </button>
+          <button
+            class="filter-btn filter-province"
+            onclick="window.handleFilterExam('so', this)"
+          >
+            <svg class="ui-icon icon-duotone" viewBox="0 0 24 24" aria-hidden="true"><path class="icon-soft" d="m3 9 9-6 9 6v12H3z"></path><path d="M3 21h18M5 21V9M19 21V9M3 9l9-6 9 6"></path><path class="icon-detail" d="M9 21v-6h6v6M8 11h8"></path></svg> Đề Sở & Tỉnh
+          </button>
+          <button
+            class="filter-btn filter-saved"
+            onclick="window.handleFilterExam('bookmarked', this)"
+          >
+            <svg class="ui-icon icon-duotone" viewBox="0 0 24 24" aria-hidden="true"><path class="icon-soft" d="M6 3h12v17l-6-4-6 4z"></path><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path><path class="icon-detail" d="M9 8h6"></path></svg> Đề đã lưu
+          </button>
+        </div>
+      </div>
         <div class="exam-grid" id="exam-list"></div>
+      </section>
+    </div>
+
+    <!-- ================== THƯ VIỆN TÀI LIỆU PDF ================== -->
+    <div id="documents-screen" class="fade-in" style="display: none">
+      <section class="documents-hero">
+        <div class="documents-hero-copy">
+          <span class="documents-eyebrow">THƯ VIỆN HỌC TẬP</span>
+          <h2>Tài liệu Toán THPT chọn lọc</h2>
+          <p>
+            Tổng hợp đề thi, công thức và tài liệu học tập quan trọng. Xem nhanh
+            trang đầu, lưu lại hoặc tải PDF để học bất cứ lúc nào.
+          </p>
+        </div>
+
+        <div class="documents-hero-stat" aria-label="Số lượng tài liệu">
+          <span id="documents-total-count">0</span>
+          <small>Tài liệu PDF</small>
+        </div>
+      </section>
+
+      <div class="search-filter-box documents-toolbar">
+        <div class="search-bar-wrapper">
+          <span class="search-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+              <circle cx="11" cy="11" r="7"></circle>
+              <path d="m20 20-3.5-3.5"></path>
+            </svg>
+          </span>
+          <input
+            type="text"
+            id="search-document-input"
+            class="search-input"
+            placeholder="Tìm kiếm đề thi, công thức, tài liệu..."
+            oninput="window.handleSearchDocument()"
+          />
+        </div>
+
+        <div class="filter-tags documents-filter-tags">
+          <button
+            class="filter-btn document-filter-btn filter-exam active"
+            onclick="window.handleFilterDocument('tong-on', this)"
+          >
+            <svg class="ui-icon icon-duotone" viewBox="0 0 24 24" aria-hidden="true"><path class="icon-soft" d="M5 2h10l4 5v15H5z"></path><path d="M5 2h10l4 5v15H5zM15 2v6h4"></path><path class="icon-detail" d="M8 13h8M8 17h6"></path></svg> Đề thi
+          </button>
+          <button
+            class="filter-btn document-filter-btn filter-formula"
+            onclick="window.handleFilterDocument('cong-thuc', this)"
+          >
+            <svg class="ui-icon icon-duotone" viewBox="0 0 24 24" aria-hidden="true"><rect class="icon-soft" x="4" y="2" width="16" height="20" rx="3"></rect><rect x="4" y="2" width="16" height="20" rx="2"></rect><path class="icon-detail" d="M8 7h8M8 12h2M14 12h2M8 16h8"></path></svg> Công thức
+          </button>
+          <button
+            class="filter-btn document-filter-btn filter-other"
+            onclick="window.handleFilterDocument('khac', this)"
+          >
+            <svg class="ui-icon icon-duotone" viewBox="0 0 24 24" aria-hidden="true"><path class="icon-soft" d="M3 7h6l2 2h10v11H3z"></path><path d="M3 7h6l2 2h10v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><path class="icon-detail" d="M3 7V5a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v2"></path></svg> Khác
+          </button>
+          <button
+            class="filter-btn document-filter-btn filter-saved"
+            onclick="window.handleFilterDocument('saved', this)"
+          >
+            <svg class="ui-icon icon-duotone" viewBox="0 0 24 24" aria-hidden="true"><path class="icon-soft" d="M6 3h12v17l-6-4-6 4z"></path><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path><path class="icon-detail" d="M9 8h6"></path></svg> Đã lưu
+          </button>
+        </div>
+      </div>
+
+      <div class="documents-grid" id="documents-list" aria-live="polite">
+        <div class="documents-loading-state">
+          <span class="documents-loading-spinner"></span>
+          <p>Đang tải thư viện tài liệu...</p>
+        </div>
+      </div>
     </div>
 
     <!-- ================== KHU VỰC PHÒNG THI ================== -->
     <div class="workspace" id="exam-workspace">
-        <div class="left-panel">
-            <div class="toolbar-wrapper" id="toolbar-wrapper" style="display: none;">
-                <div class="pdf-toolbar" id="custom-toolbar">
-                    <button class="tool-btn" id="tool-pen">🖊️ Bút vẽ</button>
-                    <button class="tool-btn" id="tool-highlighter">🖍️ Dạ quang</button>
-                    <button class="tool-btn" id="tool-eraser">🗑️ Cục tẩy</button>
-                    <button class="tool-btn" id="tool-pan" style="display: none;">🖐️ Di chuyển</button>
-                    <div style="width: 1px; height: 20px; background: #cbd5e1; margin: 0 5px; flex-shrink: 0;"></div>
-                    
-                    <div class="tool-group" id="color-palette">
-                        <div class="color-swatch active" style="background: #0f172a;" data-color="#0f172a"></div>
-                        <div class="color-swatch" style="background: #2563eb;" data-color="#2563eb"></div>
-                        <div class="color-swatch" style="background: #ef4444;" data-color="#ef4444"></div>
-                        <div class="color-swatch" style="background: #facc15;" data-color="#facc15"></div>
-                        <div class="color-swatch" style="background: #16a34a;" data-color="#16a34a"></div>
-                    </div>
-                    
-                    <div style="width: 1px; height: 20px; background: #cbd5e1; margin: 0 5px; flex-shrink: 0;"></div>
-                    <div class="brush-controls">
-                        <span style="font-size: 16px;">📏</span>
-                        <input type="range" id="brush-size" min="1" max="30" value="3">
-                    </div>
-                    <button class="btn-action-sm btn-undo" id="btn-undo" title="Phím tắt: Ctrl + Z">↩️ Hoàn tác</button>
-                    <button class="btn-action-sm btn-clear" id="btn-clear-canvas">Xóa Tất Cả</button>
-                </div>
-                <div class="toolbar-toggle-container" onclick="window.toggleToolbar()">
-                    <span class="toggle-arrow" id="toggle-arrow">▲</span>
-                </div>
-            </div>
-
-            <div id="pdf-render-wrapper">
-                <div id="pdf-zoom-container">
-                    <div id="pdf-scroll-content">
-                        <canvas id="static-layer" class="pdf-canvas-layer"></canvas>
-                        <canvas id="draw-layer" class="pdf-canvas-layer"></canvas>
-                    </div>
-                </div>
-            </div>
-
-            <div class="zoom-controls" id="zoom-controls" style="display: none;">
-                <button class="zoom-btn" onclick="window.changeZoom(-0.1)">-</button>
-                <span id="zoom-text" onclick="window.changeZoom(1, true)" style="cursor: pointer;" title="Bấm để reset">100%</span>
-                <button class="zoom-btn" onclick="window.changeZoom(0.1)">+</button>
-            </div>
-            <button class="mobile-fab" id="mobile-toggle-sheet" onclick="window.toggleMobileSheet()">📝 Điền đáp án</button>
-        </div>
-        
-        <div id="drawer-backdrop" class="drawer-backdrop" onclick="window.toggleMobileSheet()"></div>
-
-        <div class="right-panel" id="right-panel-drawer" style="position: relative;">
-            <div class="timer-header" id="control-header">
-                <button class="btn-close-panel" onclick="window.toggleMobileSheet()">✖ Đóng</button>
-                <div style="font-weight: 900; color: var(--thpt-dark); font-size: 15px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 180px;" id="current-exam-name">Đang tải...</div>
-                <button class="submit-btn" id="btn-submit-exam" onclick="window.openModal('submit')">Nộp bài</button>
-            </div>
-            
-            <button id="btn-back-summary" onclick="window.backToSummary()" class="fade-in" style="display: none; position: absolute; top: 12px; right: 20px; background: #e0f2fe; color: var(--thpt-main); border: 1px solid #bae6fd; padding: 6px 12px; border-radius: 8px; font-weight: 900; cursor: pointer; font-size: 12px; z-index: 100; align-items: center; box-shadow: 0 2px 5px rgba(2, 132, 199, 0.2);">
-                QUAY LẠI <span style="font-size: 14px; margin-left: 3px;">➔</span>
+      <div class="left-panel">
+        <div class="toolbar-wrapper" id="toolbar-wrapper" style="display: none">
+          <div class="pdf-toolbar" id="custom-toolbar">
+            <button class="tool-btn" id="tool-pen"><svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m12 19 7-7 3 3-7 7-4 1zM18 13l-7-7 3-3 7 7"></path><path d="m2 22 6-2L4 16z"></path></svg> Bút vẽ</button>
+            <button class="tool-btn" id="tool-highlighter"><svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 11-6 6v4h4l6-6M13 15l8-8-4-4-8 8zM14 4l4 4"></path></svg> Dạ quang</button>
+            <button class="tool-btn" id="tool-eraser"><svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m7 21-4-4L14 6a2.8 2.8 0 0 1 4 0l1 1a2.8 2.8 0 0 1 0 4L9 21z"></path><path d="m6 14 5 5M7 21h14"></path></svg> Cục tẩy</button>
+            <button class="tool-btn" id="tool-pan" style="display: none">
+              <svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M18 11V7a2 2 0 0 0-4 0v3-5a2 2 0 0 0-4 0v5-3a2 2 0 0 0-4 0v8l-1.5-1.5a2.1 2.1 0 0 0-3 3L7 22h9a6 6 0 0 0 6-6v-5a2 2 0 0 0-4 0z"></path></svg> Di chuyển
             </button>
+            <div
+              style="
+                width: 1px;
+                height: 20px;
+                background: #cbd5e1;
+                margin: 0 5px;
+                flex-shrink: 0;
+              "
+            ></div>
 
-            <div id="sheets-container"></div>
-            
-            <div id="summary-screen" class="fade-in">
-                <div class="summary-card">
-                    <h2 style="color: var(--thpt-dark); font-weight: 900;">KẾT QUẢ</h2>
-                    <div class="final-score" id="final-score-text">0.00</div>
-                    <p style="margin-bottom: 20px; color: #64748b;" id="summary-desc">Điểm thi tối đa là 10.0.</p>
-                    <div id="summary-stats"></div>
-                    <div class="banner-container" style="margin-top: 20px; margin-bottom: 10px; border-color: #86efac; background: #f0fdf4;">
-                        <span class="banner-label" style="color: #15803d;">🎁 Gợi ý nâng cấp điểm số</span>
-                        <div class="banner-content">
-                            <a href="https://tiki.vn" target="_blank" style="background: white; color: #16a34a; border: 1px solid #bbf7d0;">👉 [Affiliate Link] Đặt mua sách nâng cao tặng kèm khóa học!</a>
-                        </div>
-                    </div>
-                    <button class="submit-btn" style="background: var(--thpt-main); margin-top: 15px; width: 100%; padding: 15px;" onclick="window.viewDetailedAnswers()">XEM LẠI ĐÁP ÁN CHI TIẾT</button>
-                    <button class="submit-btn" style="background: #f1f5f9; color: var(--thpt-dark); margin-top: 10px; width: 100%; padding: 15px;" onclick="window.goHome()">VỀ TRANG CHỦ / THOÁT</button>
-                </div>
+            <div class="tool-group" id="color-palette">
+              <div
+                class="color-swatch active"
+                style="background: #0f172a"
+                data-color="#0f172a"
+              ></div>
+              <div
+                class="color-swatch"
+                style="background: #2563eb"
+                data-color="#2563eb"
+              ></div>
+              <div
+                class="color-swatch"
+                style="background: #ef4444"
+                data-color="#ef4444"
+              ></div>
+              <div
+                class="color-swatch"
+                style="background: #facc15"
+                data-color="#facc15"
+              ></div>
+              <div
+                class="color-swatch"
+                style="background: #16a34a"
+                data-color="#16a34a"
+              ></div>
             </div>
+
+            <div
+              style="
+                width: 1px;
+                height: 20px;
+                background: #cbd5e1;
+                margin: 0 5px;
+                flex-shrink: 0;
+              "
+            ></div>
+            <div class="brush-controls">
+              <span class="brush-label"><svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 7h18M6 7v4M10 7v2M14 7v4M18 7v2M3 17h18"></path></svg> Cỡ nét</span>
+              <input type="range" id="brush-size" min="1" max="30" value="3" />
+            </div>
+            <button
+              class="btn-action-sm btn-undo"
+              id="btn-undo"
+              title="Phím tắt: Ctrl + Z"
+            >
+              <svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 7 4 12l5 5"></path><path d="M4 12h10a6 6 0 0 1 6 6"></path></svg> Hoàn tác
+            </button>
+            <button class="btn-action-sm btn-clear" id="btn-clear-canvas">
+              Xóa Tất Cả
+            </button>
+          </div>
+          <div
+            class="toolbar-toggle-container"
+            onclick="window.toggleToolbar()"
+          >
+            <span class="toggle-arrow" id="toggle-arrow">▲</span>
+          </div>
         </div>
+
+        <div id="pdf-render-wrapper">
+          <div id="pdf-zoom-container">
+            <div id="pdf-scroll-content">
+              <canvas id="static-layer" class="pdf-canvas-layer"></canvas>
+              <canvas id="draw-layer" class="pdf-canvas-layer"></canvas>
+            </div>
+          </div>
+        </div>
+
+        <div class="zoom-controls" id="zoom-controls" style="display: none">
+          <button class="zoom-btn" onclick="window.changeZoom(-0.1)">-</button>
+          <span
+            id="zoom-text"
+            onclick="window.changeZoom(1, true)"
+            style="cursor: pointer"
+            title="Bấm để reset"
+            >100%</span
+          >
+          <button class="zoom-btn" onclick="window.changeZoom(0.1)">+</button>
+        </div>
+      </div>
+
+      <div
+        id="drawer-backdrop"
+        class="drawer-backdrop"
+        onclick="window.toggleMobileSheet()"
+      ></div>
+
+      <div
+        class="right-panel"
+        id="right-panel-drawer"
+        style="position: relative"
+      >
+        <div class="timer-header" id="control-header">
+          <button class="btn-close-panel" onclick="window.toggleMobileSheet()">
+            ✖ Đóng
+          </button>
+          <div
+            style="
+              font-weight: 900;
+              color: var(--thpt-dark);
+              font-size: 15px;
+              white-space: nowrap;
+              overflow: hidden;
+              text-overflow: ellipsis;
+              max-width: 180px;
+            "
+            id="current-exam-name"
+          >
+            Đang tải...
+          </div>
+          <button
+            class="submit-btn"
+            id="btn-submit-exam"
+            onclick="window.openModal('submit')"
+          >
+            Nộp bài
+          </button>
+        </div>
+
+        <button
+          id="btn-back-summary"
+          onclick="window.backToSummary()"
+          class="fade-in"
+          style="
+            display: none;
+            position: absolute;
+            top: 12px;
+            right: 20px;
+            background: #e0f2fe;
+            color: var(--thpt-main);
+            border: 1px solid #bae6fd;
+            padding: 6px 12px;
+            border-radius: 8px;
+            font-weight: 900;
+            cursor: pointer;
+            font-size: 12px;
+            z-index: 100;
+            align-items: center;
+            box-shadow: 0 2px 5px rgba(2, 132, 199, 0.2);
+          "
+        >
+          QUAY LẠI
+          <svg
+            class="ui-icon"
+            viewBox="0 0 24 24"
+            aria-hidden="true"
+            style="width: 15px; height: 15px; margin-left: 4px"
+          >
+            <path d="M5 12h14M13 6l6 6-6 6"></path>
+          </svg>
+        </button>
+
+        <div id="sheets-container"></div>
+
+        <div id="summary-screen" class="fade-in">
+          <div class="summary-card">
+            <div class="result-summary-top">
+              <div class="result-overview">
+                <span class="result-overview-label">KẾT QUẢ BÀI THI</span>
+                <h2 id="result-exam-title">Tổng kết bài làm</h2>
+                <div class="result-score-ring">
+                  <div class="result-score-content">
+                    <div class="final-score" id="final-score-text">0.00</div>
+                    <small>/ 10 điểm</small>
+                  </div>
+                </div>
+                <p id="summary-desc">Điểm thi tối đa là 10.0.</p>
+                <div class="result-meta-pills">
+                  <span>
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M12 7v5l3 2"></path></svg>
+                    <strong id="result-duration">--:--</strong>
+                  </span>
+                  <span>
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 21h8M12 17v4M7 4h10v5a5 5 0 0 1-10 0V4Z"></path><path d="M7 6H4v2a4 4 0 0 0 4 4M17 6h3v2a4 4 0 0 1-4 4"></path></svg>
+                    <strong id="result-rank" aria-live="polite">Chưa xếp hạng</strong>
+                  </span>
+                </div>
+              </div>
+              <div class="result-breakdown">
+                <span class="result-breakdown-label">CHI TIẾT ĐIỂM</span>
+                <div id="summary-stats"></div>
+              </div>
+            </div>
+
+            <section class="result-leaderboard-card">
+              <div class="result-leaderboard-heading">
+                <div>
+                  <span>BẢNG ĐIỂM CỦA ĐỀ NÀY</span>
+                  <h3>Kết quả của các học sinh</h3>
+                  <p>Mỗi học sinh chỉ hiển thị kết quả tốt nhất.</p>
+                </div>
+                <div class="result-sort-controls">
+                  <button class="active" data-order="asc" onclick="window.changeResultLeaderboardSort('asc', this)">Thấp → cao</button>
+                  <button data-order="desc" onclick="window.changeResultLeaderboardSort('desc', this)">Cao → thấp</button>
+                </div>
+              </div>
+              <div class="result-leaderboard-list" id="result-exam-leaderboard" aria-live="polite">
+                <div class="dashboard-loading-row">Đang cập nhật bảng điểm...</div>
+              </div>
+            </section>
+
+            <div class="result-resource-card">
+              <span class="banner-label"
+                ><svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 19.5V4.7A2.7 2.7 0 0 1 6.7 2H20v17H6.5A2.5 2.5 0 0 0 4 21.5"></path><path d="M8 7h8M8 11h6"></path></svg> Gợi ý cải thiện điểm số</span>
+              <div class="banner-content">
+                <a
+                  href="https://tiki.vn"
+                  target="_blank"
+                  ><svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M15 3h6v6M10 14 21 3M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path></svg> [Affiliate Link] Đặt mua sách nâng cao tặng kèm khóa học!</a
+                >
+              </div>
+            </div>
+            <div class="result-actions">
+              <button class="result-action-primary" onclick="window.viewDetailedAnswers()">
+                Xem lại đáp án chi tiết
+              </button>
+              <button class="result-action-secondary" onclick="window.goHome()">
+                Về trang chủ
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
 
     <!-- ================== CÁC MODAL HỖ TRỢ ================== -->
-    <div class="modal-overlay" id="custom-modal" onclick="window.handleBackdropClick(event, 'custom-modal')">
-        <div class="custom-modal-content" onclick="event.stopPropagation()">
-            <div class="modal-title" id="modal-title">Xác nhận</div>
-            <div class="modal-msg" id="modal-message">Nội dung...</div>
-            <div class="history-list" id="modal-history-list" style="display: none;"></div>
-            <div class="modal-actions" id="modal-action-buttons">
-                <button class="btn-cancel" onclick="window.closeModal()">Quay lại</button>
-                <button class="btn-confirm" id="modal-confirm-btn" onclick="window.confirmAction()">Đồng ý</button>
-            </div>
+    <div
+      class="modal-overlay"
+      id="custom-modal"
+      onclick="window.handleBackdropClick(event, 'custom-modal')"
+    >
+      <div class="custom-modal-content" onclick="event.stopPropagation()">
+        <div class="modal-title" id="modal-title">Xác nhận</div>
+        <div class="modal-msg" id="modal-message">Nội dung...</div>
+        <div class="history-toolbar" id="modal-history-toolbar" style="display: none">
+          <label class="history-search" for="modal-history-search">
+            <svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true">
+              <circle cx="11" cy="11" r="7"></circle>
+              <path d="m20 20-3.5-3.5"></path>
+            </svg>
+            <input
+              id="modal-history-search"
+              type="search"
+              autocomplete="off"
+              placeholder="Tìm theo lần thi hoặc thời gian..."
+            />
+          </label>
+          <div class="history-table-head" aria-hidden="true">
+            <span>Lần thi</span><span>Kết quả</span><span></span>
+          </div>
         </div>
+        <div
+          class="history-list"
+          id="modal-history-list"
+          style="display: none"
+        ></div>
+        <div class="history-footer" id="modal-history-footer" style="display: none">
+          <span id="modal-history-count"></span>
+          <button class="btn-cancel" type="button" onclick="window.closeModal()">
+            Đóng lịch sử
+          </button>
+        </div>
+        <div class="modal-actions" id="modal-action-buttons">
+          <button class="btn-cancel" onclick="window.closeModal()">
+            Quay lại
+          </button>
+          <button
+            class="btn-confirm"
+            id="modal-confirm-btn"
+            onclick="window.confirmAction()"
+          >
+            Đồng ý
+          </button>
+        </div>
+      </div>
     </div>
 
-    <div id="notification-modal" class="modal-overlay" onclick="window.handleBackdropClick(event, 'notification-modal')">
-        <div class="modal-box" onclick="event.stopPropagation()">
-            <h3 id="notif-title">Thông báo</h3>
-            <p id="notif-message">Nội dung thông báo...</p>
-            <button id="notif-close-btn" onclick="window.closeNotificationModal()">Xác nhận</button>
-        </div>
+    <div
+      id="notification-modal"
+      class="modal-overlay"
+      onclick="window.handleBackdropClick(event, 'notification-modal')"
+    >
+      <div class="modal-box" onclick="event.stopPropagation()">
+        <h3 id="notif-title">Thông báo</h3>
+        <p id="notif-message">Nội dung thông báo...</p>
+        <button id="notif-close-btn" onclick="window.closeNotificationModal()">
+          Xác nhận
+        </button>
+      </div>
     </div>
 
     <script type="module" src="script.js"></script>
-</body>
+  </body>
 </html>
