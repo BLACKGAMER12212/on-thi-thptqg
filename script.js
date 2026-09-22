@@ -88,6 +88,34 @@ let recentlyInteracted = new Set();
 let isExamsMergedWithDB = false;
 let engagementFeatureAvailable = null;
 let resultExamSortOrder = "asc";
+
+// 100vh trên trình duyệt điện thoại có thể bao gồm cả vùng đang bị thanh địa
+// chỉ che khuất. Đồng bộ chiều cao nhìn thấy thật để phòng thi không bị cắt
+// hoặc chừa một dải trống ở cạnh dưới trên Chrome/Safari mobile.
+let viewportHeightSyncFrame = 0;
+function syncVisibleViewportHeight() {
+  cancelAnimationFrame(viewportHeightSyncFrame);
+  viewportHeightSyncFrame = requestAnimationFrame(() => {
+    const viewportHeight = Math.round(
+      window.visualViewport?.height || window.innerHeight,
+    );
+    if (viewportHeight > 0) {
+      document.documentElement.style.setProperty(
+        "--app-viewport-height",
+        `${viewportHeight}px`,
+      );
+    }
+  });
+}
+
+syncVisibleViewportHeight();
+window.addEventListener("resize", syncVisibleViewportHeight, { passive: true });
+window.addEventListener("orientationchange", syncVisibleViewportHeight, {
+  passive: true,
+});
+window.visualViewport?.addEventListener("resize", syncVisibleViewportHeight, {
+  passive: true,
+});
 let engagementLoadSequence = 0;
 let resultRankingLoadSequence = 0;
 let avatarModerationFeatureAvailable = null;
@@ -3177,6 +3205,7 @@ document.addEventListener("fullscreenchange", () => {
 });
 
 window.startExam = async (eId, mode, attIdx = null) => {
+  syncVisibleViewportHeight();
   clearTimeout(drawerBackdropHideTimer);
   document.body.classList.remove("is-documents-view");
   document.getElementById("documents-screen")?.classList.remove("is-active-screen");
@@ -3285,8 +3314,19 @@ window.startExam = async (eId, mode, attIdx = null) => {
     sessionStorage.removeItem("thpt_review_state");
   }
 
+  // Một lượt thi mới phải có trạng thái nộp bài hoàn toàn độc lập với lượt
+  // trước. Trước đây biến đã được reset nhưng nút vẫn còn disabled và còn chữ
+  // "ĐÃ NỘP BÀI", khiến học sinh không thể nộp lần làm lại.
+  clearInterval(timerInterval);
   isReviewMode = mode === "review";
   isSubmitted = isReviewMode;
+  isSubmitting = false;
+  const submitButton = document.getElementById("btn-submit-exam");
+  if (submitButton) {
+    submitButton.disabled = isReviewMode;
+    submitButton.removeAttribute("aria-busy");
+    submitButton.innerText = isReviewMode ? "ĐÃ NỘP BÀI" : "Nộp bài";
+  }
   setPublicAdsVisibility(false);
   const headerSelectors = [
     "header",
@@ -3362,9 +3402,32 @@ window.startExam = async (eId, mode, attIdx = null) => {
       endTime = Date.now() + totalTime * 1000;
     }
 
-    // Lưu vào ổ cứng để khóa vị trí ngay lập tức
+    // Khởi tạo bản cứu hộ trực tiếp thay vì gọi saveProgress lúc bảng đáp án
+    // của lượt trước vẫn còn trong DOM. Làm mới luôn bắt đầu rỗng; chỉ chế độ
+    // Tiếp tục mới được mang đáp án và nét vẽ đang làm dở sang.
     userDataCache.activeExam = eId;
-    window.saveProgress(true);
+    const continuingState =
+      mode === "continue" && userDataCache.activeState
+        ? userDataCache.activeState
+        : null;
+    userDataCache.activeState = {
+      endTime,
+      answers: continuingState
+        ? JSON.parse(JSON.stringify(continuingState.answers || {}))
+        : {},
+      strokes: continuingState
+        ? JSON.parse(JSON.stringify(strokes))
+        : [],
+    };
+    if (currentUser) {
+      localStorage.setItem(
+        "thpt_active_" + currentUser.id,
+        JSON.stringify({
+          examId: eId,
+          state: userDataCache.activeState,
+        }),
+      );
+    }
 
     // Đẩy ngầm lên mạng
     if (currentUser) {
