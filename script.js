@@ -4114,31 +4114,63 @@ window.changeZoom = (amount, isAbsolute = false) => {
 
   const scaledWidth = originalPdfWidth * currentZoom;
   const scrollContent = document.getElementById("pdf-scroll-content");
-  if (scrollContent) scrollContent.style.transform = `scale(${currentZoom})`;
-
   const container = document.getElementById("pdf-zoom-container");
   if (wrapper && container) {
-    // Điện thoại thật có thể làm tròn kích thước canvas khác số đo PDF. Đo
-    // chính nội dung đã bố trí để vùng cuộn không kết thúc sớm và chém mất
-    // phần cuối đề như khi chỉ dùng originalPdfHeight.
-    const layoutHeight = scrollContent
-      ? Math.max(scrollContent.scrollHeight, scrollContent.offsetHeight)
-      : originalPdfHeight;
-    const visualHeight = scrollContent
-      ? scrollContent.getBoundingClientRect().height
-      : 0;
-    const scaledHeight = Math.max(
-      originalPdfHeight * currentZoom,
-      layoutHeight * currentZoom,
-      visualHeight,
-    );
-    container.style.width = scaledWidth + "px";
-    container.style.height = Math.ceil(scaledHeight) + 2 + "px";
+    const isMobilePdf = window.innerWidth <= 1024;
+
+    if (isMobilePdf && scrollContent) {
+      // Mobile: thay đổi kích thước bố cục thật của từng trang. Các canvas sẽ
+      // tự nối tiếp nhau trong normal flow, nên vùng cuộn luôn dài đúng bằng
+      // nội dung PDF và không còn bị cắt ở cuối như khi scale một khối absolute.
+      scrollContent.style.transform = "none";
+      scrollContent.style.width = Math.ceil(scaledWidth) + "px";
+      scrollContent.style.height = "auto";
+
+      scrollContent.querySelectorAll(".pdf-page-canvas").forEach((canvas) => {
+        const baseWidth = Number.parseFloat(
+          canvas.style.getPropertyValue("--pdf-page-width"),
+        );
+        const baseHeight = Number.parseFloat(
+          canvas.style.getPropertyValue("--pdf-page-height"),
+        );
+        if (Number.isFinite(baseWidth) && Number.isFinite(baseHeight)) {
+          canvas.style.setProperty(
+            "width",
+            `${Math.ceil(baseWidth * currentZoom)}px`,
+            "important",
+          );
+          canvas.style.setProperty(
+            "height",
+            `${Math.ceil(baseHeight * currentZoom)}px`,
+            "important",
+          );
+        }
+      });
+
+      container.style.width = Math.ceil(scaledWidth) + "px";
+      container.style.height = "auto";
+      container.style.minHeight = "0";
+    } else {
+      // Desktop vẫn dùng transform để giữ khung vẽ và tọa độ nét bút chính xác.
+      scrollContent?.querySelectorAll(".pdf-page-canvas").forEach((canvas) => {
+        canvas.style.removeProperty("width");
+        canvas.style.removeProperty("height");
+      });
+      if (scrollContent) {
+        scrollContent.style.width = "";
+        scrollContent.style.height = "";
+        scrollContent.style.transform = `scale(${currentZoom})`;
+      }
+      container.style.width = scaledWidth + "px";
+      container.style.height = originalPdfHeight * currentZoom + "px";
+      container.style.minHeight = "";
+    }
+
     if (scaledWidth < wrapper.clientWidth)
       container.style.marginLeft =
         (wrapper.clientWidth - scaledWidth) / 2 + "px";
     else
-      container.style.marginLeft = window.innerWidth <= 1024 ? "0px" : "20px";
+      container.style.marginLeft = isMobilePdf ? "0px" : "20px";
   }
   const zoomText = document.getElementById("zoom-text");
   if (zoomText) zoomText.innerText = Math.round(currentZoom * 100) + "%";
