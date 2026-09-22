@@ -86,8 +86,24 @@ body:not(.is-taking-exam) #header-timer-box { display: none !important; }
         padding-bottom: max(8px, env(safe-area-inset-bottom, 0px)) !important; margin: 0 auto !important; box-sizing: border-box !important;
         overscroll-behavior-y: contain !important;
     }
-    #pdf-zoom-container { margin: 0 !important; display: block !important; }
-    #pdf-scroll-content { transform-origin: top left !important; }
+    /* Mobile dùng luồng bố cục thật thay vì một khối absolute được scale.
+       Nhờ vậy Chrome Android tự tính đủ chiều cao của toàn bộ các trang PDF. */
+    #pdf-zoom-container {
+        position: relative !important;
+        height: auto !important;
+        min-height: 0 !important;
+        margin: 0 !important;
+        display: block !important;
+    }
+    #pdf-scroll-content {
+        position: relative !important;
+        top: auto !important;
+        left: auto !important;
+        height: auto !important;
+        min-height: 0 !important;
+        transform: none !important;
+        transform-origin: top left !important;
+    }
     .pdf-page-canvas { width: auto !important; max-width: none !important; height: auto !important; margin: 0 0 5px 0 !important; box-shadow: none !important; border-radius: 0 !important; display: block !important; }
     #toolbar-wrapper, #zoom-controls, #static-layer, #draw-layer { display: none !important; }
     
