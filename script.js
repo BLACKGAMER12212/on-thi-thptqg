@@ -1750,15 +1750,12 @@ window.toggleBookmark = (examId, btn) => {
 
 window.toggleLike = async (examId, element) => {
   const uid = currentUser ? currentUser.id : "guest";
-  const isAdmin =
-    userDataCache &&
-    (userDataCache.role === "admin" || userDataCache.role === "editor");
-  let historyData =
-    userDataCache && userDataCache.history
-      ? userDataCache.history[examId] || []
-      : [];
+  const storedHistory = userDataCache?.history?.[examId];
+  const historyData = Array.isArray(storedHistory) ? storedHistory : [];
 
-  if (!isAdmin && historyData.length === 0) {
+  // Dùng cùng một quy tắc trên PC và mobile, kể cả tài khoản Admin: chỉ được
+  // thả tim sau khi đã hoàn thành đề ít nhất một lần.
+  if (historyData.length === 0) {
     window.showNotification(
       "Chưa thể thả tim",
       "Bạn phải hoàn thành bài thi này ít nhất 1 lần mới có thể thả tim nhé!",
@@ -2793,10 +2790,6 @@ window.handleAvatarUpload = async (input) => {
     userDataCache.avatar_warning = "";
     userDataCache.avatar_warning_at = null;
     syncUserIdentityUI();
-    window.showNotification(
-      "Đã cập nhật ảnh",
-      "Ảnh đã hiển thị ngay trên tài khoản và bảng xếp hạng. Quản trị viên có thể gỡ nếu ảnh không phù hợp.",
-    );
   } catch (error) {
     window.showNotification("Lỗi", "Tải ảnh thất bại.");
   } finally {
@@ -4120,14 +4113,27 @@ window.changeZoom = (amount, isAbsolute = false) => {
   if (currentZoom > 5.0) currentZoom = 5.0;
 
   const scaledWidth = originalPdfWidth * currentZoom;
-  const scaledHeight = originalPdfHeight * currentZoom;
   const scrollContent = document.getElementById("pdf-scroll-content");
   if (scrollContent) scrollContent.style.transform = `scale(${currentZoom})`;
 
   const container = document.getElementById("pdf-zoom-container");
   if (wrapper && container) {
+    // Điện thoại thật có thể làm tròn kích thước canvas khác số đo PDF. Đo
+    // chính nội dung đã bố trí để vùng cuộn không kết thúc sớm và chém mất
+    // phần cuối đề như khi chỉ dùng originalPdfHeight.
+    const layoutHeight = scrollContent
+      ? Math.max(scrollContent.scrollHeight, scrollContent.offsetHeight)
+      : originalPdfHeight;
+    const visualHeight = scrollContent
+      ? scrollContent.getBoundingClientRect().height
+      : 0;
+    const scaledHeight = Math.max(
+      originalPdfHeight * currentZoom,
+      layoutHeight * currentZoom,
+      visualHeight,
+    );
     container.style.width = scaledWidth + "px";
-    container.style.height = scaledHeight + "px";
+    container.style.height = Math.ceil(scaledHeight) + 2 + "px";
     if (scaledWidth < wrapper.clientWidth)
       container.style.marginLeft =
         (wrapper.clientWidth - scaledWidth) / 2 + "px";
