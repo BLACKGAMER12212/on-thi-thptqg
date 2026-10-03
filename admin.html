@@ -924,7 +924,9 @@
         color: #16a34a;
       }
     </style>
-    <link rel="stylesheet" href="assets/css/admin-polish.css" />
+    <link rel="stylesheet" href="assets/css/admin-polish.css?v=20260925-insights-2" />
+    <link rel="stylesheet" href="assets/css/design-refresh.css?v=20260926-auth-google-smooth-5" />
+    <link rel="stylesheet" href="assets/css/question-content.css?v=20261002-font-v4" />
   </head>
   <body>
     <div id="admin-boot-loader" role="status" aria-live="polite">
@@ -977,6 +979,13 @@
         <nav class="admin-nav">
           <button
             class="admin-nav-btn active"
+            onclick="window.switchMainTab('dashboard', this)"
+          >
+            <svg class="admin-nav-icon dashboard" viewBox="0 0 24 24" aria-hidden="true"><path class="soft" d="M3 3h8v8H3zM13 3h8v5h-8zM13 10h8v11h-8zM3 13h8v8H3z"></path><path d="M3 3h8v8H3zM13 3h8v5h-8zM13 10h8v11h-8zM3 13h8v8H3z"></path></svg>
+            TỔNG QUAN
+          </button>
+          <button
+            class="admin-nav-btn"
             onclick="window.switchMainTab('exams', this)"
           >
             <svg class="admin-nav-icon exam" viewBox="0 0 24 24" aria-hidden="true"><path class="soft" d="M6 3h9l4 4v14H6z"></path><path d="M6 3h9l4 4v14H6zM15 3v5h4M9 12h7M9 16h5"></path></svg>
@@ -988,6 +997,13 @@
           >
             <svg class="admin-nav-icon document" viewBox="0 0 24 24" aria-hidden="true"><path class="soft" d="M3 5h7l2 2h9v13H3z"></path><path d="M3 5h7l2 2h9v13H3zM8 12h8M8 16h6"></path></svg>
             TÀI LIỆU PDF
+          </button>
+          <button
+            class="admin-nav-btn"
+            onclick="window.switchMainTab('governance', this)"
+          >
+            <svg class="admin-nav-icon governance" viewBox="0 0 24 24" aria-hidden="true"><path class="soft" d="M4 5h16v4H4zM6 9h12v11H6z"></path><path d="M4 5h16v4H4zM6 9h12v11H6zM9 13h6M12 3v2"></path></svg>
+            NHẬT KÝ
           </button>
           <button
             class="admin-nav-btn"
@@ -1012,29 +1028,80 @@
       </header>
 
       <div class="main-container">
-        <!-- TAB: KHO ĐỀ THI -->
-        <div id="tab-exams" class="admin-main-pane">
-          <div class="metrics-grid">
-            <div class="metric-card">
-              <div class="metric-title">Tổng số Học sinh</div>
-              <div class="metric-value" id="stat-users-count">0</div>
+        <!-- TAB: TỔNG QUAN -->
+        <div id="tab-dashboard" class="admin-main-pane">
+          <section class="admin-overview-hero">
+            <div>
+              <span class="admin-overview-kicker">TRUNG TÂM ĐIỀU HÀNH</span>
+              <h1>Tổng quan hệ thống luyện thi</h1>
+              <p>Theo dõi hoạt động học tập và quản lý nội dung tại một nơi.</p>
             </div>
-            <div class="metric-card">
-              <div class="metric-title">Đề thi trên CSDL</div>
-              <div class="metric-value" id="stat-exams-count">0</div>
+            <div class="admin-overview-hero-actions">
+              <span class="admin-role-chip" id="stat-role-text">Admin</span>
+              <button type="button" class="admin-refresh-btn" onclick="window.loadAdminOverview(true)">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 7v5h-5M4 17v-5h5M18.5 9A7 7 0 0 0 6.2 6.3L4 8M5.5 15A7 7 0 0 0 17.8 17.7L20 16"></path></svg>
+                Làm mới
+              </button>
             </div>
-            <div class="metric-card">
-              <div class="metric-title">Chức vụ hiện tại</div>
-              <div
-                class="metric-value"
-                id="stat-role-text"
-                style="font-size: 20px; color: #0284c7"
-              >
-                Admin
-              </div>
-            </div>
+          </section>
+
+          <div class="admin-overview-metrics" aria-label="Chỉ số tổng quan">
+            <article class="overview-metric students">
+              <span>Học sinh</span><strong id="stat-users-count">0</strong><small>Tài khoản đang sử dụng</small>
+            </article>
+            <article class="overview-metric attempts">
+              <span>Lượt làm bài</span><strong id="stat-attempts-count">0</strong><small>Tổng số lượt đã nộp</small>
+            </article>
+            <article class="overview-metric score">
+              <span>Điểm trung bình</span><strong id="stat-average-score">0</strong><small>Trên thang điểm 10</small>
+            </article>
+            <article class="overview-metric exams">
+              <span>Đề đang công khai</span><strong id="stat-exams-count">0</strong><small>Học sinh có thể làm</small>
+            </article>
+            <article class="overview-metric documents">
+              <span>Tài liệu công khai</span><strong id="stat-documents-count">0</strong><small>PDF trong thư viện</small>
+            </article>
+            <article class="overview-metric downloads">
+              <span>Lượt tải tài liệu</span><strong id="stat-downloads-count">0</strong><small>Tổng lượt tải PDF</small>
+            </article>
           </div>
 
+          <div class="admin-overview-grid">
+            <section class="overview-panel overview-activity-panel">
+              <div class="overview-panel-heading">
+                <div><span>HOẠT ĐỘNG</span><h2>Lượt nộp bài 7 ngày gần nhất</h2></div>
+                <small id="overview-activity-total">0 lượt</small>
+              </div>
+              <div id="overview-attempt-chart" class="overview-bar-chart" aria-label="Biểu đồ lượt nộp bài"></div>
+            </section>
+
+            <section class="overview-panel">
+              <div class="overview-panel-heading">
+                <div><span>NỔI BẬT</span><h2>Đề được làm nhiều</h2></div>
+              </div>
+              <div id="overview-top-exams" class="overview-top-list">
+                <div class="overview-empty">Đang tổng hợp dữ liệu...</div>
+              </div>
+            </section>
+
+            <section class="overview-panel overview-quick-panel">
+              <div class="overview-panel-heading">
+                <div><span>QUẢN LÝ NHANH</span><h2>Nội dung hệ thống</h2></div>
+                <small><b id="stat-hidden-content">0</b> nội dung đang ẩn</small>
+              </div>
+              <div class="overview-quick-actions">
+                <button type="button" onclick="window.openUploadModal()"><b>Thêm đề thi</b><span>Tải PDF và soạn đáp án</span></button>
+                <button type="button" onclick="window.openDocumentUploadModal()"><b>Thêm tài liệu</b><span>Đăng PDF vào thư viện</span></button>
+                <button type="button" onclick="window.switchMainTab('exams', document.querySelector('.admin-nav-btn[onclick*=exams]'))"><b>Quản lý đề</b><span>Sửa hoặc thay đổi hiển thị</span></button>
+                <button type="button" onclick="window.switchMainTab('documents', document.querySelector('.admin-nav-btn[onclick*=documents]'))"><b>Quản lý tài liệu</b><span>Kiểm tra lượt tải và lượt tim</span></button>
+                <button type="button" onclick="window.switchMainTab('governance', document.querySelector('.admin-nav-btn[onclick*=governance]'))"><b>Nhật ký & Thùng rác</b><span>Khôi phục và kiểm tra thao tác</span></button>
+              </div>
+            </section>
+          </div>
+        </div>
+
+        <!-- TAB: KHO ĐỀ THI -->
+        <div id="tab-exams" class="admin-main-pane" style="display: none">
           <div class="panel-card">
             <div class="panel-header">
               <div class="panel-title">DANH SÁCH ĐỀ THI TỔNG HỢP</div>
@@ -1055,12 +1122,13 @@
                     <th>Khóa</th>
                     <th>Lượt Xem</th>
                     <th>Lượt Tim</th>
+                    <th>Hiển thị</th>
                     <th>Thao Tác Quản Lý</th>
                   </tr>
                 </thead>
                 <tbody id="exams-tbody">
                   <tr>
-                    <td colspan="7" style="text-align: center; color: #94a3b8">
+                    <td colspan="8" style="text-align: center; color: #94a3b8">
                       Đang tải...
                     </td>
                   </tr>
@@ -1098,12 +1166,13 @@
                     <th>Lượt tải</th>
                     <th>Lượt tim</th>
                     <th>Ngày đăng</th>
+                    <th>Hiển thị</th>
                     <th>Thao tác</th>
                   </tr>
                 </thead>
                 <tbody id="documents-tbody">
                   <tr>
-                    <td colspan="7" style="text-align: center; color: #94a3b8">
+                    <td colspan="8" style="text-align: center; color: #94a3b8">
                       Chọn tab để tải danh sách tài liệu.
                     </td>
                   </tr>
@@ -1111,6 +1180,87 @@
               </table>
             </div>
           </div>
+        </div>
+
+        <!-- TAB: NHẬT KÝ QUẢN TRỊ & THÙNG RÁC -->
+        <div id="tab-governance" class="admin-main-pane" style="display: none">
+          <section class="governance-header-card">
+            <div>
+              <span>AN TOÀN HỆ THỐNG</span>
+              <h1>Nhật ký quản trị & Thùng rác</h1>
+              <p>Nội dung bị xóa được giữ lại để khôi phục. Mọi thao tác quan trọng đều có dấu thời gian và người thực hiện.</p>
+            </div>
+            <button type="button" class="admin-refresh-btn governance-refresh" onclick="window.loadAdminGovernance(true)">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 7v5h-5M4 17v-5h5M18.5 9A7 7 0 0 0 6.2 6.3L4 8M5.5 15A7 7 0 0 0 17.8 17.7L20 16"></path></svg>
+              Làm mới dữ liệu
+            </button>
+          </section>
+
+          <div class="governance-summary-grid">
+            <article><span>Trong thùng rác</span><strong id="governance-trash-count">0</strong><small>Đề thi và tài liệu có thể khôi phục</small></article>
+            <article><span>Nhật ký gần đây</span><strong id="governance-log-count">0</strong><small>Tối đa 100 hoạt động mới nhất</small></article>
+            <article><span>Xóa vĩnh viễn</span><strong id="governance-permission-label">Admin</strong><small>Chỉ Quản trị viên được thực hiện</small></article>
+          </div>
+
+          <section class="panel-card governance-panel">
+            <div class="panel-header governance-panel-header">
+              <div>
+                <div class="panel-title">THÙNG RÁC NỘI DUNG</div>
+                <div class="governance-panel-subtitle">Khôi phục giữ nguyên trạng thái trước khi xóa và không phải tải lại PDF.</div>
+              </div>
+            </div>
+            <div class="data-table-wrapper governance-table-wrapper">
+              <table class="data-table governance-table">
+                <thead>
+                  <tr>
+                    <th>Loại</th>
+                    <th>Nội dung</th>
+                    <th>Trạng thái cũ</th>
+                    <th>Người xóa</th>
+                    <th>Thời gian</th>
+                    <th>Thao tác</th>
+                  </tr>
+                </thead>
+                <tbody id="governance-trash-tbody">
+                  <tr><td colspan="6" class="governance-loading-cell">Chọn tab để tải dữ liệu.</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </section>
+
+          <section class="panel-card governance-panel">
+            <div class="panel-header governance-panel-header">
+              <div>
+                <div class="panel-title">NHẬT KÝ HOẠT ĐỘNG</div>
+                <div class="governance-panel-subtitle">Lịch sử chỉ đọc, phục vụ kiểm tra khi có nhiều người cùng quản trị.</div>
+              </div>
+              <div class="governance-filters">
+                <input id="governance-search" class="admin-input" type="search" placeholder="Tìm người, nội dung..." oninput="window.renderAdminActivityLog()" />
+                <select id="governance-type-filter" class="admin-input" onchange="window.renderAdminActivityLog()">
+                  <option value="all">Tất cả nhóm</option>
+                  <option value="exam">Đề thi</option>
+                  <option value="document">Tài liệu</option>
+                  <option value="user">Tài khoản</option>
+                </select>
+              </div>
+            </div>
+            <div class="data-table-wrapper governance-table-wrapper">
+              <table class="data-table governance-table activity-log-table">
+                <thead>
+                  <tr>
+                    <th>Thời gian</th>
+                    <th>Người thực hiện</th>
+                    <th>Hoạt động</th>
+                    <th>Đối tượng</th>
+                    <th>Chi tiết</th>
+                  </tr>
+                </thead>
+                <tbody id="governance-log-tbody">
+                  <tr><td colspan="5" class="governance-loading-cell">Chọn tab để tải nhật ký.</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </section>
         </div>
 
         <!-- TAB: TÀI KHOẢN HỌC SINH -->
@@ -1189,11 +1339,12 @@
         </div>
       </div>
 
-      <div class="editor-body-content">
+      <div class="editor-body-content thpt-editor-layout">
+        <aside class="thpt-editor-tools" aria-label="Hướng dẫn và ký hiệu toán">
         <div class="editor-help-strip">
           <div>
             <strong>Quy trình nhanh</strong>
-            <span>Chọn đáp án → dán hoặc tải ảnh câu hỏi → nhập lời giải. Không cần gõ lại nội dung đề PDF.</span>
+            <span>Nhập đề bài và A/B/C/D → chọn đáp án đúng → nhập lời giải. Bấm ký hiệu toán để chèn. Câu chưa nhập nội dung vẫn đọc từ PDF.</span>
           </div>
           <nav class="editor-part-nav" aria-label="Đi tới phần đáp án">
             <button type="button" onclick="document.getElementById('editor-section-p1').scrollIntoView({behavior:'smooth'})">Phần 1</button>
@@ -1201,6 +1352,12 @@
             <button type="button" onclick="document.getElementById('editor-section-p3').scrollIntoView({behavior:'smooth'})">Phần 3</button>
           </nav>
         </div>
+        <details id="editor-math-tools" class="thpt-admin-math-tools" open>
+          <summary>Ký hiệu toán · bấm để mở / thu gọn</summary>
+          <div id="editor-math-palette"></div>
+        </details>
+        </aside>
+        <main class="thpt-editor-main">
         <section class="editor-part-settings" aria-labelledby="editor-part-settings-title">
           <div class="editor-part-settings-copy">
             <strong id="editor-part-settings-title">Cấu trúc đề thi</strong>
@@ -1231,6 +1388,7 @@
           </div>
           <div id="editor-p3-container"></div>
         </div>
+        </main>
       </div>
     </div>
 
@@ -1504,6 +1662,155 @@
       </div>
     </div>
 
+    <!-- ================= MODAL SỬA NỘI DUNG ================= -->
+    <div
+      class="modal-overlay"
+      id="content-edit-modal"
+      style="display: none"
+      onclick="window.handleBackdropClick(event, 'content-edit-modal')"
+    >
+      <div class="custom-modal-content content-manager-dialog" onclick="event.stopPropagation()">
+        <div class="content-manager-heading">
+          <div>
+            <span id="content-edit-kicker">CHỈNH SỬA NỘI DUNG</span>
+            <h3 id="content-edit-heading">Thông tin nội dung</h3>
+            <p>Thay đổi sẽ được đồng bộ sang giao diện học sinh sau khi lưu.</p>
+          </div>
+          <button type="button" class="content-manager-close" onclick="window.closeContentEditModal()" aria-label="Đóng">×</button>
+        </div>
+
+        <form id="content-edit-form" onsubmit="window.submitContentEdit(event)">
+          <input type="hidden" id="content-edit-kind" />
+          <input type="hidden" id="content-edit-id" />
+
+          <div class="modal-form-group">
+            <label class="input-label" for="content-edit-title">Tên hiển thị *</label>
+            <input id="content-edit-title" class="admin-input" type="text" maxlength="180" required />
+          </div>
+
+          <div class="modal-form-group" id="content-edit-description-wrap">
+            <label class="input-label" for="content-edit-description">Mô tả ngắn</label>
+            <textarea id="content-edit-description" class="admin-input" rows="3" maxlength="350"></textarea>
+          </div>
+
+          <div class="content-manager-fields">
+            <div class="modal-form-group">
+              <label class="input-label" for="content-edit-category">Thể loại *</label>
+              <select id="content-edit-category" class="admin-input"></select>
+            </div>
+            <div class="modal-form-group">
+              <label class="input-label" for="content-edit-cohort">Khóa học sinh</label>
+              <select id="content-edit-cohort" class="admin-input"></select>
+            </div>
+            <div class="modal-form-group">
+              <label class="input-label" for="content-edit-status">Trạng thái</label>
+              <select id="content-edit-status" class="admin-input">
+                <option value="published">Công khai</option>
+                <option value="hidden">Tạm ẩn</option>
+                <option value="draft">Bản nháp</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="modal-form-group content-manager-file-field">
+            <label class="input-label" for="content-edit-pdf">Thay file PDF (không bắt buộc)</label>
+            <input id="content-edit-pdf" class="admin-input" type="file" accept="application/pdf,.pdf" />
+            <small>Để trống nếu muốn giữ nguyên file hiện tại. Tối đa 50 MB.</small>
+          </div>
+
+          <div class="content-manager-actions">
+            <button type="button" class="btn-content-secondary" onclick="window.closeContentEditModal()">Hủy</button>
+            <button type="submit" class="btn-add-primary" id="content-edit-submit">Lưu thay đổi</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- ================= PHÂN TÍCH CHẤT LƯỢNG ĐỀ ================= -->
+    <div
+      class="modal-overlay"
+      id="exam-analytics-modal"
+      style="display: none"
+      onclick="window.handleBackdropClick(event, 'exam-analytics-modal')"
+    >
+      <div
+        class="custom-modal-content exam-analytics-dialog"
+        onclick="event.stopPropagation()"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="exam-analytics-title"
+      >
+        <div class="content-manager-heading">
+          <div>
+            <span>PHÂN TÍCH CHẤT LƯỢNG ĐỀ</span>
+            <h3 id="exam-analytics-title">Đang tải dữ liệu...</h3>
+            <p id="exam-analytics-subtitle">
+              Theo dõi điểm số, thời gian và những câu học sinh thường làm sai.
+            </p>
+          </div>
+          <button
+            type="button"
+            class="content-manager-close"
+            onclick="window.closeExamAnalytics()"
+            aria-label="Đóng"
+          >
+            ×
+          </button>
+        </div>
+        <div id="exam-analytics-summary" class="exam-analytics-summary"></div>
+        <div class="exam-analytics-section-heading">
+          <div>
+            <span>HIỆU SUẤT TỪNG CÂU</span>
+            <h4>Câu cần xem lại</h4>
+          </div>
+          <small>Sắp xếp từ tỷ lệ đúng thấp đến cao</small>
+        </div>
+        <div class="exam-analytics-table-head" aria-hidden="true">
+          <span>Câu hỏi</span>
+          <span>Tỷ lệ trả lời đúng</span>
+          <span>Kết quả tổng hợp</span>
+        </div>
+        <div
+          id="exam-analytics-question-list"
+          class="exam-analytics-question-list"
+          aria-live="polite"
+        ></div>
+        <p id="exam-analytics-note" class="exam-analytics-note"></p>
+        <div class="content-manager-actions">
+          <button
+            type="button"
+            class="btn-content-secondary"
+            onclick="window.closeExamAnalytics()"
+          >
+            Đóng
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ================= MODAL XEM TRƯỚC NỘI DUNG ================= -->
+    <div
+      class="modal-overlay"
+      id="content-preview-modal"
+      style="display: none"
+      onclick="window.handleBackdropClick(event, 'content-preview-modal')"
+    >
+      <div class="custom-modal-content content-preview-dialog" onclick="event.stopPropagation()">
+        <div class="content-manager-heading">
+          <div>
+            <span>XEM TRƯỚC PHÍA HỌC SINH</span>
+            <h3 id="content-preview-title">Nội dung</h3>
+          </div>
+          <button type="button" class="content-manager-close" onclick="window.closeManagedContentPreview()" aria-label="Đóng">×</button>
+        </div>
+        <div id="content-preview-body"></div>
+        <div class="content-manager-actions">
+          <button type="button" class="btn-content-secondary" onclick="window.closeManagedContentPreview()">Đóng</button>
+          <button type="button" class="btn-add-primary" id="content-preview-open-pdf">Mở file PDF</button>
+        </div>
+      </div>
+    </div>
+
     <!-- ================= BẢNG XEM TRƯỚC GIAO DIỆN HỌC SINH ================= -->
     <div
       class="modal-overlay"
@@ -1723,6 +2030,9 @@
     ===================================================================== -->
     <script type="module">
       import { createSupabaseBrowserClient } from "./assets/js/config/supabase.shared.js";
+      import { editorContentHtml, paletteHtml, fillEditorContent, collectEditorContent, bindMathEditor, syncRichMathEditors } from "./assets/js/features/question-content-admin.js";
+
+      import { imageWorkspaceHtml, createImageEditor } from "./assets/js/features/question-image-editor.js";
 
       // 👉 TẠO HIỆU ỨNG "LOAD CHÌM" BẰNG CÁCH ẨN MỌI THỨ KHI MỚI VÀO
       document.getElementById("admin-login-view").style.display = "none";
@@ -1733,6 +2043,11 @@
 
       let currentAdmin = null;
       let editingExamId = null;
+      let editingAnswers = {};
+      const adminExamCache = new Map();
+      const adminDocumentCache = new Map();
+      let adminActivityCache = [];
+      let adminTrashCache = [];
       let avatarModerationTargetUserId = null;
       let adminConfirmResolver = null;
       let imageFilesStore = {};
@@ -1745,6 +2060,9 @@
         { key: "P3", title: "Phần 3", description: "Trả lời ngắn / điền số", questionCount: 6 },
       ];
       let editorPartConfig = DEFAULT_EDITOR_PARTS.map((part) => ({ ...part }));
+
+      document.getElementById("editor-math-palette").innerHTML = paletteHtml();
+      bindMathEditor(document.getElementById("answer-editor-overlay"));
 
       function normalizeEditorPartConfig(answers = {}) {
         const savedParts = Array.isArray(answers?._config?.parts)
@@ -1846,6 +2164,7 @@
 
       // MỞ KHUNG SOẠN ĐÁP ÁN
       window.openAnswerEditor = async (examId, examTitle) => {
+        questionImageEditor.destroyAll();
         editingExamId = examId;
         document.getElementById("editor-exam-title").innerText =
           `Đang soạn đáp án cho: ${examTitle}`;
@@ -1857,11 +2176,18 @@
           .select("answers")
           .eq("id", examId)
           .single();
-        editorPartConfig = normalizeEditorPartConfig(ex?.answers || {});
+        if (error || !ex) {
+          editingExamId = null;
+          window.showNotification("Chưa mở được đề", "Không tải được đáp án hiện tại. Em thử lại để tránh ghi đè dữ liệu cũ.");
+          return;
+        }
+        editingAnswers = structuredClone(ex.answers || {});
+        editorPartConfig = normalizeEditorPartConfig(editingAnswers);
         syncEditorPartSettings();
         buildEditorForms();
         if (ex && ex.answers) {
           fillExistingAnswers(ex.answers);
+          fillEditorContent(document.getElementById("answer-editor-overlay"), ex.answers);
         }
 
         const overlay = document.getElementById("answer-editor-overlay");
@@ -1870,41 +2196,22 @@
       };
 
       window.closeAnswerEditor = () => {
+        questionImageEditor.destroyAll();
         document.getElementById("answer-editor-overlay").style.display = "none";
         editingExamId = null;
         window.activeCroppers = {};
         canvaState = {};
       };
 
-      function createImageWorkspaceHTML(qId) {
-        return `
-                <div class="drop-zone" id="drop_zone_${qId}" tabindex="0" data-qid="${qId}" 
-                     onclick="if(window.innerWidth <= 1024) window.triggerImageSelect('${qId}')"
-                     ondblclick="window.triggerImageSelect('${qId}')">
-                    <span>
-                        <span class="text-pc">Nhấp đúp chuột hoặc trỏ vào đây bấm <b>Ctrl+V</b> để dán ảnh</span>
-                        <span class="text-mobile">Bấm vào đây để tải ảnh lên</span>
-                    </span>
-                </div>
-
-                <div class="image-wrapper" id="img_wrap_${qId}">
-                    <div class="resizable-box" id="resize_box_${qId}">
-                        <img id="img_preview_${qId}" crossorigin="anonymous">
-                    </div>
-                    <span class="resize-hint">
-                        <span class="text-pc">Gợi ý: Cầm vào góc dưới cùng bên phải bức ảnh và kéo ngang để thu phóng kích thước tùy ý!</span>
-                        <span class="text-mobile">Gợi ý: Dùng tính năng Cắt ảnh để điều chỉnh khung hình.</span>
-                    </span>
-                    <div class="img-action-bar">
-                        <button type="button" class="btn-action-tool" id="btn_crop_${qId}" onclick="window.toggleInlineCrop(event, '${qId}')">Cắt Ảnh</button>
-                        <button type="button" class="btn-action-tool" onclick="window.showStudentPreview(event, '${qId}')">Xem Trước</button>
-                        <button type="button" class="btn-action-tool danger" onclick="window.removeImage(event, '${qId}')">Xóa Ảnh</button>
-                    </div>
-                </div>
-            `;
-      }
+      const questionImageEditor = createImageEditor({
+        getState: () => canvaState,
+        getFiles: () => imageFilesStore,
+        getCroppers: () => window.activeCroppers,
+      });
+      const createImageWorkspaceHTML = imageWorkspaceHtml;
 
       function buildEditorForms() {
+        questionImageEditor.destroyAll();
         const [part1, part2, part3] = editorPartConfig;
         syncEditorPartSettings();
         const p1Container = document.getElementById("editor-p1-container");
@@ -1920,7 +2227,7 @@
                                 <label class="opt-btn-item"><input type="radio" name="ed_p1_q${i}" value="C"><span>C</span></label>
                                 <label class="opt-btn-item"><input type="radio" name="ed_p1_q${i}" value="D"><span>D</span></label>
                             </div>
-                        </div> ${createImageWorkspaceHTML(qId)}
+                        </div> ${editorContentHtml("P1", i)} ${createImageWorkspaceHTML(qId)}
                         <div><span style="font-size:13px; font-weight:700; color:#334155; display:block; margin-bottom:6px;">Lời giải (Chữ):</span><textarea id="ed_p1_exp_${i}" class="exp-textarea-large" placeholder="Nhập hướng dẫn giải..."></textarea></div>
                     </div>`);
         }
@@ -1940,7 +2247,7 @@
                                 <div class="tf-card-item"><span class="tf-card-label">Ý c)</span><select class="tf-select-box" id="ed_p2_${i}_c"><option value="T">Đúng (T)</option><option value="F">Sai (F)</option></select></div>
                                 <div class="tf-card-item"><span class="tf-card-label">Ý d)</span><select class="tf-select-box" id="ed_p2_${i}_d"><option value="T">Đúng (T)</option><option value="F">Sai (F)</option></select></div>
                             </div>
-                        </div> ${createImageWorkspaceHTML(qId)}
+                        </div> ${editorContentHtml("P2", i)} ${createImageWorkspaceHTML(qId)}
                         <div><span style="font-size:13px; font-weight:700; color:#334155; display:block; margin-bottom:6px;">Lời giải chi tiết cho cả 4 ý:</span><textarea id="ed_p2_exp_${i}" class="exp-textarea-large" placeholder="Nhập hướng dẫn giải chi tiết..."></textarea></div>
                     </div>`);
         }
@@ -1954,7 +2261,7 @@
                     <div class="q-box-large" onmouseenter="window.activeHoverQid = '${qId}'" onmouseleave="window.activeHoverQid = null">
                         <div class="q-box-header"><span class="q-badge-num" style="background:#0d9488;">Câu ${i} (Điền số)</span>
                             <div style="display: flex; align-items: center; gap: 10px;"><span style="font-size: 13px; font-weight: 800; color: #0d9488;">ĐÁP ÁN CHUẨN:</span><input type="text" id="ed_p3_ans_${i}" class="short-ans-input" placeholder="VD: 84 hoặc -12,5"></div>
-                        </div> ${createImageWorkspaceHTML(qId)}
+                        </div> ${editorContentHtml("P3", i)} ${createImageWorkspaceHTML(qId)}
                         <div><span style="font-size:13px; font-weight:700; color:#334155; display:block; margin-bottom:6px;">Lời giải chi tiết:</span><textarea id="ed_p3_exp_${i}" class="exp-textarea-large" placeholder="Nhập hướng dẫn giải..."></textarea></div>
                     </div>`);
         }
@@ -2006,134 +2313,12 @@
         }
       });
 
-      function processNewImage(qId, imgSrc, blobFile) {
-        const dropZone = document.getElementById(`drop_zone_${qId}`);
-        const imgWrap = document.getElementById(`img_wrap_${qId}`);
-        const imgEl = document.getElementById(`img_preview_${qId}`);
-        const resizeBox = document.getElementById(`resize_box_${qId}`);
-
-        if (dropZone) dropZone.style.display = "none";
-        if (!canvaState[qId] || !canvaState[qId].originalSrc) {
-          canvaState[qId] = {
-            originalSrc: imgSrc,
-            originalBlob: blobFile,
-            cropData: null,
-            isNewFile: !!blobFile,
-            hasChanged: false,
-          };
-        }
-        imgEl.src = imgSrc;
-        imgEl.onload = () => {
-          if (!resizeBox.classList.contains("is-cropping")) {
-            resizeBox.style.width = "auto";
-            resizeBox.style.height = "auto";
-            resizeBox.style.resize = "horizontal";
-          }
-          if (imgWrap) imgWrap.style.display = "block";
-          imgEl.onload = null;
-        };
-        if (blobFile) {
-          imageFilesStore[qId] = blobFile;
-        }
-      }
-
-      window.removeImage = (event, qId) => {
-        event.stopPropagation();
-        if (window.activeCroppers[qId]) {
-          window.activeCroppers[qId].destroy();
-          delete window.activeCroppers[qId];
-        }
-        const dropZone = document.getElementById(`drop_zone_${qId}`);
-        const imgWrap = document.getElementById(`img_wrap_${qId}`);
-        const imgEl = document.getElementById(`img_preview_${qId}`);
-        const btnCrop = document.getElementById(`btn_crop_${qId}`);
-
-        imgEl.src = "";
-        if (imgWrap) imgWrap.style.display = "none";
-        if (dropZone) {
-          dropZone.innerHTML = `<span><span class="text-pc">Nhấp đúp chuột hoặc trỏ vào đây bấm <b>Ctrl+V</b> để dán ảnh</span><span class="text-mobile">Bấm vào đây để tải ảnh lên</span></span>`;
-          dropZone.style.display = "flex";
-        }
-        if (btnCrop) {
-          btnCrop.innerHTML = "Cắt Ảnh";
-          btnCrop.classList.remove("success");
-        }
-        delete imageFilesStore[qId];
-        delete canvaState[qId];
-      };
-
-      window.toggleInlineCrop = (event, qId) => {
-        event.stopPropagation();
-        const imgEl = document.getElementById(`img_preview_${qId}`);
-        const btnCrop = document.getElementById(`btn_crop_${qId}`);
-        const resizeBox = document.getElementById(`resize_box_${qId}`);
-        if (!imgEl || !canvaState[qId] || !canvaState[qId].originalSrc) return;
-
-        if (!window.activeCroppers[qId]) {
-          resizeBox.style.resize = "none";
-          resizeBox.classList.add("is-cropping");
-          resizeBox.style.width = "100%";
-
-          const startCropper = () => {
-            if (window.activeCroppers[qId]) return;
-            window.activeCroppers[qId] = new Cropper(imgEl, {
-              viewMode: 1,
-              dragMode: "crop",
-              autoCropArea: 1,
-              background: false,
-              guides: true,
-              center: true,
-              highlight: true,
-              cropBoxMovable: true,
-              cropBoxResizable: true,
-              toggleDragModeOnDblclick: false,
-              ready() {
-                if (canvaState[qId].cropData) {
-                  this.cropper.setData(canvaState[qId].cropData);
-                }
-              },
-            });
-            btnCrop.innerHTML = "Hoàn Tất Cắt";
-            btnCrop.classList.add("success");
-            imgEl.onload = null;
-          };
-
-          if (imgEl.src === canvaState[qId].originalSrc) {
-            startCropper();
-          } else {
-            imgEl.onload = startCropper;
-            imgEl.src = canvaState[qId].originalSrc;
-            if (imgEl.complete && imgEl.naturalHeight !== 0) startCropper();
-          }
-        } else {
-          const cropper = window.activeCroppers[qId];
-          canvaState[qId].cropData = cropper.getData();
-          const canvas = cropper.getCroppedCanvas({
-            imageSmoothingEnabled: true,
-            imageSmoothingQuality: "high",
-          });
-
-          if (canvas) {
-            canvas.toBlob((blob) => {
-              imageFilesStore[qId] = blob;
-              canvaState[qId].isNewFile = true;
-              canvaState[qId].hasChanged = true;
-              cropper.destroy();
-              delete window.activeCroppers[qId];
-              imgEl.onload = () => {
-                resizeBox.classList.remove("is-cropping");
-                resizeBox.style.width = "auto";
-                resizeBox.style.height = "auto";
-                resizeBox.style.resize = "horizontal";
-                imgEl.onload = null;
-              };
-              imgEl.src = canvas.toDataURL("image/png");
-              btnCrop.innerHTML = "Sửa Lại Cắt";
-              btnCrop.classList.remove("success");
-            }, "image/png");
-          }
-        }
-      };
+      // Khu vực ảnh mới giữ nguyên tên hàm mà luồng lưu/nạp cũ đang gọi.
+      const processNewImage = questionImageEditor.load;
+      window.removeImage = questionImageEditor.remove;
+      window.toggleInlineCrop = questionImageEditor.start;
+      window.applyInlineCrop = questionImageEditor.apply;
+      window.cancelInlineCrop = questionImageEditor.cancel;
 
       window.showStudentPreview = (event, qId) => {
         event.stopPropagation();
@@ -2261,6 +2446,13 @@
       }
 
       window.saveFullAnswersAndExplanations = async () => {
+        let questionContent;
+        try {
+          questionContent = collectEditorContent(document.getElementById("answer-editor-overlay"), editorPartConfig);
+        } catch (error) {
+          window.showNotification("Nội dung câu hỏi chưa đủ", error.message);
+          return;
+        }
         const activeCrops = Object.keys(window.activeCroppers);
         if (activeCrops.length > 0) {
           window.showNotification(
@@ -2376,6 +2568,7 @@
               `input[name="ed_p1_q${i}"]:checked`,
             );
             p1Obj[i.toString()] = {
+              ...(typeof editingAnswers.P1?.[i] === "object" ? editingAnswers.P1[i] : {}),
               ans: sel ? sel.value : "A",
               exp: document.getElementById(`ed_p1_exp_${i}`).value,
               ...getDbData(`P1_${i}`),
@@ -2385,6 +2578,7 @@
           let p2Obj = {};
           for (let i = 1; i <= editorPartConfig[1].questionCount; i++) {
             p2Obj[i.toString()] = {
+              ...(typeof editingAnswers.P2?.[i] === "object" ? editingAnswers.P2[i] : {}),
               a: document.getElementById(`ed_p2_${i}_a`).value,
               b: document.getElementById(`ed_p2_${i}_b`).value,
               c: document.getElementById(`ed_p2_${i}_c`).value,
@@ -2397,6 +2591,7 @@
           let p3Obj = {};
           for (let i = 1; i <= editorPartConfig[2].questionCount; i++) {
             p3Obj[i.toString()] = {
+              ...(typeof editingAnswers.P3?.[i] === "object" ? editingAnswers.P3[i] : {}),
               ans: document.getElementById(`ed_p3_ans_${i}`).value.trim(),
               exp: document.getElementById(`ed_p3_exp_${i}`).value,
               ...getDbData(`P3_${i}`),
@@ -2407,7 +2602,9 @@
             .from("exams")
             .update({
               answers: {
-                _config: { version: 1, parts: editorPartConfig },
+                ...editingAnswers,
+                _config: { ...editingAnswers._config, version: 1, parts: editorPartConfig },
+                _content: { ...editingAnswers._content, ...questionContent },
                 P1: p1Obj,
                 P2: p2Obj,
                 P3: p3Obj,
@@ -2415,6 +2612,16 @@
             })
             .eq("id", editingExamId);
           if (error) throw error;
+
+          void recordAdminActivity(
+            "answers_update",
+            "exam",
+            editingExamId,
+            adminExamCache.get(String(editingExamId))?.title || `Đề ${editingExamId}`,
+            {
+              summary: `Đã lưu cấu trúc ${editorPartConfig.map((part) => `${part.title}: ${part.questionCount} câu`).join(" · ")}`,
+            },
+          );
 
           btn.innerText = "ĐÃ LƯU THÀNH CÔNG";
           btn.style.background = "#10b981";
@@ -2473,7 +2680,7 @@
 
             // Nếu không có backup, về màn hình Quản lý
             const savedAdminTab = sessionStorage.getItem("admin_current_tab");
-            if (savedAdminTab && savedAdminTab !== "exams") {
+            if (savedAdminTab && savedAdminTab !== "dashboard") {
               setTimeout(() => {
                 const btn = document.querySelector(
                   `.admin-nav-btn[onclick*="${savedAdminTab}"]`,
@@ -2563,6 +2770,7 @@
         if (adminSyncInterval) clearInterval(adminSyncInterval);
         stopAdminDocumentRealtimeSync();
         stopAdminUserRealtimeSync();
+        stopAdminGovernanceRealtimeSync();
         document.getElementById("admin-boot-loader").style.display = "none";
         document.getElementById("admin-login-view").style.display = "flex";
         document.getElementById("admin-dashboard-view").style.display = "none";
@@ -2577,14 +2785,13 @@
         document.getElementById("admin-name-text").innerText =
           currentAdmin.full_name || currentAdmin.username || "Admin";
         document.getElementById("stat-role-text").innerText =
-          currentAdmin.role === "admin" ? "Chủ Tịch (Admin)" : "Biên Tập Viên";
+          currentAdmin.role === "admin" ? "Quản trị viên" : "Biên tập viên";
         const usersNavButton = document.getElementById("users-nav-btn");
         if (usersNavButton)
           usersNavButton.style.display =
             currentAdmin.role === "admin" ? "" : "none";
 
-        loadMetrics();
-        loadExams();
+        window.loadAdminOverview();
 
         // Editor chỉ quản lý nội dung đề, không được tải danh sách học sinh.
         if (currentAdmin.role === "admin") {
@@ -2594,15 +2801,450 @@
       }
 
       async function loadMetrics() {
-        const { count: uCount } = await supabase
-          .from("user_profiles")
-          .select("*", { count: "exact", head: true });
-        document.getElementById("stat-users-count").innerText = uCount || 0;
-        const { count: eCount } = await supabase
-          .from("exams")
-          .select("*", { count: "exact", head: true });
-        document.getElementById("stat-exams-count").innerText = eCount || 0;
+        const [usersResult, examsResult, documentsResult] = await Promise.all([
+          supabase.from("user_profiles").select("*", { count: "exact", head: true }),
+          supabase.from("exams").select("*", { count: "exact", head: true }),
+          supabase.from("documents").select("download_count"),
+        ]);
+        const documents = documentsResult.data || [];
+        renderAdminOverview({
+          total_students: usersResult.count || 0,
+          total_attempts: 0,
+          average_score: 0,
+          published_exams: examsResult.count || 0,
+          published_documents: documents.length,
+          document_downloads: documents.reduce(
+            (total, item) => total + Number(item.download_count || 0),
+            0,
+          ),
+          hidden_content: 0,
+          series: [],
+          top_exams: [],
+        });
       }
+
+      function formatAdminNumber(value, maximumFractionDigits = 0) {
+        return new Intl.NumberFormat("vi-VN", { maximumFractionDigits }).format(
+          Number(value || 0),
+        );
+      }
+
+      function renderAdminOverview(data = {}) {
+        const metrics = [
+          ["stat-users-count", data.total_students],
+          ["stat-attempts-count", data.total_attempts],
+          ["stat-average-score", data.average_score, 2],
+          ["stat-exams-count", data.published_exams],
+          ["stat-documents-count", data.published_documents],
+          ["stat-downloads-count", data.document_downloads],
+          ["stat-hidden-content", data.hidden_content],
+        ];
+        metrics.forEach(([id, value, digits = 0]) => {
+          const element = document.getElementById(id);
+          if (element) element.textContent = formatAdminNumber(value, digits);
+        });
+
+        const series = Array.isArray(data.series) ? data.series : [];
+        const chart = document.getElementById("overview-attempt-chart");
+        const activityTotal = series.reduce(
+          (total, item) => total + Number(item.attempts || 0),
+          0,
+        );
+        document.getElementById("overview-activity-total").textContent =
+          `${formatAdminNumber(activityTotal)} lượt`;
+        chart.replaceChildren();
+
+        if (!series.length) {
+          const empty = document.createElement("div");
+          empty.className = "overview-empty";
+          empty.textContent = "Chưa có dữ liệu theo ngày. Dashboard vẫn cập nhật các chỉ số tổng.";
+          chart.appendChild(empty);
+        } else {
+          const maxValue = Math.max(1, ...series.map((item) => Number(item.attempts || 0)));
+          series.forEach((item) => {
+            const date = new Date(`${item.date}T00:00:00`);
+            const column = document.createElement("div");
+            column.className = "overview-bar-column";
+            const value = Number(item.attempts || 0);
+            const bar = document.createElement("i");
+            bar.style.setProperty("--bar-height", `${Math.max(value ? 12 : 3, (value / maxValue) * 100)}%`);
+            bar.title = `${value} lượt nộp`;
+            const count = document.createElement("b");
+            count.textContent = formatAdminNumber(value);
+            const label = document.createElement("span");
+            label.textContent = Number.isNaN(date.getTime())
+              ? "--"
+              : date.toLocaleDateString("vi-VN", { weekday: "short" }).replace("Th ", "T");
+            column.append(count, bar, label);
+            chart.appendChild(column);
+          });
+        }
+
+        const topList = document.getElementById("overview-top-exams");
+        topList.replaceChildren();
+        const topExams = Array.isArray(data.top_exams) ? data.top_exams : [];
+        if (!topExams.length) {
+          const empty = document.createElement("div");
+          empty.className = "overview-empty";
+          empty.textContent = "Chưa có lượt nộp bài để xếp hạng.";
+          topList.appendChild(empty);
+        } else {
+          topExams.forEach((exam, index) => {
+            const item = document.createElement("div");
+            item.className = "overview-top-item";
+            const rank = document.createElement("span");
+            rank.textContent = String(index + 1).padStart(2, "0");
+            const copy = document.createElement("div");
+            const title = document.createElement("b");
+            title.textContent = exam.title || exam.exam_id || "Đề thi";
+            const meta = document.createElement("small");
+            meta.textContent = `${formatAdminNumber(exam.attempt_count)} lượt · Điểm TB ${formatAdminNumber(exam.average_score, 2)}`;
+            copy.append(title, meta);
+            item.append(rank, copy);
+            topList.appendChild(item);
+          });
+        }
+      }
+
+      window.loadAdminOverview = async (showFeedback = false) => {
+        try {
+          const { data, error } = await supabase.rpc(
+            "get_admin_dashboard_overview",
+            { p_days: 7 },
+          );
+          if (error) throw error;
+          renderAdminOverview(data || {});
+          if (showFeedback) {
+            window.showNotification("Đã cập nhật", "Dashboard đã lấy dữ liệu mới nhất.");
+          }
+        } catch (error) {
+          console.warn("Dashboard RPC chưa sẵn sàng:", error);
+          await loadMetrics();
+          if (showFeedback) {
+            window.showNotification(
+              "Dashboard cơ bản",
+              "Hãy chạy file supabase-admin-content.sql để bật biểu đồ và thống kê đầy đủ.",
+            );
+          }
+        }
+      };
+
+      async function recordAdminActivity(
+        action,
+        contentType,
+        contentId = null,
+        contentTitle = null,
+        details = {},
+      ) {
+        try {
+          const { error } = await supabase.rpc("record_admin_activity", {
+            p_action: action,
+            p_content_type: contentType,
+            p_content_id: contentId === null ? null : String(contentId),
+            p_content_title: contentTitle || null,
+            p_details: details || {},
+          });
+          if (error) throw error;
+          return true;
+        } catch (error) {
+          console.warn("Chưa ghi được nhật ký quản trị:", error);
+          return false;
+        }
+      }
+
+      function formatAdminDateTime(value) {
+        const date = new Date(value);
+        if (Number.isNaN(date.getTime())) return "--";
+        return date.toLocaleString("vi-VN", {
+          hour: "2-digit",
+          minute: "2-digit",
+          day: "2-digit",
+          month: "2-digit",
+          year: "numeric",
+        });
+      }
+
+      function getAdminActionLabel(action) {
+        return {
+          create: "Tạo mới",
+          update: "Chỉnh sửa",
+          publish: "Công khai",
+          hide: "Tạm ẩn",
+          draft: "Chuyển bản nháp",
+          answers_update: "Cập nhật đáp án",
+          soft_delete: "Chuyển vào thùng rác",
+          restore: "Khôi phục",
+          permanent_delete: "Xóa vĩnh viễn",
+          avatar_approve: "Kiểm tra avatar",
+          avatar_remove: "Gỡ avatar",
+          role_update: "Đổi quyền tài khoản",
+        }[action] || action || "Hoạt động";
+      }
+
+      function getAdminContentTypeLabel(type) {
+        return {
+          exam: "Đề thi",
+          document: "Tài liệu",
+          user: "Tài khoản",
+          system: "Hệ thống",
+        }[type] || type || "Nội dung";
+      }
+
+      function getActivityDetailText(log) {
+        const details = log?.details || {};
+        if (details.summary) return String(details.summary);
+        if (log.action === "soft_delete") {
+          return `Giữ trạng thái cũ: ${details.previous_status || "--"}`;
+        }
+        if (log.action === "restore") {
+          return `Khôi phục về: ${details.restored_status || "--"}`;
+        }
+        if (log.action === "role_update") {
+          return `${details.previous_role || "--"} → ${details.new_role || "--"}`;
+        }
+        if (log.action === "update" && details.publication_status) {
+          return `Trạng thái: ${details.publication_status}`;
+        }
+        return "Đã ghi nhận thành công";
+      }
+
+      function renderAdminTrash() {
+        const tbody = document.getElementById("governance-trash-tbody");
+        if (!tbody) return;
+        tbody.replaceChildren();
+        document.getElementById("governance-trash-count").textContent =
+          formatAdminNumber(adminTrashCache.length);
+
+        if (!adminTrashCache.length) {
+          const row = document.createElement("tr");
+          const cell = document.createElement("td");
+          cell.colSpan = 6;
+          cell.className = "governance-empty-cell";
+          cell.textContent = "Thùng rác đang trống.";
+          row.appendChild(cell);
+          tbody.appendChild(row);
+          return;
+        }
+
+        const fragment = document.createDocumentFragment();
+        adminTrashCache.forEach((item) => {
+          const row = document.createElement("tr");
+          const typeCell = document.createElement("td");
+          const typeBadge = document.createElement("span");
+          typeBadge.className = `governance-type-badge ${item.content_type}`;
+          typeBadge.textContent = getAdminContentTypeLabel(item.content_type);
+          typeCell.appendChild(typeBadge);
+          row.appendChild(typeCell);
+          appendCell(row, item.title || "Chưa đặt tên", { bold: true });
+
+          const statusCell = document.createElement("td");
+          statusCell.appendChild(
+            createPublicationBadge(item.deleted_from_status || "hidden"),
+          );
+          row.appendChild(statusCell);
+          appendCell(row, item.deleted_by_name || "Quản trị viên");
+          appendCell(row, formatAdminDateTime(item.deleted_at));
+
+          const actionCell = document.createElement("td");
+          actionCell.className = "admin-row-actions governance-row-actions";
+          const restoreButton = createAdminActionButton(
+            "Khôi phục",
+            "publish",
+            () => window.restoreDeletedContent(item.content_type, item.id),
+          );
+          actionCell.appendChild(restoreButton);
+          if (currentAdmin?.role === "admin") {
+            const permanentButton = createAdminActionButton(
+              "Xóa vĩnh viễn",
+              "delete",
+              () =>
+                item.content_type === "exam"
+                  ? window.permanentlyDeleteExam(item.id)
+                  : window.permanentlyDeleteDocument(item.id),
+            );
+            actionCell.appendChild(permanentButton);
+          }
+          row.appendChild(actionCell);
+          fragment.appendChild(row);
+        });
+        tbody.appendChild(fragment);
+      }
+
+      function setGovernanceTableMessage(tbody, columnCount, message, className) {
+        if (!tbody) return;
+        const row = document.createElement("tr");
+        const cell = document.createElement("td");
+        cell.colSpan = columnCount;
+        cell.className = className;
+        cell.textContent = message;
+        row.appendChild(cell);
+        tbody.replaceChildren(row);
+      }
+
+      window.renderAdminActivityLog = () => {
+        const tbody = document.getElementById("governance-log-tbody");
+        if (!tbody) return;
+        const searchValue = String(
+          document.getElementById("governance-search")?.value || "",
+        )
+          .trim()
+          .toLocaleLowerCase("vi");
+        const typeFilter =
+          document.getElementById("governance-type-filter")?.value || "all";
+        const filteredLogs = adminActivityCache.filter((log) => {
+          if (typeFilter !== "all" && log.content_type !== typeFilter) return false;
+          if (!searchValue) return true;
+          const searchable = `${log.actor_name || ""} ${log.content_title || ""} ${log.content_id || ""} ${getAdminActionLabel(log.action)} ${getActivityDetailText(log)}`.toLocaleLowerCase("vi");
+          return searchable.includes(searchValue);
+        });
+
+        tbody.replaceChildren();
+        if (!filteredLogs.length) {
+          const row = document.createElement("tr");
+          const cell = document.createElement("td");
+          cell.colSpan = 5;
+          cell.className = "governance-empty-cell";
+          cell.textContent = adminActivityCache.length
+            ? "Không có hoạt động phù hợp bộ lọc."
+            : "Chưa có hoạt động quản trị nào được ghi nhận.";
+          row.appendChild(cell);
+          tbody.appendChild(row);
+          return;
+        }
+
+        const fragment = document.createDocumentFragment();
+        filteredLogs.forEach((log) => {
+          const row = document.createElement("tr");
+          appendCell(row, formatAdminDateTime(log.created_at));
+
+          const actorCell = document.createElement("td");
+          const actor = document.createElement("div");
+          actor.className = "governance-actor";
+          const avatar = document.createElement("span");
+          avatar.textContent = String(log.actor_name || "A")
+            .trim()
+            .charAt(0)
+            .toUpperCase();
+          const actorCopy = document.createElement("div");
+          const actorName = document.createElement("b");
+          actorName.textContent = log.actor_name || "Quản trị viên";
+          const actorRole = document.createElement("small");
+          actorRole.textContent =
+            log.actor_role === "admin" ? "Admin" : "Biên tập viên";
+          actorCopy.append(actorName, actorRole);
+          actor.append(avatar, actorCopy);
+          actorCell.appendChild(actor);
+          row.appendChild(actorCell);
+
+          const actionCell = document.createElement("td");
+          const actionBadge = document.createElement("span");
+          actionBadge.className = `governance-action-badge ${log.action || "default"}`;
+          actionBadge.textContent = getAdminActionLabel(log.action);
+          actionCell.appendChild(actionBadge);
+          row.appendChild(actionCell);
+
+          const objectCell = document.createElement("td");
+          const objectTitle = document.createElement("b");
+          objectTitle.textContent = log.content_title || log.content_id || "--";
+          const objectType = document.createElement("small");
+          objectType.textContent = getAdminContentTypeLabel(log.content_type);
+          objectCell.className = "governance-object-cell";
+          objectCell.append(objectTitle, objectType);
+          row.appendChild(objectCell);
+          appendCell(row, getActivityDetailText(log));
+          fragment.appendChild(row);
+        });
+        tbody.appendChild(fragment);
+      };
+
+      window.loadAdminGovernance = async (showFeedback = false) => {
+        const trashBody = document.getElementById("governance-trash-tbody");
+        const logBody = document.getElementById("governance-log-tbody");
+        setGovernanceTableMessage(
+          trashBody,
+          6,
+          "Đang tải thùng rác...",
+          "governance-loading-cell",
+        );
+        setGovernanceTableMessage(
+          logBody,
+          5,
+          "Đang tải nhật ký...",
+          "governance-loading-cell",
+        );
+
+        const [examsResult, documentsResult, logsResult] = await Promise.all([
+          supabase
+            .from("exams")
+            .select("id, title, pdf_url, answers, publication_status, deleted_at, deleted_by_name, deleted_from_status")
+            .not("deleted_at", "is", null)
+            .order("deleted_at", { ascending: false }),
+          supabase
+            .from("documents")
+            .select("id, title, pdf_url, storage_path, publication_status, deleted_at, deleted_by_name, deleted_from_status")
+            .not("deleted_at", "is", null)
+            .order("deleted_at", { ascending: false }),
+          supabase
+            .from("admin_activity_logs")
+            .select("id, actor_id, actor_name, actor_role, action, content_type, content_id, content_title, details, created_at")
+            .order("created_at", { ascending: false })
+            .limit(100),
+        ]);
+
+        const firstError = examsResult.error || documentsResult.error || logsResult.error;
+        if (firstError) {
+          const message = /deleted_at|admin_activity_logs|record_admin_activity/i.test(
+            firstError.message || "",
+          )
+            ? "Hãy chạy file supabase-admin-audit-trash.sql trước."
+            : firstError.message || "Chưa tải được dữ liệu quản trị.";
+          setGovernanceTableMessage(
+            trashBody,
+            6,
+            message,
+            "governance-error-cell",
+          );
+          setGovernanceTableMessage(
+            logBody,
+            5,
+            message,
+            "governance-error-cell",
+          );
+          const trashCount = document.getElementById("governance-trash-count");
+          const logCount = document.getElementById("governance-log-count");
+          if (trashCount) trashCount.textContent = "--";
+          if (logCount) logCount.textContent = "--";
+          return;
+        }
+
+        adminTrashCache = [
+          ...(examsResult.data || []).map((item) => ({
+            ...item,
+            content_type: "exam",
+          })),
+          ...(documentsResult.data || []).map((item) => ({
+            ...item,
+            content_type: "document",
+          })),
+        ].sort(
+          (a, b) => new Date(b.deleted_at).getTime() - new Date(a.deleted_at).getTime(),
+        );
+        adminActivityCache = logsResult.data || [];
+        document.getElementById("governance-log-count").textContent =
+          formatAdminNumber(adminActivityCache.length);
+        document.getElementById("governance-permission-label").textContent =
+          currentAdmin?.role === "admin" ? "Được phép" : "Không được phép";
+        renderAdminTrash();
+        window.renderAdminActivityLog();
+        startAdminGovernanceRealtimeSync();
+
+        if (showFeedback) {
+          window.showNotification(
+            "Đã cập nhật",
+            "Nhật ký và thùng rác đã lấy dữ liệu mới nhất.",
+          );
+        }
+      };
 
       let adminSyncInterval = null;
       let adminDocumentRealtimeChannel = null;
@@ -2611,6 +3253,55 @@
       let adminUserRealtimeChannel = null;
       let adminUserFallbackInterval = null;
       let adminUserReloadTimeout = null;
+      let adminGovernanceRealtimeChannel = null;
+      let adminGovernanceReloadTimeout = null;
+
+      function isGovernanceTabVisible() {
+        return (
+          document.getElementById("tab-governance")?.style.display !== "none" &&
+          !document.hidden
+        );
+      }
+
+      function scheduleAdminGovernanceReload() {
+        if (!isGovernanceTabVisible()) return;
+        clearTimeout(adminGovernanceReloadTimeout);
+        adminGovernanceReloadTimeout = setTimeout(
+          () => window.loadAdminGovernance(),
+          220,
+        );
+      }
+
+      function stopAdminGovernanceRealtimeSync() {
+        clearTimeout(adminGovernanceReloadTimeout);
+        adminGovernanceReloadTimeout = null;
+        if (adminGovernanceRealtimeChannel) {
+          void supabase.removeChannel(adminGovernanceRealtimeChannel);
+          adminGovernanceRealtimeChannel = null;
+        }
+      }
+
+      function startAdminGovernanceRealtimeSync() {
+        if (!currentAdmin || adminGovernanceRealtimeChannel) return;
+        adminGovernanceRealtimeChannel = supabase
+          .channel(`admin-governance-live-${currentAdmin.id}`)
+          .on(
+            "postgres_changes",
+            { event: "*", schema: "public", table: "admin_activity_logs" },
+            scheduleAdminGovernanceReload,
+          )
+          .on(
+            "postgres_changes",
+            { event: "UPDATE", schema: "public", table: "exams" },
+            scheduleAdminGovernanceReload,
+          )
+          .on(
+            "postgres_changes",
+            { event: "UPDATE", schema: "public", table: "documents" },
+            scheduleAdminGovernanceReload,
+          )
+          .subscribe();
+      }
 
       function isUsersTabVisible() {
         return (
@@ -2675,8 +3366,23 @@
           try {
             const { data } = await supabase
               .from("exams")
-              .select("id, views, likes");
+              .select("id, title, views, likes, publication_status, deleted_at")
+              .is("deleted_at", null);
             if (data) {
+              const contentChanged =
+                data.length !== adminExamCache.size ||
+                data.some((exam) => {
+                  const cached = adminExamCache.get(String(exam.id));
+                  return (
+                    !cached ||
+                    cached.title !== exam.title ||
+                    cached.publication_status !== exam.publication_status
+                  );
+                });
+              if (contentChanged) {
+                loadExams();
+                return;
+              }
               data.forEach((ex) => {
                 const viewEl = document.getElementById(`admin-view-${ex.id}`);
                 if (viewEl && parseInt(viewEl.innerText) !== (ex.views || 0)) {
@@ -2692,31 +3398,74 @@
         }, 10000);
       }
 
+      function createPublicationBadge(status) {
+        const normalized = ["published", "hidden", "draft"].includes(status)
+          ? status
+          : "published";
+        const labels = {
+          published: "Công khai",
+          hidden: "Tạm ẩn",
+          draft: "Bản nháp",
+        };
+        const badge = document.createElement("span");
+        badge.className = `publication-badge ${normalized}`;
+        badge.textContent = labels[normalized];
+        return badge;
+      }
+
+      function createAdminActionButton(label, className, handler, title = "") {
+        const button = document.createElement("button");
+        button.type = "button";
+        button.className = `btn-tb-action ${className}`;
+        button.textContent = label;
+        button.title = title;
+        button.addEventListener("click", handler);
+        return button;
+      }
+
       async function loadExams() {
         const tbody = document.getElementById("exams-tbody");
         tbody.innerHTML =
-          '<tr><td colspan="7" style="text-align:center; color:#94a3b8;">Đang tải...</td></tr>';
-        const { data: exams, error } = await supabase
+          '<tr><td colspan="8" style="text-align:center; color:#94a3b8;">Đang tải...</td></tr>';
+        let examsResult = await supabase
           .from("exams")
-          .select("id, title, category, cohort, views, likes, created_at")
+          .select("id, title, category, cohort, pdf_url, views, likes, publication_status, deleted_at, created_at, updated_at")
+          .is("deleted_at", null)
           .order("created_at", { ascending: false });
+
+        if (examsResult.error && /publication_status|updated_at|deleted_at/i.test(examsResult.error.message || "")) {
+          examsResult = await supabase
+            .from("exams")
+            .select("id, title, category, cohort, pdf_url, views, likes, created_at")
+            .order("created_at", { ascending: false });
+          examsResult.data = (examsResult.data || []).map((item) => ({
+            ...item,
+            publication_status: "published",
+            updated_at: item.created_at,
+          }));
+        }
+
+        const { data: exams, error } = examsResult;
 
         if (error) {
           tbody.innerHTML =
-            '<tr><td colspan="7" style="text-align:center; color:#ef4444;">Không tải được danh sách đề.</td></tr>';
+            '<tr><td colspan="8" style="text-align:center; color:#ef4444;">Không tải được danh sách đề.</td></tr>';
           return;
         }
 
         if (!exams || exams.length === 0) {
           tbody.innerHTML =
-            '<tr><td colspan="7" style="text-align:center; color:#94a3b8;">Chưa có đề thi nào!</td></tr>';
+            '<tr><td colspan="8" style="text-align:center; color:#94a3b8;">Chưa có đề thi nào!</td></tr>';
           return;
         }
 
         tbody.replaceChildren();
+        adminExamCache.clear();
         const examsFragment = document.createDocumentFragment();
         exams.forEach((ex) => {
+          adminExamCache.set(String(ex.id), ex);
           const row = document.createElement("tr");
+          row.dataset.examId = ex.id;
           const examCategoryLabels = {
             so: "Đề Sở & Tỉnh",
             chuyen: "Đề trường chuyên",
@@ -2746,22 +3495,51 @@
           likesCell.className = "notranslate";
           likesCell.setAttribute("translate", "no");
 
+          const statusCell = document.createElement("td");
+          statusCell.appendChild(createPublicationBadge(ex.publication_status));
+          row.appendChild(statusCell);
+
           const actionCell = document.createElement("td");
-          const answerButton = document.createElement("button");
-          answerButton.className = "btn-tb-action answer";
-          answerButton.textContent = "Soạn Đáp Án";
-          answerButton.addEventListener("click", () =>
-            window.openAnswerEditor(ex.id, ex.title),
+          actionCell.className = "admin-row-actions";
+          const previewButton = createAdminActionButton(
+            "Xem trước",
+            "preview",
+            () => window.previewManagedContent("exam", ex.id),
+          );
+          const editButton = createAdminActionButton(
+            "Chỉnh sửa",
+            "edit",
+            () => window.openContentEditModal("exam", ex.id),
+          );
+          const visibilityButton = createAdminActionButton(
+            ex.publication_status === "published" ? "Ẩn" : "Công khai",
+            ex.publication_status === "published" ? "hide" : "publish",
+            () => window.toggleContentPublication("exam", ex.id),
+          );
+          const answerButton = createAdminActionButton(
+            "Soạn đáp án",
+            "answer",
+            () => window.openAnswerEditor(ex.id, ex.title),
+          );
+          const analyticsButton = createAdminActionButton(
+            "Phân tích",
+            "analytics",
+            () => window.openExamAnalytics(ex.id),
+          );
+          const deleteButton = createAdminActionButton(
+            "Thùng rác",
+            "trash",
+            () => window.deleteExam(ex.id),
           );
 
-          const deleteButton = document.createElement("button");
-          deleteButton.className = "btn-tb-action delete";
-          deleteButton.textContent = "Xóa";
-          deleteButton.addEventListener("click", () =>
-            window.deleteExam(ex.id),
+          actionCell.append(
+            previewButton,
+            editButton,
+            visibilityButton,
+            answerButton,
+            analyticsButton,
+            deleteButton,
           );
-
-          actionCell.append(answerButton, deleteButton);
           row.appendChild(actionCell);
           examsFragment.appendChild(row);
         });
@@ -2822,7 +3600,8 @@
 
         const { data, error } = await supabase
           .from("documents")
-          .select("id, download_count, like_count");
+          .select("id, download_count, like_count, deleted_at")
+          .is("deleted_at", null);
         if (error || !Array.isArray(data)) return;
 
         const renderedRows = document.querySelectorAll(
@@ -2863,6 +3642,15 @@
             (payload) => {
               if (payload.eventType === "UPDATE") {
                 updateAdminDocumentCounters(payload.new);
+                const cached = adminDocumentCache.get(String(payload.new?.id));
+                if (
+                  !cached ||
+                  cached.title !== payload.new?.title ||
+                  cached.category !== payload.new?.category ||
+                  cached.publication_status !== payload.new?.publication_status
+                ) {
+                  queueAdminDocumentsReload();
+                }
               } else if (
                 payload.eventType === "INSERT" ||
                 payload.eventType === "DELETE"
@@ -2890,23 +3678,38 @@
         startAdminDocumentRealtimeSync();
 
         tbody.innerHTML =
-          '<tr><td colspan="7" style="text-align:center; color:#94a3b8;">Đang tải tài liệu...</td></tr>';
+          '<tr><td colspan="8" style="text-align:center; color:#94a3b8;">Đang tải tài liệu...</td></tr>';
 
-        const { data: documents, error } = await supabase
+        let documentsResult = await supabase
           .from("documents")
-          .select("id, title, category, cohort, pdf_url, storage_path, file_name, file_size, download_count, like_count, created_at")
+          .select("id, title, description, category, cohort, pdf_url, storage_path, file_name, file_size, download_count, like_count, publication_status, deleted_at, created_at, updated_at")
+          .is("deleted_at", null)
           .order("created_at", { ascending: false });
+
+        if (documentsResult.error && /publication_status|updated_at|deleted_at/i.test(documentsResult.error.message || "")) {
+          documentsResult = await supabase
+            .from("documents")
+            .select("id, title, description, category, cohort, pdf_url, storage_path, file_name, file_size, download_count, like_count, created_at")
+            .order("created_at", { ascending: false });
+          documentsResult.data = (documentsResult.data || []).map((item) => ({
+            ...item,
+            publication_status: "published",
+            updated_at: item.created_at,
+          }));
+        }
+
+        const { data: documents, error } = documentsResult;
 
         if (error) {
           console.error("Không thể tải tài liệu trong Admin:", error);
           tbody.innerHTML =
-            '<tr><td colspan="7" style="text-align:center; color:#ef4444;">Chưa tải được dữ liệu. Hãy kiểm tra đã chạy file SQL thiết lập hay chưa.</td></tr>';
+            '<tr><td colspan="8" style="text-align:center; color:#ef4444;">Chưa tải được dữ liệu. Hãy kiểm tra đã chạy file SQL thiết lập hay chưa.</td></tr>';
           return;
         }
 
         if (!documents || documents.length === 0) {
           tbody.innerHTML =
-            '<tr><td colspan="7" style="text-align:center; color:#94a3b8;">Chưa có tài liệu PDF nào.</td></tr>';
+            '<tr><td colspan="8" style="text-align:center; color:#94a3b8;">Chưa có tài liệu PDF nào.</td></tr>';
           return;
         }
 
@@ -2918,8 +3721,10 @@
         };
 
         tbody.replaceChildren();
+        adminDocumentCache.clear();
         const documentsFragment = document.createDocumentFragment();
         documents.forEach((documentItem) => {
+          adminDocumentCache.set(String(documentItem.id), documentItem);
           const row = document.createElement("tr");
           row.dataset.documentId = documentItem.id;
           appendCell(row, documentItem.title || "Chưa đặt tên", { bold: true });
@@ -2963,22 +3768,47 @@
           documentLikesCell.setAttribute("translate", "no");
           appendCell(row, formatAdminDate(documentItem.created_at));
 
-          const actionCell = document.createElement("td");
-          const openButton = document.createElement("button");
-          openButton.className = "btn-tb-action answer";
-          openButton.textContent = "Mở PDF";
-          openButton.addEventListener("click", () => {
-            window.open(documentItem.pdf_url, "_blank", "noopener,noreferrer");
-          });
+          const statusCell = document.createElement("td");
+          statusCell.appendChild(
+            createPublicationBadge(documentItem.publication_status),
+          );
+          row.appendChild(statusCell);
 
-          const deleteButton = document.createElement("button");
-          deleteButton.className = "btn-tb-action delete";
-          deleteButton.textContent = "Xóa";
-          deleteButton.addEventListener("click", () =>
-            window.deleteDocument(documentItem.id),
+          const actionCell = document.createElement("td");
+          actionCell.className = "admin-row-actions";
+          const previewButton = createAdminActionButton(
+            "Xem trước",
+            "preview",
+            () => window.previewManagedContent("document", documentItem.id),
+          );
+          const editButton = createAdminActionButton(
+            "Chỉnh sửa",
+            "edit",
+            () => window.openContentEditModal("document", documentItem.id),
+          );
+          const visibilityButton = createAdminActionButton(
+            documentItem.publication_status === "published" ? "Ẩn" : "Công khai",
+            documentItem.publication_status === "published" ? "hide" : "publish",
+            () => window.toggleContentPublication("document", documentItem.id),
+          );
+          const openButton = createAdminActionButton(
+            "Mở PDF",
+            "answer",
+            () => window.open(documentItem.pdf_url, "_blank", "noopener,noreferrer"),
+          );
+          const deleteButton = createAdminActionButton(
+            "Thùng rác",
+            "trash",
+            () => window.deleteDocument(documentItem.id),
           );
 
-          actionCell.append(openButton, deleteButton);
+          actionCell.append(
+            previewButton,
+            editButton,
+            visibilityButton,
+            openButton,
+            deleteButton,
+          );
           row.appendChild(actionCell);
           documentsFragment.appendChild(row);
         });
@@ -3289,6 +4119,19 @@
               console.warn("Không thể dọn file avatar cũ:", storageError);
           }
 
+          void recordAdminActivity(
+            action === "approve" ? "avatar_approve" : "avatar_remove",
+            "user",
+            userId,
+            null,
+            {
+              summary:
+                action === "approve"
+                  ? "Đã đánh dấu avatar là phù hợp"
+                  : warning || "Đã gỡ avatar không phù hợp",
+            },
+          );
+
           window.showNotification(
             "Đã cập nhật",
             action === "approve"
@@ -3308,22 +4151,452 @@
         }
       };
 
-      window.deleteExam = async (examId) => {
+      function setAdminSelectOptions(selectElement, options, selectedValue) {
+        selectElement.replaceChildren();
+        options.forEach(([value, label]) => {
+          const option = document.createElement("option");
+          option.value = value;
+          option.textContent = label;
+          option.selected = value === selectedValue;
+          selectElement.appendChild(option);
+        });
+      }
+
+      function getManagedContent(kind, id) {
+        const cache = kind === "exam" ? adminExamCache : adminDocumentCache;
+        return cache.get(String(id)) || null;
+      }
+
+      window.openContentEditModal = (kind, id) => {
+        const item = getManagedContent(kind, id);
+        if (!item) {
+          window.showNotification(
+            "Dữ liệu đang cập nhật",
+            "Em hãy đợi danh sách tải xong rồi thử lại.",
+          );
+          return;
+        }
+
+        const isExam = kind === "exam";
+        document.getElementById("content-edit-kind").value = kind;
+        document.getElementById("content-edit-id").value = id;
+        document.getElementById("content-edit-kicker").textContent =
+          isExam ? "CHỈNH SỬA ĐỀ THI" : "CHỈNH SỬA TÀI LIỆU";
+        document.getElementById("content-edit-heading").textContent =
+          item.title || (isExam ? "Đề thi" : "Tài liệu PDF");
+        document.getElementById("content-edit-title").value = item.title || "";
+        document.getElementById("content-edit-description").value =
+          item.description || "";
+        document.getElementById("content-edit-description-wrap").hidden = isExam;
+        document.getElementById("content-edit-status").value =
+          item.publication_status || "published";
+        document.getElementById("content-edit-pdf").value = "";
+
+        setAdminSelectOptions(
+          document.getElementById("content-edit-category"),
+          isExam
+            ? [
+                ["so", "Đề Sở & Tỉnh"],
+                ["chuyen", "Đề trường chuyên"],
+                ["practise", "Đề luyện tập"],
+              ]
+            : [
+                ["tong-on", "Đề thi"],
+                ["cong-thuc", "Công thức"],
+                ["khac", "Khác"],
+              ],
+          item.category,
+        );
+        setAdminSelectOptions(
+          document.getElementById("content-edit-cohort"),
+          isExam
+            ? [
+                ["2k9", "Khóa 2k9"],
+                ["2k8", "Khóa 2k8"],
+              ]
+            : [
+                ["all", "Dùng chung"],
+                ["2k9", "Khóa 2k9"],
+                ["2k8", "Khóa 2k8"],
+              ],
+          item.cohort || (isExam ? "2k9" : "all"),
+        );
+
+        const modal = document.getElementById("content-edit-modal");
+        modal.style.display = "flex";
+        modal.setAttribute("aria-hidden", "false");
+        requestAnimationFrame(() => {
+          modal.classList.add("active");
+          document.getElementById("content-edit-title").focus();
+        });
+      };
+
+      window.closeContentEditModal = () => {
+        const modal = document.getElementById("content-edit-modal");
+        modal.classList.remove("active");
+        modal.setAttribute("aria-hidden", "true");
+        setTimeout(() => {
+          if (!modal.classList.contains("active")) modal.style.display = "none";
+        }, 220);
+      };
+
+      window.submitContentEdit = async (event) => {
+        event.preventDefault();
+        const kind = document.getElementById("content-edit-kind").value;
+        const id = document.getElementById("content-edit-id").value;
+        const currentItem = getManagedContent(kind, id);
+        const isExam = kind === "exam";
+        const table = isExam ? "exams" : "documents";
+        const bucket = isExam ? "exams" : "documents";
+        const button = document.getElementById("content-edit-submit");
+        const file = document.getElementById("content-edit-pdf").files[0];
+        let uploadedPath = null;
+
+        button.disabled = true;
+        button.textContent = file ? "Đang tải PDF..." : "Đang lưu...";
+
+        try {
+          if (!currentItem) throw new Error("Không tìm thấy nội dung cần sửa.");
+          const title = document.getElementById("content-edit-title").value.trim();
+          if (!title) throw new Error("Tên hiển thị không được để trống.");
+
+          if (file) {
+            if (
+              file.type !== "application/pdf" &&
+              !file.name.toLowerCase().endsWith(".pdf")
+            ) {
+              throw new Error("Hệ thống chỉ chấp nhận file PDF.");
+            }
+            if (file.size > 50 * 1024 * 1024) {
+              throw new Error("File PDF vượt quá giới hạn 50 MB.");
+            }
+          }
+
+          const updates = {
+            title,
+            category: document.getElementById("content-edit-category").value,
+            cohort: document.getElementById("content-edit-cohort").value,
+            publication_status: document.getElementById("content-edit-status").value,
+          };
+          if (!isExam) {
+            updates.description =
+              document.getElementById("content-edit-description").value.trim() || null;
+          }
+
+          if (file) {
+            const safeName = file.name
+              .normalize("NFD")
+              .replace(/[\u0300-\u036f]/g, "")
+              .replace(/[^a-zA-Z0-9._-]+/g, "-")
+              .replace(/-+/g, "-");
+            uploadedPath = isExam
+              ? `${id}_${Date.now()}-${safeName}`
+              : `${currentAdmin.id}/${Date.now()}-${safeName}`;
+
+            const { error: uploadError } = await supabase.storage
+              .from(bucket)
+              .upload(uploadedPath, file, {
+                contentType: "application/pdf",
+                upsert: false,
+              });
+            if (uploadError) throw uploadError;
+
+            const { data: publicUrlData } = supabase.storage
+              .from(bucket)
+              .getPublicUrl(uploadedPath);
+            updates.pdf_url = publicUrlData.publicUrl;
+            if (!isExam) {
+              updates.storage_path = uploadedPath;
+              updates.file_name = file.name;
+              updates.file_size = file.size;
+            }
+            button.textContent = "Đang ghi dữ liệu...";
+          }
+
+          const { error: updateError } = await supabase
+            .from(table)
+            .update(updates)
+            .eq("id", id);
+          if (updateError) throw updateError;
+
+          if (uploadedPath) {
+            const oldPath = isExam
+              ? getPublicStoragePath(currentItem.pdf_url, bucket)
+              : currentItem.storage_path || getPublicStoragePath(currentItem.pdf_url, bucket);
+            if (oldPath && oldPath !== uploadedPath) {
+              const { error: cleanupError } = await supabase.storage
+                .from(bucket)
+                .remove([oldPath]);
+              if (cleanupError) console.warn("Không thể dọn PDF cũ:", cleanupError);
+            }
+          }
+
+          void recordAdminActivity(
+            "update",
+            kind,
+            id,
+            title,
+            {
+              summary: file
+                ? "Đã sửa thông tin và thay file PDF"
+                : "Đã sửa thông tin hiển thị",
+              publication_status: updates.publication_status,
+            },
+          );
+
+          window.closeContentEditModal();
+          window.showNotification(
+            "Đã lưu thay đổi",
+            `${isExam ? "Đề thi" : "Tài liệu"} đã được cập nhật thành công.`,
+          );
+          if (isExam) await loadExams();
+          else await loadDocumentsAdmin();
+          window.loadAdminOverview();
+        } catch (error) {
+          if (uploadedPath) {
+            const { error: cleanupError } = await supabase.storage
+              .from(bucket)
+              .remove([uploadedPath]);
+            if (cleanupError) console.warn("Không thể dọn PDF tải lỗi:", cleanupError);
+          }
+          window.showNotification(
+            "Chưa thể lưu",
+            /publication_status/i.test(error.message || "")
+              ? "Hãy chạy file supabase-admin-content.sql trước."
+              : error.message || "Đã xảy ra lỗi.",
+          );
+        } finally {
+          button.disabled = false;
+          button.textContent = "Lưu thay đổi";
+        }
+      };
+
+      window.toggleContentPublication = async (kind, id) => {
+        const item = getManagedContent(kind, id);
+        if (!item) return;
+        const isPublished = (item.publication_status || "published") === "published";
+        const nextStatus = isPublished ? "hidden" : "published";
         const accepted = await window.askAdminConfirmation({
-          title: "Xóa đề thi",
-          message: `Đề [${examId}] và các tệp liên quan sẽ bị xóa vĩnh viễn. Thao tác này không thể hoàn tác.`,
-          confirmLabel: "Xóa đề thi",
+          title: isPublished ? "Tạm ẩn nội dung" : "Công khai nội dung",
+          message: isPublished
+            ? "Học sinh sẽ không còn thấy nội dung này, nhưng toàn bộ dữ liệu và thống kê vẫn được giữ nguyên."
+            : "Nội dung sẽ xuất hiện trở lại trên giao diện học sinh.",
+          confirmLabel: isPublished ? "Tạm ẩn" : "Công khai",
+          tone: "primary",
+        });
+        if (!accepted) return;
+
+        const table = kind === "exam" ? "exams" : "documents";
+        const { error } = await supabase
+          .from(table)
+          .update({ publication_status: nextStatus })
+          .eq("id", id);
+        if (error) {
+          window.showNotification(
+            "Chưa thể đổi trạng thái",
+            /publication_status/i.test(error.message || "")
+              ? "Hãy chạy file supabase-admin-content.sql trước."
+              : error.message,
+          );
+          return;
+        }
+
+        void recordAdminActivity(
+          nextStatus === "published" ? "publish" : "hide",
+          kind,
+          id,
+          item.title,
+          {
+            summary:
+              nextStatus === "published"
+                ? "Đã công khai cho học sinh"
+                : "Đã tạm ẩn khỏi học sinh",
+          },
+        );
+
+        if (kind === "exam") await loadExams();
+        else await loadDocumentsAdmin();
+        window.loadAdminOverview();
+      };
+
+      window.previewManagedContent = (kind, id) => {
+        const item = getManagedContent(kind, id);
+        if (!item) return;
+        const isExam = kind === "exam";
+        const title = document.getElementById("content-preview-title");
+        const body = document.getElementById("content-preview-body");
+        const openButton = document.getElementById("content-preview-open-pdf");
+        title.textContent = item.title || (isExam ? "Đề thi" : "Tài liệu PDF");
+        body.replaceChildren();
+
+        const preview = document.createElement("article");
+        preview.className = "managed-content-preview-card";
+        const frame = document.createElement("iframe");
+        frame.className = "managed-content-preview-frame";
+        frame.loading = "lazy";
+        frame.title = `Xem trước ${title.textContent}`;
+        frame.src = `${item.pdf_url || ""}#page=1&toolbar=0&navpanes=0&scrollbar=0`;
+        const copy = document.createElement("div");
+        copy.className = "managed-content-preview-copy";
+        const meta = document.createElement("div");
+        meta.className = "managed-content-preview-meta";
+        meta.appendChild(createPublicationBadge(item.publication_status));
+        const type = document.createElement("span");
+        type.textContent = isExam ? "Đề thi PDF" : "Tài liệu PDF";
+        meta.appendChild(type);
+        const heading = document.createElement("h4");
+        heading.textContent = title.textContent;
+        const description = document.createElement("p");
+        description.textContent = isExam
+          ? `Khóa ${String(item.cohort || "2k9").toUpperCase()} · Học sinh làm bài trực tiếp trên file PDF.`
+          : item.description || "Tài liệu PDF phục vụ học tập và ôn thi THPT.";
+        copy.append(meta, heading, description);
+        preview.append(frame, copy);
+        body.appendChild(preview);
+
+        openButton.onclick = () =>
+          window.open(item.pdf_url, "_blank", "noopener,noreferrer");
+        const modal = document.getElementById("content-preview-modal");
+        modal.style.display = "flex";
+        modal.setAttribute("aria-hidden", "false");
+        requestAnimationFrame(() => modal.classList.add("active"));
+      };
+
+      window.closeManagedContentPreview = () => {
+        const modal = document.getElementById("content-preview-modal");
+        modal.classList.remove("active");
+        modal.setAttribute("aria-hidden", "true");
+        setTimeout(() => {
+          if (!modal.classList.contains("active")) {
+            modal.style.display = "none";
+            document.getElementById("content-preview-body").replaceChildren();
+          }
+        }, 220);
+      };
+
+      window.deleteExam = async (examId) => {
+        const item = adminExamCache.get(String(examId));
+        const accepted = await window.askAdminConfirmation({
+          title: "Chuyển đề vào thùng rác",
+          message:
+            "Đề sẽ biến mất khỏi giao diện học sinh nhưng vẫn giữ nguyên PDF, đáp án và thống kê để có thể khôi phục.",
+          confirmLabel: "Chuyển vào thùng rác",
+          tone: "primary",
+        });
+        if (!accepted) return;
+
+        const { error } = await supabase.rpc("admin_soft_delete_content", {
+          p_content_type: "exam",
+          p_content_id: String(examId),
+        });
+        if (error) {
+          window.showNotification(
+            "Chưa thể chuyển vào thùng rác",
+            /admin_soft_delete_content|deleted_at/i.test(error.message || "")
+              ? "Hãy chạy file supabase-admin-audit-trash.sql trước."
+              : error.message || "Đã xảy ra lỗi.",
+          );
+          return;
+        }
+
+        window.showNotification(
+          "Đã chuyển vào thùng rác",
+          `Đề “${item?.title || examId}” có thể được khôi phục trong tab Nhật ký.`,
+        );
+        await loadExams();
+        window.loadAdminOverview();
+      };
+
+      window.deleteDocument = async (documentId) => {
+        const item = adminDocumentCache.get(String(documentId));
+        const accepted = await window.askAdminConfirmation({
+          title: "Chuyển tài liệu vào thùng rác",
+          message:
+            "Tài liệu sẽ bị ẩn khỏi học sinh nhưng file PDF và toàn bộ lượt tải/lượt tim vẫn được giữ lại.",
+          confirmLabel: "Chuyển vào thùng rác",
+          tone: "primary",
+        });
+        if (!accepted) return;
+
+        const { error } = await supabase.rpc("admin_soft_delete_content", {
+          p_content_type: "document",
+          p_content_id: String(documentId),
+        });
+        if (error) {
+          window.showNotification(
+            "Chưa thể chuyển vào thùng rác",
+            /admin_soft_delete_content|deleted_at/i.test(error.message || "")
+              ? "Hãy chạy file supabase-admin-audit-trash.sql trước."
+              : error.message || "Đã xảy ra lỗi.",
+          );
+          return;
+        }
+
+        window.showNotification(
+          "Đã chuyển vào thùng rác",
+          `Tài liệu “${item?.title || "Tài liệu PDF"}” có thể được khôi phục trong tab Nhật ký.`,
+        );
+        await loadDocumentsAdmin();
+        window.loadAdminOverview();
+      };
+
+      window.restoreDeletedContent = async (contentType, contentId) => {
+        const item = adminTrashCache.find(
+          (entry) =>
+            entry.content_type === contentType && String(entry.id) === String(contentId),
+        );
+        const accepted = await window.askAdminConfirmation({
+          title: "Khôi phục nội dung",
+          message: `“${item?.title || "Nội dung"}” sẽ trở lại đúng trạng thái trước khi bị xóa.`,
+          confirmLabel: "Khôi phục",
+          tone: "primary",
+        });
+        if (!accepted) return;
+
+        const { error } = await supabase.rpc("admin_restore_content", {
+          p_content_type: contentType,
+          p_content_id: String(contentId),
+        });
+        if (error) {
+          window.showNotification(
+            "Chưa thể khôi phục",
+            error.message || "Đã xảy ra lỗi.",
+          );
+          return;
+        }
+
+        window.showNotification(
+          "Khôi phục thành công",
+          `“${item?.title || "Nội dung"}” đã được đưa trở lại hệ thống.`,
+        );
+        await window.loadAdminGovernance();
+        window.loadAdminOverview();
+      };
+
+      window.permanentlyDeleteExam = async (examId) => {
+        if (currentAdmin?.role !== "admin") {
+          window.showNotification(
+            "Không đủ quyền",
+            "Chỉ Admin mới được xóa vĩnh viễn.",
+          );
+          return;
+        }
+        const accepted = await window.askAdminConfirmation({
+          title: "Xóa vĩnh viễn đề thi",
+          message: `Đề [${examId}], PDF và toàn bộ ảnh lời giải sẽ bị xóa vĩnh viễn. Thao tác này không thể hoàn tác.`,
+          confirmLabel: "Xóa vĩnh viễn",
           tone: "danger",
         });
         if (!accepted) return;
         try {
-          const { data: exam, error: readError } = await supabase
-            .from("exams")
-            .select("pdf_url, answers")
-            .eq("id", examId)
-            .single();
-
-          if (readError) throw readError;
+          const { data: exam, error: deleteError } = await supabase.rpc(
+            "admin_permanently_delete_content",
+            {
+              p_content_type: "exam",
+              p_content_id: String(examId),
+            },
+          );
+          if (deleteError) throw deleteError;
 
           const pdfPath = getPublicStoragePath(exam?.pdf_url, "exams");
           const imagePaths = new Set();
@@ -3345,12 +4618,6 @@
             });
           });
 
-          const { error: deleteError } = await supabase
-            .from("exams")
-            .delete()
-            .eq("id", examId);
-          if (deleteError) throw deleteError;
-
           // Dọn Storage sau khi bản ghi đã xóa thành công. Lỗi dọn file không làm mất trạng thái xóa đề.
           if (pdfPath) {
             const { error } = await supabase.storage
@@ -3368,43 +4635,45 @@
 
           window.showNotification(
             "Thành công",
-            "Đã xóa đề thi và dọn các tệp liên quan!",
+            "Đã xóa vĩnh viễn đề thi và dọn các tệp liên quan!",
           );
-          loadExams();
-          loadMetrics();
+          await window.loadAdminGovernance();
+          window.loadAdminOverview();
         } catch (err) {
           window.showNotification("Lỗi", err.message);
         }
       };
 
-      window.deleteDocument = async (documentId) => {
+      window.permanentlyDeleteDocument = async (documentId) => {
+        if (currentAdmin?.role !== "admin") {
+          window.showNotification(
+            "Không đủ quyền",
+            "Chỉ Admin mới được xóa vĩnh viễn.",
+          );
+          return;
+        }
         const accepted = await window.askAdminConfirmation({
-          title: "Xóa tài liệu PDF",
+          title: "Xóa vĩnh viễn tài liệu PDF",
           message:
-            "Tài liệu và file PDF trong kho lưu trữ sẽ bị xóa vĩnh viễn.",
-          confirmLabel: "Xóa tài liệu",
+            "Bản ghi và file PDF trong kho lưu trữ sẽ bị xóa vĩnh viễn, không thể khôi phục.",
+          confirmLabel: "Xóa vĩnh viễn",
           tone: "danger",
         });
         if (!accepted) return;
 
         try {
-          const { data: documentItem, error: readError } = await supabase
-            .from("documents")
-            .select("storage_path, pdf_url, title")
-            .eq("id", documentId)
-            .single();
-
-          if (readError) throw readError;
+          const { data: documentItem, error: deleteError } = await supabase.rpc(
+            "admin_permanently_delete_content",
+            {
+              p_content_type: "document",
+              p_content_id: String(documentId),
+            },
+          );
+          if (deleteError) throw deleteError;
 
           const storagePath =
             documentItem.storage_path ||
             getPublicStoragePath(documentItem.pdf_url, "documents");
-
-          const { error: deleteError } = await supabase
-            .from("documents")
-            .delete()
-            .eq("id", documentId);
-          if (deleteError) throw deleteError;
 
           if (storagePath) {
             const { error: storageError } = await supabase.storage
@@ -3416,9 +4685,10 @@
 
           window.showNotification(
             "Thành công",
-            `Đã xóa tài liệu: ${documentItem.title || "Tài liệu PDF"}`,
+            `Đã xóa vĩnh viễn: ${documentItem.title || "Tài liệu PDF"}`,
           );
-          loadDocumentsAdmin();
+          await window.loadAdminGovernance();
+          window.loadAdminOverview();
         } catch (error) {
           window.showNotification(
             "Không thể xóa",
@@ -3458,6 +4728,17 @@
             .update({ role: newRole })
             .eq("id", userId);
           if (error) throw error;
+          void recordAdminActivity(
+            "role_update",
+            "user",
+            userId,
+            null,
+            {
+              previous_role: currentRole,
+              new_role: newRole,
+              summary: `Đã đổi quyền từ ${currentRole} sang ${newRole}`,
+            },
+          );
           window.showNotification("Thành công", "Đã cập nhật quyền!");
           loadUsers();
         } catch (err) {
@@ -3478,14 +4759,21 @@
         document
           .querySelectorAll(".admin-main-pane")
           .forEach((el) => (el.style.display = "none"));
-        document.getElementById(`tab-${tabName}`).style.display = "block";
+        const nextPane = document.getElementById(`tab-${tabName}`);
+        if (!nextPane) return;
+        nextPane.style.display = "block";
         document
           .querySelectorAll(".admin-nav-btn")
           .forEach((b) => b.classList.remove("active"));
         if (btn) btn.classList.add("active");
         sessionStorage.setItem("admin_current_tab", tabName);
 
+        if (tabName !== "documents") stopAdminDocumentRealtimeSync();
+        if (tabName !== "governance") stopAdminGovernanceRealtimeSync();
+        if (tabName === "dashboard") window.loadAdminOverview();
+        if (tabName === "exams") loadExams();
         if (tabName === "documents") loadDocumentsAdmin();
+        if (tabName === "governance") window.loadAdminGovernance();
         if (tabName === "users") {
           loadUsers();
           startAdminUserRealtimeSync();
@@ -3570,7 +4858,7 @@
             .getPublicUrl(uploadedPath);
 
           button.innerText = "ĐANG GHI DỮ LIỆU...";
-          const { error: insertError } = await supabase
+          const { data: insertedDocument, error: insertError } = await supabase
             .from("documents")
             .insert({
               title,
@@ -3582,8 +4870,18 @@
               file_name: file.name,
               file_size: file.size,
               created_by: currentAdmin.id,
-            });
+            })
+            .select("id")
+            .single();
           if (insertError) throw insertError;
+
+          void recordAdminActivity(
+            "create",
+            "document",
+            insertedDocument?.id || null,
+            title,
+            { summary: "Đã tải lên tài liệu PDF mới" },
+          );
 
           window.closeDocumentUploadModal();
           window.showNotification(
@@ -3610,6 +4908,174 @@
         }
       };
 
+      function formatAnalyticsDuration(seconds) {
+        const total = Math.max(0, Number(seconds || 0));
+        const minutes = Math.floor(total / 60);
+        const remaining = Math.round(total % 60);
+        if (!minutes) return remaining + " giây";
+        return minutes + " phút " + String(remaining).padStart(2, "0") + " giây";
+      }
+
+      function setExamAnalyticsLoading(message) {
+        const summary = document.getElementById("exam-analytics-summary");
+        const list = document.getElementById("exam-analytics-question-list");
+        if (summary) summary.replaceChildren();
+        if (list) {
+          list.replaceChildren();
+          const state = document.createElement("div");
+          state.className = "exam-analytics-state";
+          const spinner = document.createElement("span");
+          spinner.className = "exam-analytics-spinner";
+          const text = document.createElement("strong");
+          text.textContent = message;
+          state.append(spinner, text);
+          list.appendChild(state);
+        }
+      }
+
+      function renderExamAnalytics(data) {
+        const summaryData = data?.summary || {};
+        const summary = document.getElementById("exam-analytics-summary");
+        const list = document.getElementById("exam-analytics-question-list");
+        const note = document.getElementById("exam-analytics-note");
+        const summaryItems = [
+          ["Lượt làm", Number(summaryData.total_attempts || 0)],
+          ["Học sinh", Number(summaryData.unique_students || 0)],
+          ["Điểm trung bình", Number(summaryData.average_score || 0).toFixed(2)],
+          ["Trung vị", Number(summaryData.median_score || 0).toFixed(2)],
+          ["Cao nhất", Number(summaryData.highest_score || 0).toFixed(2)],
+          ["Thời gian TB", formatAnalyticsDuration(summaryData.average_duration_seconds)],
+        ];
+
+        summary.replaceChildren();
+        summaryItems.forEach(([label, value]) => {
+          const card = document.createElement("article");
+          const span = document.createElement("span");
+          span.textContent = label;
+          const strong = document.createElement("strong");
+          strong.textContent = String(value);
+          card.append(span, strong);
+          summary.appendChild(card);
+        });
+
+        const rows = Array.isArray(data?.question_stats)
+          ? [...data.question_stats].sort(
+              (left, right) =>
+                Number(left.correct_rate || 0) - Number(right.correct_rate || 0),
+            )
+          : [];
+        list.replaceChildren();
+        if (!rows.length) {
+          const state = document.createElement("div");
+          state.className = "exam-analytics-state";
+          const strong = document.createElement("strong");
+          strong.textContent = "Chưa có dữ liệu từng câu";
+          const span = document.createElement("span");
+          span.textContent =
+            "Thống kê chi tiết sẽ xuất hiện khi học sinh nộp bài sau khi bật tính năng mới.";
+          state.append(strong, span);
+          list.appendChild(state);
+        } else {
+          const fragment = document.createDocumentFragment();
+          rows.forEach((row) => {
+            const item = document.createElement("article");
+            item.className = "exam-analytics-question-row";
+            const identity = document.createElement("div");
+            identity.className = "exam-analytics-question-identity";
+            const number = document.createElement("strong");
+            number.textContent = "Câu " + Number(row.question_number || 0);
+            const part = document.createElement("span");
+            part.textContent = row.part_title || row.part_key || "Phần thi";
+            identity.append(number, part);
+
+            const progress = document.createElement("div");
+            progress.className = "exam-analytics-progress";
+            const bar = document.createElement("span");
+            bar.style.width =
+              Math.max(0, Math.min(100, Number(row.correct_rate || 0))) + "%";
+            progress.appendChild(bar);
+
+            const counts = document.createElement("div");
+            counts.className = "exam-analytics-counts";
+            const rate = document.createElement("strong");
+            rate.textContent =
+              Number(row.correct_rate || 0).toFixed(1) + "% đúng";
+            const detail = document.createElement("span");
+            detail.textContent =
+              Number(row.correct_count || 0) +
+              " đúng · " +
+              (Number(row.partial_count || 0) +
+                Number(row.incorrect_count || 0)) +
+              " cần xem · " +
+              Number(row.unanswered_count || 0) +
+              " bỏ trống";
+            counts.append(rate, detail);
+            item.append(identity, progress, counts);
+            fragment.appendChild(item);
+          });
+          list.appendChild(fragment);
+        }
+
+        const detailed = Number(summaryData.detailed_attempts || 0);
+        const total = Number(summaryData.total_attempts || 0);
+        note.textContent =
+          detailed < total
+            ? "Điểm tổng dùng toàn bộ " +
+              total +
+              " lượt làm; phân tích từng câu hiện có " +
+              detailed +
+              " lượt được ghi theo định dạng mới."
+            : "Dữ liệu được tổng hợp từ " + detailed + " lượt nộp chi tiết.";
+      }
+
+      window.openExamAnalytics = async (examId) => {
+        const modal = document.getElementById("exam-analytics-modal");
+        const cached = adminExamCache.get(String(examId));
+        document.getElementById("exam-analytics-title").textContent =
+          cached?.title || "Phân tích đề thi";
+        document.getElementById("exam-analytics-subtitle").textContent =
+          "Theo dõi điểm số, thời gian và những câu học sinh thường làm sai.";
+        document.getElementById("exam-analytics-note").textContent = "";
+        setExamAnalyticsLoading("Đang tổng hợp dữ liệu...");
+        modal.style.display = "flex";
+        requestAnimationFrame(() => modal.classList.add("active"));
+
+        try {
+          const { data, error } = await supabase.rpc(
+            "get_admin_exam_analytics",
+            { p_exam_id: String(examId) },
+          );
+          if (error) throw error;
+          document.getElementById("exam-analytics-title").textContent =
+            data?.exam_title || cached?.title || "Phân tích đề thi";
+          renderExamAnalytics(data || {});
+        } catch (error) {
+          console.error("Không tải được phân tích đề:", error);
+          const list = document.getElementById("exam-analytics-question-list");
+          list.replaceChildren();
+          const state = document.createElement("div");
+          state.className = "exam-analytics-state error";
+          const strong = document.createElement("strong");
+          strong.textContent = "Chưa mở được báo cáo";
+          const span = document.createElement("span");
+          span.textContent =
+            String(error?.code || "").includes("PGRST") ||
+            String(error?.message || "").includes("get_admin_exam_analytics")
+              ? "Em chạy file supabase-exam-insights.sql trong Supabase SQL Editor trước nhé."
+              : "Kiểm tra kết nối rồi thử lại.";
+          state.append(strong, span);
+          list.appendChild(state);
+        }
+      };
+
+      window.closeExamAnalytics = () => {
+        const modal = document.getElementById("exam-analytics-modal");
+        modal.classList.remove("active");
+        setTimeout(() => {
+          if (!modal.classList.contains("active")) modal.style.display = "none";
+        }, 250);
+      };
+
       window.showNotification = (title, message) => {
         document.getElementById("notif-title").innerText = title;
         document.getElementById("notif-message").innerText = message;
@@ -3628,6 +5094,12 @@
           if (modalId === "upload-modal") window.closeUploadModal();
           if (modalId === "document-upload-modal")
             window.closeDocumentUploadModal();
+          if (modalId === "content-edit-modal")
+            window.closeContentEditModal();
+          if (modalId === "content-preview-modal")
+            window.closeManagedContentPreview();
+          if (modalId === "exam-analytics-modal")
+            window.closeExamAnalytics();
           if (modalId === "notification-modal") window.closeNotificationModal();
           if (modalId === "preview-student-modal") window.closeStudentPreview();
           if (modalId === "avatar-moderation-modal")
@@ -3687,13 +5159,20 @@
             },
           });
           if (dbError) throw dbError;
+          void recordAdminActivity(
+            "create",
+            "exam",
+            id,
+            title,
+            { summary: "Đã tạo đề thi PDF mới" },
+          );
           window.closeUploadModal();
           window.showNotification(
             "Thành công",
             "Tạo đề thành công! Màn hình điền đáp án sẽ mở ngay.",
           );
           loadExams();
-          loadMetrics();
+          window.loadAdminOverview();
           setTimeout(() => {
             window.openAnswerEditor(id, title);
           }, 600);
@@ -3776,6 +5255,7 @@
       });
 
       window.restoreAdminEditorBackup = (backup) => {
+        questionImageEditor.destroyAll();
         editingExamId = backup.examId;
         document.getElementById("editor-exam-title").innerText =
           `Đang soạn đáp án cho: ${backup.examTitle}`;
@@ -3795,6 +5275,8 @@
             if (radio) radio.checked = true;
           }
         }
+
+        syncRichMathEditors(document.getElementById("answer-editor-overlay"));
 
         for (let qId in backup.canva) {
           const state = backup.canva[qId];
