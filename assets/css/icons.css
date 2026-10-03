@@ -1,0 +1,87 @@
+/* ==========================================================
+   HỆ ICON NÉT MẢNH — GIỮ NGUYÊN MÀU SẮC VÀ ANIMATION GỐC
+   ========================================================== */
+.ui-icon {
+  width: 1em;
+  height: 1em;
+  flex: 0 0 auto;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.menu-item .ui-icon,
+.m-menu-item .ui-icon,
+.dropdown-item .ui-icon,
+.mobile-dropdown .logout-btn .ui-icon,
+.cohort-btn .ui-icon,
+.filter-btn .ui-icon,
+.tool-btn .ui-icon,
+.btn-action-sm .ui-icon,
+.banner-label .ui-icon,
+.banner-content .ui-icon,
+.profile-menu .ui-icon {
+  width: 16px;
+  height: 16px;
+}
+
+.dropdown-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.cohort-btn,
+.filter-btn,
+.tool-btn,
+.btn-action-sm,
+.mobile-dropdown .logout-btn,
+.banner-label,
+.banner-content a,
+.profile-menu li a,
+.avatar-edit-overlay,
+.brush-label {
+  align-items: center;
+  gap: 6px;
+}
+
+.cohort-btn,
+.filter-btn,
+.tool-btn,
+.btn-action-sm,
+.brush-label {
+  display: inline-flex;
+  justify-content: center;
+}
+
+.banner-label,
+.banner-content a,
+.profile-menu li a,
+.avatar-edit-overlay {
+  display: flex;
+}
+
+.mobile-dropdown .logout-btn {
+  display: flex;
+  justify-content: center;
+}
+
+.timer-icon {
+  width: 17px;
+  height: 17px;
+  color: #dc2626;
+}
+
+.search-icon .ui-icon,
+.search-icon svg {
+  display: block;
+}
+
+.document-error-icon {
+  width: 30px;
+  height: 30px;
+}
+
+/* ========================================================== */
