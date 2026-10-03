@@ -1,6 +1,13 @@
+// THPT_AUTHORED_IMPORT_START
+import { mountAuthoredExam, clearAuthoredExam } from "./assets/js/features/question-cards.js";
+// THPT_AUTHORED_IMPORT_END
 import { supabase } from "./assets/js/config/supabase.js";
 import { initAds, setPublicAdsVisibility } from "./assets/js/features/ads.js";
 import { updateRankCharacter } from "./assets/js/features/rank-character.js";
+import {
+  analyzeExamAttempt,
+  formatStoredAnswer,
+} from "./assets/js/features/exam-insights.js";
 import {
   escapeHtml,
   formatExamDuration,
@@ -88,6 +95,156 @@ let recentlyInteracted = new Set();
 let isExamsMergedWithDB = false;
 let engagementFeatureAvailable = null;
 let resultExamSortOrder = "asc";
+let wrongNotebookItems = [];
+let wrongNotebookAttempts = null;
+let wrongNotebookFilter = "all";
+let wrongNotebookSearch = "";
+let wrongNotebookFeatureAvailable = null;
+let selectedWrongExamId = null;
+let selectedWrongExamPartKey = null;
+let wrongNotebookLoadSequence = 0;
+let documentLoadSequence = 0;
+let engagementLoadSequence = 0;
+let resultRankingLoadSequence = 0;
+const wrongSolutionAnswersCache = new Map();
+const wrongExamPartConfigCache = new Map();
+
+const ACCOUNT_SESSION_KEYS = [
+  "thpt_in_exam",
+  "thpt_review_state",
+  "thpt_current_view",
+  "thpt_current_tab",
+  "thpt_wrong_exam_id",
+  "thpt_documents_scroll",
+];
+
+function clearAccountSessionState() {
+  ACCOUNT_SESSION_KEYS.forEach((key) => sessionStorage.removeItem(key));
+}
+
+function resetAccountRuntimeState() {
+  clearInterval(timerInterval);
+  timerInterval = null;
+  engagementLoadSequence += 1;
+  resultRankingLoadSequence += 1;
+  currentExam = null;
+  isSubmitted = false;
+  isSubmitting = false;
+  isReviewMode = false;
+  userDataCache = { history: {}, activeExam: null, activeState: null };
+  currentCategoryFilter = "all";
+  currentCohortFilter = "2k9";
+  currentSearchQuery = "";
+  currentDocumentFilter = "tong-on";
+  currentDocumentSearchQuery = "";
+  wrongNotebookItems = [];
+  wrongNotebookAttempts = null;
+  wrongNotebookFilter = "all";
+  wrongNotebookSearch = "";
+  wrongNotebookFeatureAvailable = null;
+  wrongNotebookLoadSequence += 1;
+  documentLoadSequence += 1;
+  selectedWrongExamId = null;
+  selectedWrongExamPartKey = null;
+  wrongSolutionAnswersCache.clear();
+  wrongExamPartConfigCache.clear();
+  DOCUMENT_DATABASE = [];
+  likedDocumentIds.clear();
+  savedDocumentIds.clear();
+  recentlyInteracted.clear();
+  documentsLoaded = false;
+  stopDocumentRealtimeSync();
+  document.body.classList.remove(
+    "is-taking-exam",
+    "has-exam-result",
+    "is-documents-view",
+    "is-review-view",
+  );
+  document.getElementById("wrong-solution-modal")?.classList.remove("show");
+}
+
+function bindBrowserStateToAccount(userId) {
+  const nextUserId = String(userId || "");
+  const previousUserId = sessionStorage.getItem("thpt_session_owner") || "";
+  if (previousUserId !== nextUserId) {
+    clearAccountSessionState();
+    resetAccountRuntimeState();
+  }
+  if (nextUserId) sessionStorage.setItem("thpt_session_owner", nextUserId);
+  else sessionStorage.removeItem("thpt_session_owner");
+}
+
+function syncAuthenticationUI() {
+  const isGuest = !currentUser;
+  document.body.classList.toggle("is-guest", isGuest);
+
+  const loginButton = document.getElementById("header-login-btn");
+  if (loginButton) loginButton.style.display = isGuest ? "inline-flex" : "none";
+  const mobileLoginButton = document.getElementById("mobile-login-btn");
+  if (mobileLoginButton)
+    mobileLoginButton.style.display = isGuest ? "flex" : "none";
+
+  document.querySelectorAll(".auth-user-only").forEach((element) => {
+    element.style.display = isGuest ? "none" : "";
+  });
+
+  const userInfo = document.getElementById("header-user-info");
+  if (userInfo) {
+    userInfo.style.display = !isGuest && window.innerWidth > 1024 ? "flex" : "none";
+  }
+  const hamburger = document.getElementById("hamburger-btn");
+  if (hamburger) {
+    hamburger.style.display = window.innerWidth <= 1024 ? "block" : "none";
+  }
+}
+
+window.openAuthModal = (
+  _reason = "",
+  type = "login",
+) => {
+  const authScreen = document.getElementById("auth-screen");
+  if (!authScreen) return;
+  window.toggleAuth?.(type);
+  authScreen.style.display = "flex";
+  authScreen.setAttribute("aria-hidden", "false");
+  document.body.classList.add("has-auth-modal");
+  requestAnimationFrame(() => {
+    authScreen.classList.add("show");
+    const firstInput =
+      type === "register"
+        ? document.getElementById("reg-fullname")
+        : type === "forgot"
+          ? document.getElementById("forgot-email")
+          : document.getElementById("login-user");
+    window.setTimeout(() => firstInput?.focus({ preventScroll: true }), 120);
+  });
+};
+
+window.closeAuthModal = (event) => {
+  if (event && event.target !== event.currentTarget) return;
+  const authScreen = document.getElementById("auth-screen");
+  if (!authScreen || authScreen.style.display === "none") return;
+  authScreen.classList.remove("show");
+  authScreen.setAttribute("aria-hidden", "true");
+  document.body.classList.remove("has-auth-modal");
+  window.setTimeout(() => {
+    if (!authScreen.classList.contains("show")) authScreen.style.display = "none";
+  }, 180);
+};
+
+function requireAuthentication(reason) {
+  if (currentUser) return true;
+  window.openAuthModal(reason || "Đăng nhập để sử dụng tính năng này.");
+  return false;
+}
+
+function enterGuestMode() {
+  currentUser = null;
+  syncAuthenticationUI();
+  window.closeAuthModal();
+  window.hideLoader();
+  window.setTimeout(() => window.showHome?.(true), 0);
+}
 
 // 100vh trên trình duyệt điện thoại có thể bao gồm cả vùng đang bị thanh địa
 // chỉ che khuất. Đồng bộ chiều cao nhìn thấy thật để phòng thi không bị cắt
@@ -116,8 +273,6 @@ window.addEventListener("orientationchange", syncVisibleViewportHeight, {
 window.visualViewport?.addEventListener("resize", syncVisibleViewportHeight, {
   passive: true,
 });
-let engagementLoadSequence = 0;
-let resultRankingLoadSequence = 0;
 let avatarModerationFeatureAvailable = null;
 let homeSearchTimer = null;
 let documentSearchTimer = null;
@@ -126,6 +281,8 @@ let activePdfDocument = null;
 let activePdfRenderToken = 0;
 let pdfPageObserver = null;
 let loaderHideTimer = null;
+let loaderShowTimer = null;
+let loaderHasHiddenOnce = false;
 let notificationHideTimer = null;
 let customModalHideTimer = null;
 let drawerBackdropHideTimer = null;
@@ -388,24 +545,34 @@ window.updateFabVisibility();
 
 window.showLoader = (text = "Đang tải...") => {
   clearTimeout(loaderHideTimer);
+  clearTimeout(loaderShowTimer);
   const loaderText = document.getElementById("loader-text");
   if (loaderText) loaderText.innerText = text;
   const loader = document.getElementById("global-loader");
-  if (loader) {
+  if (!loader) return;
+
+  const revealLoader = () => {
     loader.style.display = "flex";
-    loader.style.opacity = "1";
-  }
+    loader.style.transition = "opacity 0.18s ease";
+    requestAnimationFrame(() => (loader.style.opacity = "1"));
+  };
+
+  // Tác vụ ngắn không cần chớp một màn loader toàn trang.
+  if (loaderHasHiddenOnce) loaderShowTimer = setTimeout(revealLoader, 140);
+  else revealLoader();
 };
 window.hideLoader = () => {
   const loader = document.getElementById("global-loader");
+  clearTimeout(loaderShowTimer);
+  loaderHasHiddenOnce = true;
   if (!loader || loader.style.display === "none") return;
   clearTimeout(loaderHideTimer);
-  loader.style.transition = "opacity 0.3s ease";
+  loader.style.transition = "opacity 0.18s ease";
   loader.style.opacity = "0";
   loaderHideTimer = setTimeout(() => {
     loader.style.display = "none";
     loader.style.opacity = "1";
-  }, 300);
+  }, 190);
 };
 window.showNotification = (title, message) => {
   const notifModal = document.getElementById("notification-modal");
@@ -452,28 +619,38 @@ window.closeProfileModal = () => {
   }
 };
 
+const screenRevealTimers = new WeakMap();
+function revealScreen(element) {
+  if (!element) return;
+  const previousTimer = screenRevealTimers.get(element);
+  if (previousTimer) clearTimeout(previousTimer);
+  element.classList.remove("view-enter");
+  requestAnimationFrame(() => {
+    element.classList.add("view-enter");
+    const timer = setTimeout(() => {
+      element.classList.remove("view-enter");
+      screenRevealTimers.delete(element);
+    }, 260);
+    screenRevealTimers.set(element, timer);
+  });
+}
+
 // ==============================================================================
 // 5. THEO DÕI PHIÊN ĐĂNG NHẬP & BẢO MẬT (AUTO-SAVE)
 // ==============================================================================
 let initialLagTimeout = setTimeout(() => {
   if (isInitialLoad) {
-    window.hideLoader();
-    document.getElementById("auth-screen").style.display = "flex";
-    document.getElementById("login-form").classList.add("active");
+    enterGuestMode();
   }
-}, 1500);
-const hasLocalSession = localStorage.getItem("thpt_student_auth_token");
-if (!hasLocalSession) {
-  clearTimeout(initialLagTimeout);
-  window.hideLoader();
-  document.getElementById("auth-screen").style.display = "flex";
-  document.getElementById("login-form").classList.add("active");
-}
+}, 900);
 
 supabase.auth.onAuthStateChange(async (event, session) => {
   clearTimeout(initialLagTimeout);
   if (session) {
+    bindBrowserStateToAccount(session.user.id);
     currentUser = session.user;
+    document.body.classList.remove("is-guest");
+    syncAuthenticationUI();
     if (isAuthenticating) return;
     try {
       const [profileResult, moderationResult] = await Promise.all([
@@ -507,16 +684,32 @@ supabase.auth.onAuthStateChange(async (event, session) => {
           id: currentUser.id,
           username: fallbackUsername,
           email: currentUser.email || fallbackUsername + "@thithu.local",
-          full_name: currentUser.user_metadata?.full_name || null,
+          full_name:
+            currentUser.user_metadata?.full_name ||
+            currentUser.user_metadata?.name ||
+            null,
+          avatar_url:
+            currentUser.user_metadata?.avatar_url ||
+            currentUser.user_metadata?.picture ||
+            null,
           history: {},
           active_exam: null,
           active_state: null,
           session_id: currentSessionId,
           role: "student",
         };
-        const { error: insertError } = await supabase
+        let { error: insertError } = await supabase
           .from("user_profiles")
           .insert([newProfile]);
+
+        // Tên lấy từ phần trước dấu @ có thể trùng một tài khoản đã tồn tại.
+        // Chỉ khi đó mới thêm hậu tố ngắn; mọi thông tin Google còn lại giữ nguyên.
+        if (insertError?.code === "23505") {
+          newProfile.username = `${fallbackUsername}_${currentUser.id.slice(0, 6)}`;
+          ({ error: insertError } = await supabase
+            .from("user_profiles")
+            .insert([newProfile]));
+        }
         if (insertError) throw insertError;
         data = newProfile;
       }
@@ -603,7 +796,7 @@ supabase.auth.onAuthStateChange(async (event, session) => {
         if (isInitialLoad) {
           isInitialLoad = false;
           window.hideLoader();
-          document.getElementById("auth-screen").style.display = "none";
+          window.closeAuthModal();
 
           // Thu thập tín hiệu từ trang Đáp Án gửi về
           const urlParams = new URLSearchParams(window.location.search);
@@ -641,34 +834,27 @@ supabase.auth.onAuthStateChange(async (event, session) => {
             const lastView = sessionStorage.getItem("thpt_current_view");
             if (lastView === "profile") window.showProfilePage();
             else if (lastView === "documents") window.showDocumentsPage();
+            else if (lastView === "review") window.showReviewPage();
             else window.showHome();
           }
         }
       } else {
         await supabase.auth.signOut();
-        window.hideLoader();
-        document.getElementById("auth-screen").style.display = "flex";
-        document.getElementById("login-form").classList.add("active");
+        enterGuestMode();
       }
     } catch (err) {
-      window.hideLoader();
-      document.getElementById("auth-screen").style.display = "flex";
-      document.getElementById("login-form").classList.add("active");
+      console.error("Không thể tải hồ sơ tài khoản:", err);
+      await supabase.auth.signOut().catch(() => {});
+      enterGuestMode();
     }
   } else {
     clearInterval(sessionGuardInterval);
     stopDocumentRealtimeSync();
     isInitialLoad = true;
+    bindBrowserStateToAccount("");
+    resetAccountRuntimeState();
     currentUser = null;
-    DOCUMENT_DATABASE = [];
-    likedDocumentIds.clear();
-    savedDocumentIds.clear();
-    documentsLoaded = false;
-    window.hideLoader();
-    document.getElementById("auth-screen").style.display = "flex";
-    document.getElementById("login-form").classList.add("active");
-    document.getElementById("header-user-info").style.display = "none";
-    document.getElementById("hamburger-btn").style.display = "none";
+    enterGuestMode();
   }
 });
 
@@ -701,6 +887,9 @@ window.checkEnter = (e, type) => {
 };
 
 window.toggleAuth = (type) => {
+  document
+    .querySelector("#auth-screen .auth-wrapper")
+    ?.classList.toggle("is-registering", type === "register");
   document.getElementById("login-form").classList.remove("active");
   document.getElementById("register-form").classList.remove("active");
   document.getElementById("forgot-form").classList.remove("active");
@@ -714,6 +903,55 @@ window.toggleAuth = (type) => {
     document.getElementById("register-form").classList.add("active");
   else if (type === "forgot")
     document.getElementById("forgot-form").classList.add("active");
+};
+
+window.handleGoogleAuth = async (button) => {
+  if (isAuthenticating) return;
+  const isRegister = document
+    .getElementById("register-form")
+    ?.classList.contains("active");
+  const errorBox = document.getElementById(
+    isRegister ? "reg-error" : "login-error",
+  );
+  if (errorBox) errorBox.style.display = "none";
+
+  isAuthenticating = true;
+  document.querySelectorAll(".google-auth-btn").forEach((item) => {
+    item.disabled = true;
+  });
+  if (button) button.classList.add("is-loading");
+  window.showLoader("Đang kết nối Google...");
+
+  try {
+    // Sau khi Google chuyển về trang, luồng đăng nhập hiện tại sẽ tự tạo hồ sơ
+    // nếu đây là học sinh mới và vẫn áp dụng tách dữ liệu theo từng tài khoản.
+    sessionStorage.setItem("just_logged_in", "true");
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: "google",
+      options: {
+        redirectTo: window.location.origin + window.location.pathname,
+        queryParams: {
+          access_type: "offline",
+          prompt: "select_account",
+        },
+      },
+    });
+    if (error) throw error;
+  } catch (error) {
+    console.error("Không thể xác thực Google:", error);
+    sessionStorage.removeItem("just_logged_in");
+    isAuthenticating = false;
+    window.hideLoader();
+    document.querySelectorAll(".google-auth-btn").forEach((item) => {
+      item.disabled = false;
+      item.classList.remove("is-loading");
+    });
+    if (errorBox) {
+      errorBox.innerText =
+        "Chưa thể kết nối Google. Em kiểm tra cấu hình Google trong Supabase rồi thử lại nhé.";
+      errorBox.style.display = "block";
+    }
+  }
 };
 
 window.handleForgot = async () => {
@@ -928,11 +1166,12 @@ window.handleLogin = async () => {
 
 window.handleLogout = async () => {
   window.showLoader("Đang đăng xuất...");
-  sessionStorage.removeItem("thpt_in_exam");
-  sessionStorage.removeItem("thpt_review_state");
-  sessionStorage.removeItem("thpt_current_view");
+  clearAccountSessionState();
+  sessionStorage.removeItem("thpt_session_owner");
+  resetAccountRuntimeState();
   await supabase.auth.signOut();
-  location.reload();
+  currentUser = null;
+  enterGuestMode();
 };
 
 // ==============================================================================
@@ -1003,7 +1242,11 @@ window.switchTab = (tabId, element, event) => {
     setMainMenuActive("tailieu");
     sessionStorage.setItem("thpt_current_tab", "tailieu");
     window.showDocumentsPage();
-  } else if (["ontap", "tintuc"].includes(tabId)) {
+  } else if (tabId === "ontap") {
+    setMainMenuActive("ontap");
+    sessionStorage.setItem("thpt_current_tab", "ontap");
+    window.showReviewPage();
+  } else if (tabId === "tintuc") {
     // Không lưu các tab chưa phát triển, tránh popup tự bật lại sau F5/chuyển trang.
     sessionStorage.setItem("thpt_current_tab", "luyenthi");
     window.showNotification(
@@ -1076,6 +1319,12 @@ window.handleCohort = (cohort, btnEl) => {
   renderHome();
 };
 window.handleFilterExam = (category, btnEl) => {
+  if (
+    category === "bookmarked" &&
+    !requireAuthentication("Đăng nhập để xem những đề em đã lưu.")
+  ) {
+    return;
+  }
   currentCategoryFilter = category;
   document
     .querySelectorAll(".filter-btn")
@@ -1105,6 +1354,7 @@ window.showHome = (force = false) => {
   sessionStorage.setItem("thpt_current_view", "home");
   disposeExamPdf();
   document.body.classList.remove("is-documents-view");
+  document.body.classList.remove("is-review-view");
   document.getElementById("documents-screen")?.classList.remove("is-active-screen");
   sessionStorage.setItem("thpt_current_tab", "luyenthi"); // 👉 ĐÃ FIX: Reset bộ nhớ Tab để chống kẹt Popup thông báo
   setMainMenuActive("luyenthi");
@@ -1133,13 +1383,13 @@ window.showHome = (force = false) => {
     .getElementById("exam-workspace")
     .classList.remove("fullscreen-active");
   document.getElementById("header-timer-box").style.display = "none";
-  document.getElementById("header-user-info").style.display =
-    window.innerWidth <= 1024 ? "none" : "flex";
-  document.getElementById("hamburger-btn").style.display =
-    window.innerWidth <= 1024 ? "block" : "none";
+  syncAuthenticationUI();
   document.getElementById("home-screen").style.display = "block";
+  revealScreen(document.getElementById("home-screen"));
   const documentsScreen = document.getElementById("documents-screen");
   if (documentsScreen) documentsScreen.style.display = "none";
+  const reviewScreen = document.getElementById("review-screen");
+  if (reviewScreen) reviewScreen.style.display = "none";
   document.getElementById("exam-workspace").style.display = "none";
   const profileScreen = document.getElementById("profile-screen");
   if (profileScreen) profileScreen.style.display = "none";
@@ -1147,8 +1397,10 @@ window.showHome = (force = false) => {
   window.updateFabVisibility();
   currentExam = null;
   renderHome();
-  loadEngagementDashboard();
-  showAvatarModerationNotice();
+  if (currentUser) {
+    loadEngagementDashboard();
+    showAvatarModerationNotice();
+  }
 };
 
 function animateNumberChange(element, newValue) {
@@ -1247,11 +1499,16 @@ function renderDashboardSummary(summary = null) {
   if (nameElement) nameElement.textContent = displayName;
 
   const streakElement = document.getElementById("dashboard-streak");
+  const attendanceStreakCount = document.getElementById(
+    "attendance-streak-count",
+  );
   const timeElement = document.getElementById("dashboard-study-time");
   const attemptsElement = document.getElementById("dashboard-attempts");
   const pointsElement = document.getElementById("dashboard-points");
 
   if (streakElement) animateNumberChange(streakElement, streak);
+  if (attendanceStreakCount)
+    animateNumberChange(attendanceStreakCount, streak);
   if (timeElement)
     animateNumberChange(
       timeElement,
@@ -1263,18 +1520,20 @@ function renderDashboardSummary(summary = null) {
   updateRankCharacter(document.getElementById("dashboard-level"), points);
 
   const checkinButton = document.getElementById("attendance-checkin-btn");
+  const streakCard = document.getElementById("attendance-streak-card");
   const attendanceMessage = document.getElementById("attendance-message");
   if (checkinButton) {
     const checkedToday = Boolean(summary?.checked_today);
     checkinButton.disabled = checkedToday || engagementFeatureAvailable === false;
     checkinButton.classList.toggle("checked", checkedToday);
-    const label = checkinButton.querySelector("span");
+    streakCard?.classList.toggle("is-checked", checkedToday);
+    const label = checkinButton.querySelector(".attendance-checkin-label");
     if (label)
-      label.textContent = checkedToday ? "Đã điểm danh" : "Điểm danh";
+      label.textContent = checkedToday ? "Chuỗi đang được giữ" : "Giữ chuỗi hôm nay";
     if (attendanceMessage) {
       attendanceMessage.textContent = checkedToday
-        ? `Đã giữ chuỗi ${streak} ngày hôm nay`
-        : "Sẵn sàng cho hôm nay?";
+        ? "Ngọn lửa hôm nay đã được thắp sáng."
+        : "Điểm danh để thắp sáng chuỗi hôm nay.";
     }
   }
 }
@@ -1320,10 +1579,10 @@ function renderEngagementSetupFallback() {
   renderAttendanceLeaderboard([], true);
 }
 
-async function loadEngagementDashboard() {
+async function loadEngagementDashboard(preserveCurrentState = false) {
   if (!currentUser) return;
   const loadSequence = ++engagementLoadSequence;
-  renderDashboardSummary(null);
+  if (!preserveCurrentState) renderDashboardSummary(null);
 
   const weekDates = getCurrentWeekDates();
   const weekStart = getLocalDateKey(weekDates[0]);
@@ -1359,7 +1618,9 @@ async function loadEngagementDashboard() {
 }
 
 window.checkInToday = async () => {
-  if (!currentUser) return;
+  if (!requireAuthentication("Đăng nhập để điểm danh và giữ chuỗi học tập.")) {
+    return;
+  }
   if (engagementFeatureAvailable === false) {
     window.showNotification(
       "Chưa kích hoạt",
@@ -1369,7 +1630,8 @@ window.checkInToday = async () => {
   }
 
   const button = document.getElementById("attendance-checkin-btn");
-  const label = button?.querySelector("span");
+  const streakCard = document.getElementById("attendance-streak-card");
+  const label = button?.querySelector(".attendance-checkin-label");
   if (button) button.disabled = true;
   if (label) label.textContent = "Đang ghi nhận...";
 
@@ -1381,18 +1643,22 @@ window.checkInToday = async () => {
       button.classList.add("checked", "checkin-pop");
       setTimeout(() => button.classList.remove("checkin-pop"), 650);
     }
+    if (streakCard) {
+      streakCard.classList.add("is-checked", "celebrate");
+      setTimeout(() => streakCard.classList.remove("celebrate"), 1200);
+    }
 
     const awarded = Number(data?.points_awarded || 0);
     const successMessage = data?.already_checked
-      ? "Hôm nay em đã điểm danh rồi"
-      : `Điểm danh thành công, nhận ${awarded} điểm`;
-    await loadEngagementDashboard();
+      ? "Ngọn lửa hôm nay vẫn đang cháy."
+      : `Đã thắp sáng chuỗi · +${awarded} điểm`;
+    await loadEngagementDashboard(true);
     const message = document.getElementById("attendance-message");
     if (message) message.textContent = successMessage;
   } catch (error) {
     console.error("Không thể điểm danh:", error);
     if (button) button.disabled = false;
-    if (label) label.textContent = "Điểm danh";
+    if (label) label.textContent = "Giữ chuỗi hôm nay";
     window.showNotification(
       "Chưa điểm danh được",
       "Máy chủ chưa sẵn sàng hoặc SQL chuyên cần chưa được chạy.",
@@ -1562,8 +1828,15 @@ function startRealtimeSync() {
     if (document.hidden) return;
     if (document.getElementById("home-screen").style.display === "none") return;
     try {
-      const { data } = await supabase.from("exams").select("id, views, likes");
+      const { data } = await supabase
+        .from("exams")
+        .select("id, views, likes, publication_status")
+        .eq("publication_status", "published");
       if (data) {
+        const publishedIds = new Set(data.map((exam) => exam.id));
+        EXAM_DATABASE = EXAM_DATABASE.filter((exam) =>
+          publishedIds.has(exam.id),
+        );
         data.forEach((ex) => {
           const localEx = EXAM_DATABASE.find((e) => e.id === ex.id);
           if (localEx) {
@@ -1590,15 +1863,31 @@ function startRealtimeSync() {
   }, 10000);
 }
 
+function setHomeExamLoadingState(container) {
+  if (!container) return;
+  container.innerHTML = Array.from(
+    { length: window.innerWidth < 760 ? 2 : 3 },
+    (_, index) => `
+      <div class="exam-card-pro content-skeleton" aria-hidden="true" data-skeleton="${index}">
+        <div class="skeleton-line short"></div>
+        <div class="skeleton-line title"></div>
+        <div class="skeleton-line medium"></div>
+        <div class="skeleton-line button"></div>
+      </div>`,
+  ).join("");
+}
+
 window.renderHome = async () => {
   const listEl = document.getElementById("exam-list");
   if (!listEl) return;
   if (!isExamsMergedWithDB) {
+    if (!EXAM_DATABASE.length) setHomeExamLoadingState(listEl);
     isExamsMergedWithDB = true;
     try {
       const { data: dbExams, error } = await supabase
         .from("exams")
-        .select("id, title, category, cohort, pdf_url, views, likes, created_at")
+        .select("id, title, category, cohort, pdf_url, views, likes, publication_status, created_at")
+        .eq("publication_status", "published")
         .order("created_at", { ascending: false });
       if (!error && dbExams) {
         dbExams.forEach((dbEx) => {
@@ -1662,7 +1951,7 @@ window.renderHome = async () => {
     let actionsHtml = `<button class="btn-play primary" onclick="window.startExam('${ex.id}', 'new')">${playIcon} <span style="margin-left:5px;">Làm bài</span></button>`;
     if (hasDoneExam) {
       const lastAttempt = historyData[historyData.length - 1];
-      badgeHtml = `<div class="exam-status-inline success">Đã làm ${historyData.length} lần • ${lastAttempt.score.toFixed(2)}đ</div>`;
+      badgeHtml = `<div class="exam-status-inline success">Đã làm ${historyData.length} lần • ${normalizeAttemptScore(lastAttempt.score).toFixed(2)}đ</div>`;
       actionsHtml = `<button class="btn-play warning" onclick="window.startExam('${ex.id}', 'retake')">Làm lại</button> <button class="btn-play secondary" onclick="window.showHistory('${ex.id}')">Lịch sử</button>`;
     } else if (userDataCache.activeExam === ex.id) {
       badgeHtml = `<div class="exam-status-inline warning">Đang làm dở...</div>`;
@@ -1710,6 +1999,9 @@ window.renderHome = async () => {
 };
 
 window.toggleBookmark = (examId, btn) => {
+  if (!requireAuthentication("Đăng nhập để lưu đề và xem lại trên mọi thiết bị.")) {
+    return;
+  }
   const uid = currentUser ? currentUser.id : "guest";
   let bookmarkedExams = JSON.parse(
     localStorage.getItem("thpt_bookmarked_" + uid) || "[]",
@@ -1749,6 +2041,9 @@ window.toggleBookmark = (examId, btn) => {
 };
 
 window.toggleLike = async (examId, element) => {
+  if (!requireAuthentication("Đăng nhập để thả tim cho đề thi em đã hoàn thành.")) {
+    return;
+  }
   const uid = currentUser ? currentUser.id : "guest";
   const storedHistory = userDataCache?.history?.[examId];
   const historyData = Array.isArray(storedHistory) ? storedHistory : [];
@@ -1883,11 +2178,24 @@ function handleDocumentRealtimeChange(payload) {
   if (!documentsLoaded || !payload) return;
 
   if (payload.eventType === "UPDATE") {
+    if (payload.new?.publication_status !== "published") {
+      DOCUMENT_DATABASE = DOCUMENT_DATABASE.filter(
+        (item) => item.id !== payload.new?.id,
+      );
+      const documentsScreen = document.getElementById("documents-screen");
+      if (documentsScreen?.style.display !== "none") renderDocuments();
+      return;
+    }
+    const exists = DOCUMENT_DATABASE.some((item) => item.id === payload.new?.id);
+    if (!exists && payload.new?.id) DOCUMENT_DATABASE.unshift(payload.new);
     updateDocumentCountersFromRow(payload.new);
+    const documentsScreen = document.getElementById("documents-screen");
+    if (documentsScreen?.style.display !== "none") renderDocuments();
     return;
   }
 
   if (payload.eventType === "INSERT" && payload.new?.id) {
+    if (payload.new.publication_status !== "published") return;
     const exists = DOCUMENT_DATABASE.some((item) => item.id === payload.new.id);
     if (!exists) DOCUMENT_DATABASE.unshift(payload.new);
 
@@ -1909,13 +2217,14 @@ function handleDocumentRealtimeChange(payload) {
 }
 
 async function reconcileDocumentCounters() {
-  if (!currentUser || !documentsLoaded || document.hidden) return;
+  if (!documentsLoaded || document.hidden) return;
   const documentsScreen = document.getElementById("documents-screen");
   if (!documentsScreen || documentsScreen.style.display === "none") return;
 
   const { data, error } = await supabase
     .from("documents")
-    .select("id, download_count, like_count");
+    .select("id, download_count, like_count, publication_status")
+    .eq("publication_status", "published");
   if (error || !Array.isArray(data)) return;
 
   const localIds = new Set(DOCUMENT_DATABASE.map((item) => item.id));
@@ -1946,11 +2255,12 @@ function stopDocumentRealtimeSync() {
 }
 
 function startDocumentRealtimeSync() {
-  if (!currentUser) return;
   stopDocumentRealtimeSync();
 
+  const realtimeOwner = currentUser?.id || "guest";
+
   documentRealtimeChannel = supabase
-    .channel(`documents-live-${currentUser.id}-${Date.now()}`)
+    .channel(`documents-live-${realtimeOwner}-${Date.now()}`)
     .on(
       "postgres_changes",
       { event: "*", schema: "public", table: "documents" },
@@ -1970,30 +2280,1349 @@ function startDocumentRealtimeSync() {
   );
 }
 
-function setDocumentsLoadingState() {
-  const list = document.getElementById("documents-list");
-  if (!list) return;
-
-  list.innerHTML = `
-    <div class="documents-loading-state">
-      <span class="documents-loading-spinner"></span>
-      <p>Đang tải thư viện tài liệu...</p>
-    </div>
-  `;
+function isMissingInsightsFeature(error) {
+  const code = String(error?.code || "");
+  const message = String(error?.message || "").toLowerCase();
+  return (
+    ["42P01", "42883", "PGRST202", "PGRST205"].includes(code) ||
+    message.includes("student_wrong_questions") ||
+    message.includes("record_exam_attempt_v2") ||
+    message.includes("schema cache")
+  );
 }
 
-window.showDocumentsPage = async () => {
-  if (!currentUser) {
-    window.showNotification(
-      "Thông báo",
-      "Em hãy đăng nhập để xem tài liệu nhé!",
+function getWrongQuestionStatusLabel(status) {
+  return {
+    correct: "Lần gần nhất đã làm đúng",
+    partial: "Đúng một phần",
+    incorrect: "Trả lời sai",
+    unanswered: "Bỏ trống",
+  }[status] || "Cần ôn lại";
+}
+
+function setWrongNotebookState(
+  title,
+  detail,
+  loading = false,
+  targetId = selectedWrongExamId ? "wrong-notebook-list" : "wrong-exam-list",
+) {
+  const list = document.getElementById(targetId);
+  if (!list) return;
+  list.replaceChildren();
+  const state = document.createElement("div");
+  state.className = "wrong-notebook-state";
+  if (loading) {
+    const spinner = document.createElement("span");
+    spinner.className = "wrong-notebook-spinner";
+    state.appendChild(spinner);
+  }
+  const strong = document.createElement("strong");
+  strong.textContent = title;
+  const span = document.createElement("span");
+  span.textContent = detail;
+  state.append(strong, span);
+  list.appendChild(state);
+}
+
+function updateWrongNotebookStats() {
+  const groups = getWrongExamGroups();
+  const trackedItems = groups.flatMap((group) => group.items);
+  const remaining = trackedItems.filter(
+    (item) => item.status === "learning",
+  ).length;
+  const mastered = trackedItems.filter(
+    (item) => item.status === "mastered",
+  ).length;
+  const confidence = groups.length
+    ? Math.round(
+        groups.reduce(
+          (total, group) => total + calculateWrongExamConfidence(group),
+          0,
+        ) / groups.length,
+      )
+    : 0;
+
+  animateNumberChange(
+    document.getElementById("wrong-remaining-count"),
+    remaining,
+  );
+  animateNumberChange(
+    document.getElementById("wrong-filter-all-count"),
+    trackedItems.length,
+  );
+  animateNumberChange(
+    document.getElementById("wrong-filter-learning-count"),
+    remaining,
+  );
+  animateNumberChange(
+    document.getElementById("wrong-filter-mastered-count"),
+    mastered,
+  );
+  animateNumberChange(
+    document.getElementById("review-confidence-value"),
+    confidence + "%",
+  );
+  const ring = document.getElementById("review-confidence-ring");
+  if (ring) {
+    ring.style.setProperty("--confidence-value", confidence + "%");
+    ring.dataset.level =
+      confidence >= 80 ? "high" : confidence >= 55 ? "medium" : "low";
+    ring.title =
+      "Tính từ điểm các lần làm gần nhất và tiến độ khắc phục câu sai.";
+  }
+  const priorityMessage = document.getElementById("review-priority-message");
+  if (priorityMessage) {
+    priorityMessage.textContent = remaining
+      ? remaining + " câu chưa làm đúng"
+      : "Em đã xử lý hết câu sai";
+  }
+}
+
+function normalizeAttemptScore(value) {
+  const score = Number(value);
+  return Number.isFinite(score) ? Math.max(0, Math.min(10, score)) : 0;
+}
+
+function getRecentAttemptScore(attempts = []) {
+  const recent = attempts.slice(-3);
+  if (!recent.length) return 0;
+  let weightedTotal = 0;
+  let totalWeight = 0;
+  recent.forEach((attempt, index) => {
+    const weight = index + 1;
+    weightedTotal += normalizeAttemptScore(attempt?.score) * weight;
+    totalWeight += weight;
+  });
+  return totalWeight ? weightedTotal / totalWeight : 0;
+}
+
+function calculateWrongExamConfidence(group) {
+  const performanceRate = getRecentAttemptScore(group.attempts) * 10;
+  const trackedCount = group.learningCount + group.masteredCount;
+  if (!trackedCount) return Math.round(performanceRate);
+  const recoveryRate = (group.masteredCount / trackedCount) * 100;
+  return Math.max(
+    0,
+    Math.min(
+      100,
+      Math.round(performanceRate * 0.8 + recoveryRate * 0.2),
+    ),
+  );
+}
+
+function getWrongExamScoreTrend(attempts = []) {
+  if (attempts.length < 2) {
+    return { label: "Lần đầu", type: "neutral" };
+  }
+  const latest = normalizeAttemptScore(attempts[attempts.length - 1]?.score);
+  const previous = normalizeAttemptScore(attempts[attempts.length - 2]?.score);
+  const change = Math.round((latest - previous) * 100) / 100;
+  if (change > 0.04) {
+    return { label: "Tăng " + change.toFixed(2), type: "up" };
+  }
+  if (change < -0.04) {
+    return { label: "Giảm " + Math.abs(change).toFixed(2), type: "down" };
+  }
+  return { label: "Ổn định", type: "neutral" };
+}
+
+function matchesWrongQuestionStatus(item) {
+  if (wrongNotebookFilter === "all") return true;
+  return item.status === wrongNotebookFilter;
+}
+
+function getWrongExamGroups() {
+  const groups = new Map();
+  const history = parseJsonObject(userDataCache.history);
+
+  if (Array.isArray(wrongNotebookAttempts)) {
+    const attemptsByExam = new Map();
+    wrongNotebookAttempts.forEach((row) => {
+      const examId = String(row.exam_id || "");
+      if (!examId) return;
+      if (!attemptsByExam.has(examId)) attemptsByExam.set(examId, []);
+      attemptsByExam.get(examId).push(row);
+    });
+
+    attemptsByExam.forEach((rows, examId) => {
+      const historyAttempts = Array.isArray(history[examId])
+        ? history[examId]
+        : [];
+      const attempts = rows
+        .slice()
+        .sort(
+          (left, right) =>
+            new Date(left.submitted_at || 0).getTime() -
+            new Date(right.submitted_at || 0).getTime(),
+        )
+        .map((row, index) => {
+          const historyIndex = Math.max(
+            0,
+            Number(row.attempt_number || index + 1) - 1,
+          );
+          const savedAttempt = historyAttempts[historyIndex] || {};
+          return {
+            ...savedAttempt,
+            score: normalizeAttemptScore(row.score),
+            duration_seconds:
+              row.duration_seconds ?? savedAttempt.duration_seconds,
+            submitted_at: row.submitted_at || savedAttempt.submitted_at,
+            date:
+              savedAttempt.date ||
+              (row.submitted_at
+                ? new Date(row.submitted_at).toLocaleString("vi-VN", {
+                    hour: "2-digit",
+                    minute: "2-digit",
+                    day: "2-digit",
+                    month: "2-digit",
+                    year: "numeric",
+                  })
+                : ""),
+          };
+        });
+      if (!attempts.length) return;
+      const exam = EXAM_DATABASE.find(
+        (item) => String(item.id) === String(examId),
+      );
+      groups.set(examId, {
+        examId,
+        title: exam?.title || "Đề thi " + examId,
+        attempts,
+        latestAttempt: attempts[attempts.length - 1] || {},
+        items: [],
+      });
+    });
+  } else {
+    Object.entries(history).forEach(([examId, attemptsValue]) => {
+      const attempts = Array.isArray(attemptsValue)
+        ? attemptsValue.filter(
+            (attempt) =>
+              Number.isFinite(Number(attempt?.score)) &&
+              Boolean(attempt?.submitted_at || attempt?.date),
+          )
+        : [];
+      if (!attempts.length) return;
+      const exam = EXAM_DATABASE.find(
+        (item) => String(item.id) === String(examId),
+      );
+      groups.set(String(examId), {
+        examId: String(examId),
+        title: exam?.title || "Đề thi " + examId,
+        attempts,
+        latestAttempt: attempts[attempts.length - 1] || {},
+        items: [],
+      });
+    });
+  }
+
+  wrongNotebookItems.forEach((item) => {
+    const examId = String(item.exam_id);
+    if (!groups.has(examId)) return;
+    const group = groups.get(examId);
+    group.title = item.exam_title || group.title;
+    group.items.push(item);
+  });
+
+  return Array.from(groups.values())
+    .map((group) => {
+      const latestWrongTimestamp = group.items.reduce((latest, item) => {
+        const timestamp = new Date(item.updated_at || 0).getTime();
+        return Math.max(latest, Number.isFinite(timestamp) ? timestamp : 0);
+      }, 0);
+      const latestAttemptTimestamp = new Date(
+        group.latestAttempt.submitted_at || 0,
+      ).getTime();
+      return {
+        ...group,
+        learningCount: group.items.filter((item) => item.status === "learning")
+          .length,
+        masteredCount: group.items.filter((item) => item.status === "mastered")
+          .length,
+        lastActivity: Math.max(
+          latestWrongTimestamp,
+          Number.isFinite(latestAttemptTimestamp) ? latestAttemptTimestamp : 0,
+        ),
+      };
+    })
+    .sort(
+      (left, right) =>
+        right.learningCount - left.learningCount ||
+        right.lastActivity - left.lastActivity,
+    );
+}
+
+function createWrongExamStat(label, value, className) {
+  const stat = document.createElement("span");
+  stat.className = className;
+  const strong = document.createElement("strong");
+  strong.textContent = String(value);
+  stat.append(strong, document.createTextNode(label));
+  return stat;
+}
+
+function getWrongFilterContext(group) {
+  if (wrongNotebookFilter === "learning") {
+    return {
+      count: group.learningCount,
+      cardClass: "showing-learning",
+      badge: "Cần ôn lại",
+      action: "Ôn câu còn sai",
+      aria: "Mở các câu còn sai của ",
+    };
+  }
+  if (wrongNotebookFilter === "mastered") {
+    return {
+      count: group.masteredCount,
+      cardClass: "showing-mastered",
+      badge: "Đã đúng",
+      action: "Xem câu đã đúng",
+      aria: "Mở các câu đã đánh dấu đúng của ",
+    };
+  }
+  return {
+    count: group.items.length,
+    cardClass: "showing-all",
+    badge: group.items.length ? "Có dữ liệu ôn tập" : "Chưa có câu cần ôn",
+    action: "Xem chi tiết",
+    aria: "Mở toàn bộ câu ôn tập của ",
+  };
+}
+
+function renderWrongExamList() {
+  const examList = document.getElementById("wrong-exam-list");
+  const detail = document.getElementById("wrong-exam-detail");
+  if (!examList || !detail) return;
+  detail.hidden = true;
+  examList.hidden = false;
+
+  const keyword = wrongNotebookSearch.trim().toLowerCase();
+  const groups = getWrongExamGroups().filter((group) => {
+    const matchesSearch =
+      !keyword ||
+      (group.title + " " + group.examId).toLowerCase().includes(keyword);
+    const matchesFilter =
+      wrongNotebookFilter === "all"
+        ? true
+        : group.items.some(matchesWrongQuestionStatus);
+    return matchesSearch && matchesFilter;
+  });
+
+  examList.replaceChildren();
+  if (!groups.length) {
+    const detailText = keyword
+      ? "Không có đề nào phù hợp với từ khóa này."
+      : wrongNotebookFilter === "all"
+        ? "Những đề em đã nộp sẽ được hiển thị tại đây."
+        : wrongNotebookFilter === "learning"
+          ? "Tất cả câu cần ôn đã được chuyển sang mục Đã đúng."
+          : "Khi em đánh dấu một câu đã đúng, đề và câu đó sẽ xuất hiện tại đây.";
+    setWrongNotebookState(
+      wrongNotebookFilter === "all"
+        ? "Chưa có đề đã làm"
+        : wrongNotebookFilter === "learning"
+          ? "Không còn câu sai"
+          : "Chưa có câu đã đúng",
+      detailText,
+      false,
+      "wrong-exam-list",
     );
     return;
   }
 
+  const fragment = document.createDocumentFragment();
+  groups.forEach((group) => {
+    const filterContext = getWrongFilterContext(group);
+    const card = document.createElement("article");
+    card.className = `wrong-exam-card ${filterContext.cardClass}`;
+    card.tabIndex = 0;
+    card.setAttribute("role", "button");
+    card.setAttribute("aria-label", filterContext.aria + group.title);
+
+    const icon = document.createElement("div");
+    icon.className = "wrong-exam-icon";
+    icon.innerHTML =
+      '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 3h8l4 4v14H7z"></path><path d="M15 3v5h5M10 12h6M10 16h6"></path></svg>';
+
+    const copy = document.createElement("div");
+    copy.className = "wrong-exam-card-copy";
+    const topLine = document.createElement("div");
+    topLine.className = "wrong-exam-topline";
+    const eyebrow = document.createElement("span");
+    eyebrow.className = "wrong-exam-eyebrow";
+    eyebrow.textContent =
+      group.attempts.length +
+      " lần làm" +
+      (group.latestAttempt.date ? " · Gần nhất " + group.latestAttempt.date : "");
+    const stateBadge = document.createElement("span");
+    stateBadge.className = "wrong-exam-filter-label";
+    stateBadge.textContent = filterContext.badge;
+    topLine.append(eyebrow, stateBadge);
+    const title = document.createElement("h3");
+    title.textContent = group.title;
+    const scoreRow = document.createElement("div");
+    scoreRow.className = "wrong-exam-score-row";
+    const score = document.createElement("p");
+    const latestScore = normalizeAttemptScore(group.latestAttempt.score);
+    score.textContent = "Điểm gần nhất: " + latestScore.toFixed(2) + "/10";
+    const trendData = getWrongExamScoreTrend(group.attempts);
+    const trend = document.createElement("span");
+    trend.className = "wrong-exam-trend " + trendData.type;
+    trend.textContent = trendData.label;
+    scoreRow.append(score, trend);
+    copy.append(topLine, title, scoreRow);
+
+    const stats = document.createElement("div");
+    stats.className = "wrong-exam-card-stats";
+    if (wrongNotebookFilter === "all") {
+      stats.append(
+        createWrongExamStat("câu còn sai", group.learningCount, "remaining"),
+        createWrongExamStat("câu đã đúng", group.masteredCount, "mastered"),
+      );
+    } else if (wrongNotebookFilter === "learning") {
+      stats.append(
+        createWrongExamStat("câu cần ôn lại", group.learningCount, "remaining"),
+      );
+    } else {
+      stats.append(
+        createWrongExamStat("câu đã đánh dấu đúng", group.masteredCount, "mastered"),
+      );
+    }
+
+    const action = document.createElement("span");
+    action.className = "wrong-exam-open";
+    action.innerHTML =
+      `${filterContext.action} <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 18 6-6-6-6"></path></svg>`;
+
+    const openGroup = () => window.selectWrongExam(group.examId);
+    card.addEventListener("click", openGroup);
+    card.addEventListener("keydown", (event) => {
+      if (event.key === "Enter" || event.key === " ") {
+        event.preventDefault();
+        openGroup();
+      }
+    });
+
+    card.append(icon, copy, stats, action);
+    fragment.appendChild(card);
+  });
+  examList.appendChild(fragment);
+}
+
+function getWrongExamPartConfig(group) {
+  const cached = wrongExamPartConfigCache.get(String(group.examId));
+  if (Array.isArray(cached) && cached.length) return cached;
+
+  return ["P1", "P2", "P3"].map((key, index) => {
+    const firstItem = group.items.find((item) => item.part_key === key);
+    const highestQuestion = group.items
+      .filter((item) => item.part_key === key)
+      .reduce(
+        (highest, item) =>
+          Math.max(highest, Number(item.question_number || 0)),
+        0,
+      );
+    return {
+      key,
+      title: firstItem?.part_title || `Phần ${index + 1}`,
+      description:
+        [
+          "Trắc nghiệm nhiều phương án",
+          "Trắc nghiệm đúng / sai",
+          "Trả lời ngắn",
+        ][index] || "",
+      questionCount: highestQuestion,
+    };
+  });
+}
+
+function createWrongQuestionCard(group, item) {
+  const card = document.createElement("article");
+  card.className =
+    "wrong-notebook-card" + (item.status === "mastered" ? " mastered" : "");
+
+  const number = document.createElement("div");
+  number.className = "wrong-question-number";
+  number.textContent = "C" + Number(item.question_number || 0);
+
+  const copy = document.createElement("div");
+  copy.className = "wrong-question-copy";
+  const meta = document.createElement("div");
+  meta.className = "wrong-question-meta";
+  const status = document.createElement("span");
+  status.className = item.status === "mastered" ? "is-mastered" : "is-learning";
+  status.textContent =
+    item.status === "mastered"
+      ? "Đã chuyển sang mục Đã đúng"
+      : getWrongQuestionStatusLabel(item.last_result);
+  meta.appendChild(status);
+  const title = document.createElement("h3");
+  title.textContent = "Câu " + Number(item.question_number || 0);
+  title.title = title.textContent + " · " + group.title;
+
+  const answers = document.createElement("div");
+  answers.className = "wrong-question-answer";
+  const userAnswer = document.createElement("span");
+  const userLabel = document.createElement("b");
+  userLabel.textContent = "Em chọn: ";
+  userAnswer.append(
+    userLabel,
+    document.createTextNode(formatStoredAnswer(item.last_user_answer)),
+  );
+  const correctAnswer = document.createElement("span");
+  const correctLabel = document.createElement("b");
+  correctLabel.textContent = "Đáp án: ";
+  correctAnswer.append(
+    correctLabel,
+    document.createTextNode(formatStoredAnswer(item.last_correct_answer)),
+  );
+  answers.append(userAnswer, correctAnswer);
+  copy.append(meta, title, answers);
+
+  const actions = document.createElement("div");
+  actions.className = "wrong-question-actions";
+  const solutionButton = document.createElement("button");
+  solutionButton.type = "button";
+  solutionButton.className = "open-solution";
+  solutionButton.textContent = "Xem lời giải";
+  solutionButton.addEventListener("click", () =>
+    window.openWrongQuestionSolution(
+      item.exam_id,
+      item.part_key,
+      item.question_number,
+    ),
+  );
+  const statusButton = document.createElement("button");
+  statusButton.type = "button";
+  statusButton.className =
+    item.status === "mastered" ? "" : "mark-mastered";
+  statusButton.textContent =
+    item.status === "mastered" ? "Đưa lại vào còn sai" : "Đánh dấu đã đúng";
+  statusButton.addEventListener("click", () =>
+    window.markWrongQuestionStatus(
+      item.id,
+      item.status === "mastered" ? "learning" : "mastered",
+      statusButton,
+    ),
+  );
+  actions.append(solutionButton, statusButton);
+  card.append(number, copy, actions);
+  return card;
+}
+
+function renderWrongQuestionCards(group) {
+  const list = document.getElementById("wrong-notebook-list");
+  if (!list) return;
+  const keyword = wrongNotebookSearch.trim().toLowerCase();
+  const filteredItems = group.items
+    .filter((item) => {
+      const haystack = [
+        item.part_title || "",
+        item.part_key || "",
+        item.question_number || "",
+        getWrongQuestionStatusLabel(item.last_result),
+      ]
+        .join(" ")
+        .toLowerCase();
+      return (
+        matchesWrongQuestionStatus(item) &&
+        (!keyword || haystack.includes(keyword))
+      );
+    })
+    .sort((left, right) => {
+      const partOrder = { P1: 1, P2: 2, P3: 3 };
+      return (
+        (partOrder[left.part_key] || 99) -
+          (partOrder[right.part_key] || 99) ||
+        Number(left.question_number || 0) -
+          Number(right.question_number || 0)
+      );
+    });
+
+  list.replaceChildren();
+  if (!filteredItems.length) {
+    setWrongNotebookState(
+      group.items.length
+        ? "Không có câu phù hợp"
+        : "Đề này chưa có câu sai được ghi nhận",
+      group.items.length
+        ? "Em thử đổi bộ lọc hoặc xóa từ khóa tìm kiếm nhé."
+        : "Có thể em đã làm đúng hoặc lần làm này có trước khi Sổ câu sai được kích hoạt.",
+      false,
+      "wrong-notebook-list",
+    );
+    return;
+  }
+
+  const configuredParts = getWrongExamPartConfig(group).filter(
+    (part) =>
+      Number(part.questionCount || 0) > 0 ||
+      group.items.some((item) => item.part_key === part.key),
+  );
+  if (!configuredParts.length) return;
+
+  const configuredKeys = configuredParts.map((part) => part.key);
+  const selectedPartHasVisibleQuestions = filteredItems.some(
+    (item) => item.part_key === selectedWrongExamPartKey,
+  );
+  if (
+    !configuredKeys.includes(selectedWrongExamPartKey) ||
+    !selectedPartHasVisibleQuestions
+  ) {
+    selectedWrongExamPartKey =
+      configuredParts.find((part) =>
+        filteredItems.some((item) => item.part_key === part.key),
+      )?.key || configuredParts[0].key;
+  }
+
+  const tabs = document.createElement("div");
+  tabs.className = "wrong-part-tabs";
+  tabs.setAttribute("role", "tablist");
+  configuredParts.forEach((part, index) => {
+    const visibleCount = filteredItems.filter(
+      (item) => item.part_key === part.key,
+    ).length;
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className =
+      "wrong-part-tab" +
+      (part.key === selectedWrongExamPartKey ? " active" : "");
+    button.setAttribute("role", "tab");
+    button.id = `wrong-part-tab-${part.key}`;
+    button.setAttribute(
+      "aria-selected",
+      String(part.key === selectedWrongExamPartKey),
+    );
+    button.setAttribute("aria-controls", `wrong-part-panel-${part.key}`);
+    button.dataset.partKey = part.key;
+    const order = document.createElement("span");
+    order.textContent = "0" + (index + 1);
+    const copy = document.createElement("span");
+    const strong = document.createElement("strong");
+    strong.textContent = `Phần ${index + 1}`;
+    const small = document.createElement("small");
+    small.textContent =
+      (part.title && part.title !== `Phần ${index + 1}`
+        ? `${part.title} · `
+        : "") +
+      visibleCount +
+      " câu" +
+      (Number(part.questionCount || 0) > 0
+        ? ` / ${part.questionCount}`
+        : "");
+    copy.append(strong, small);
+    button.append(order, copy);
+    button.addEventListener("click", () => {
+      selectedWrongExamPartKey = part.key;
+      renderWrongQuestionCards(group);
+    });
+    tabs.appendChild(button);
+  });
+
+  const activePart =
+    configuredParts.find((part) => part.key === selectedWrongExamPartKey) ||
+    configuredParts[0];
+  const partItems = filteredItems.filter(
+    (item) => item.part_key === activePart.key,
+  );
+  const panel = document.createElement("section");
+  panel.className = "wrong-part-panel";
+  panel.id = `wrong-part-panel-${activePart.key}`;
+  panel.setAttribute("role", "tabpanel");
+  panel.setAttribute("aria-labelledby", `wrong-part-tab-${activePart.key}`);
+  const heading = document.createElement("header");
+  heading.className = "wrong-part-heading";
+  const headingCopy = document.createElement("div");
+  const eyebrow = document.createElement("span");
+  eyebrow.textContent = activePart.key.replace("P", "PHẦN ");
+  const title = document.createElement("h4");
+  title.textContent = activePart.title;
+  const description = document.createElement("p");
+  description.textContent = activePart.description || "Các câu cần xem lại";
+  headingCopy.append(eyebrow, title, description);
+  const count = document.createElement("strong");
+  count.textContent = partItems.length + " câu";
+  heading.append(headingCopy, count);
+
+  const grid = document.createElement("div");
+  grid.className = "wrong-part-card-grid";
+  if (partItems.length) {
+    partItems.forEach((item) =>
+      grid.appendChild(createWrongQuestionCard(group, item)),
+    );
+  } else {
+    const empty = document.createElement("div");
+    empty.className = "wrong-part-empty";
+    empty.textContent = "Phần này không có câu phù hợp với bộ lọc hiện tại.";
+    grid.appendChild(empty);
+  }
+  panel.append(heading, grid);
+  list.append(tabs, panel);
+}
+
+function renderWrongExamDetail() {
+  const examList = document.getElementById("wrong-exam-list");
+  const detail = document.getElementById("wrong-exam-detail");
+  if (!examList || !detail) return;
+  const group = getWrongExamGroups().find(
+    (item) => item.examId === String(selectedWrongExamId),
+  );
+  if (!group) {
+    selectedWrongExamId = null;
+    sessionStorage.removeItem("thpt_wrong_exam_id");
+    renderWrongExamList();
+    return;
+  }
+
+  if (
+    wrongNotebookFilter !== "all" &&
+    !group.items.some(matchesWrongQuestionStatus)
+  ) {
+    selectedWrongExamId = null;
+    selectedWrongExamPartKey = null;
+    sessionStorage.removeItem("thpt_wrong_exam_id");
+    renderWrongExamList();
+    return;
+  }
+
+  examList.hidden = true;
+  detail.hidden = false;
+  document.getElementById("wrong-exam-detail-title").textContent = group.title;
+  const eyebrow = document.getElementById("wrong-exam-detail-eyebrow");
+  const meta = document.getElementById("wrong-exam-detail-meta");
+  if (wrongNotebookFilter === "learning") {
+    if (eyebrow) eyebrow.textContent = "CÁC CÂU CÒN SAI";
+    if (meta) meta.textContent = `${group.learningCount} câu cần ôn lại`;
+  } else if (wrongNotebookFilter === "mastered") {
+    if (eyebrow) eyebrow.textContent = "CÁC CÂU ĐÃ ĐÚNG";
+    if (meta) meta.textContent = `${group.masteredCount} câu em đã đánh dấu đúng`;
+  } else {
+    if (eyebrow) eyebrow.textContent = "TẤT CẢ CÂU ÔN TẬP";
+    if (meta) {
+      meta.textContent =
+        `${group.learningCount} câu còn sai · ${group.masteredCount} câu đã đúng`;
+    }
+  }
+  renderWrongQuestionCards(group);
+}
+
+function renderWrongNotebook() {
+  if (selectedWrongExamId) renderWrongExamDetail();
+  else renderWrongExamList();
+}
+
+async function loadWrongNotebook() {
+  if (!currentUser) return;
+  const requestedUserId = currentUser.id;
+  const loadSequence = ++wrongNotebookLoadSequence;
+  const examList = document.getElementById("wrong-exam-list");
+  const detail = document.getElementById("wrong-exam-detail");
+  if (examList) examList.hidden = false;
+  if (detail) detail.hidden = true;
+  setWrongNotebookState(
+    "Đang tải danh sách đề...",
+    "Hệ thống đang tổng hợp các đề em đã làm.",
+    true,
+    "wrong-exam-list",
+  );
+  try {
+    const [wrongQuestionsResult, attemptsResult] = await Promise.all([
+      supabase
+        .from("student_wrong_questions")
+        .select(
+          "id, exam_id, exam_title, part_key, part_title, question_number, status, wrong_count, correct_count, last_result, last_user_answer, last_correct_answer, next_review_at, updated_at",
+        )
+        .eq("user_id", requestedUserId)
+        .order("updated_at", { ascending: false })
+        .limit(300),
+      supabase
+        .from("exam_attempts")
+        .select(
+          "exam_id, score, duration_seconds, attempt_number, submitted_at",
+        )
+        .eq("user_id", requestedUserId)
+        .order("submitted_at", { ascending: true })
+        .limit(1000),
+    ]);
+    if (
+      loadSequence !== wrongNotebookLoadSequence ||
+      currentUser?.id !== requestedUserId
+    ) {
+      return;
+    }
+    if (wrongQuestionsResult.error) throw wrongQuestionsResult.error;
+    wrongNotebookFeatureAvailable = true;
+    wrongNotebookItems = Array.isArray(wrongQuestionsResult.data)
+      ? wrongQuestionsResult.data
+      : [];
+    if (attemptsResult.error) {
+      console.warn(
+        "Chưa tải được danh sách lần nộp chuẩn, đang dùng lịch sử dự phòng:",
+        attemptsResult.error,
+      );
+      wrongNotebookAttempts = null;
+    } else {
+      wrongNotebookAttempts = Array.isArray(attemptsResult.data)
+        ? attemptsResult.data
+        : [];
+    }
+    updateWrongNotebookStats();
+    renderWrongNotebook();
+    if (selectedWrongExamId) {
+      void hydrateWrongExamPartConfig(selectedWrongExamId);
+    }
+  } catch (error) {
+    if (
+      loadSequence !== wrongNotebookLoadSequence ||
+      currentUser?.id !== requestedUserId
+    ) {
+      return;
+    }
+    console.warn("Chưa thể tải Sổ câu sai:", error);
+    wrongNotebookItems = [];
+    wrongNotebookAttempts = null;
+    selectedWrongExamId = null;
+    updateWrongNotebookStats();
+    if (isMissingInsightsFeature(error)) {
+      wrongNotebookFeatureAvailable = false;
+      setWrongNotebookState(
+        "Sổ câu sai chưa được kích hoạt",
+        "Admin cần chạy file supabase-exam-insights.sql một lần trong Supabase SQL Editor.",
+        false,
+        "wrong-exam-list",
+      );
+    } else {
+      setWrongNotebookState(
+        "Chưa tải được dữ liệu",
+        "Em kiểm tra mạng rồi thử mở lại mục Ôn tập nhé.",
+        false,
+        "wrong-exam-list",
+      );
+    }
+  }
+}
+
+function renderGuestReviewState() {
+  wrongNotebookItems = [];
+  wrongNotebookAttempts = [];
+  wrongNotebookFilter = "all";
+  selectedWrongExamId = null;
+  selectedWrongExamPartKey = null;
+  updateWrongNotebookStats();
+
+  document.querySelectorAll("[data-wrong-filter]").forEach((button) => {
+    button.classList.toggle("active", button.dataset.wrongFilter === "all");
+  });
+
+  const examList = document.getElementById("wrong-exam-list");
+  const detail = document.getElementById("wrong-exam-detail");
+  if (detail) detail.hidden = true;
+  if (!examList) return;
+  examList.hidden = false;
+  examList.replaceChildren();
+
+  const state = document.createElement("div");
+  state.className = "wrong-notebook-state guest-review-state";
+  state.innerHTML = `
+    <span class="guest-review-icon" aria-hidden="true">
+      <svg viewBox="0 0 24 24"><path d="M7 3h8l4 4v14H7z"></path><path d="M15 3v5h5M10 12h6M10 16h4"></path></svg>
+    </span>
+    <strong>Sổ ôn tập dành riêng cho từng tài khoản</strong>
+    <span>Đăng nhập để xem đúng các đề em đã làm, câu còn sai và câu đã đánh dấu đúng.</span>
+  `;
+  const loginButton = document.createElement("button");
+  loginButton.type = "button";
+  loginButton.className = "guest-review-login";
+  loginButton.textContent = "Đăng nhập để xem sổ ôn tập";
+  loginButton.addEventListener("click", () =>
+    window.openAuthModal("Đăng nhập để mở đúng Sổ ôn tập của tài khoản em."),
+  );
+  state.appendChild(loginButton);
+  examList.appendChild(state);
+}
+
+window.showReviewPage = async () => {
+  sessionStorage.setItem("thpt_current_view", "review");
+  sessionStorage.setItem("thpt_current_tab", "ontap");
+  sessionStorage.removeItem("thpt_review_state");
+  sessionStorage.removeItem("thpt_in_exam");
+  disposeExamPdf();
+  document.body.classList.remove(
+    "is-documents-view",
+    "is-taking-exam",
+    "has-exam-result",
+  );
+  document.body.classList.add("is-review-view");
+  document
+    .getElementById("documents-screen")
+    ?.classList.remove("is-active-screen");
+  setMainMenuActive("ontap");
+  if (document.fullscreenElement) document.exitFullscreen().catch(() => {});
+  document.title = "Sổ Câu Sai - Thi Thử Online";
+
+  const screens = {
+    home: document.getElementById("home-screen"),
+    documents: document.getElementById("documents-screen"),
+    profile: document.getElementById("profile-screen"),
+    workspace: document.getElementById("exam-workspace"),
+    review: document.getElementById("review-screen"),
+  };
+  if (screens.home) screens.home.style.display = "none";
+  if (screens.documents) screens.documents.style.display = "none";
+  if (screens.profile) screens.profile.style.display = "none";
+  if (screens.workspace) screens.workspace.style.display = "none";
+  if (screens.review) {
+    screens.review.style.display = "block";
+    screens.review.scrollTop = 0;
+    revealScreen(screens.review);
+  }
+  document
+    .getElementById("profile-dropdown-menu")
+    ?.classList.remove("show");
+  document.getElementById("header-timer-box").style.display = "none";
+  syncAuthenticationUI();
+  setPublicAdsVisibility(true);
+  window.updateFabVisibility();
+  currentExam = null;
+  if (!currentUser) {
+    sessionStorage.removeItem("thpt_wrong_exam_id");
+    renderGuestReviewState();
+    return;
+  }
+  selectedWrongExamId =
+    sessionStorage.getItem("thpt_wrong_exam_id") || null;
+  await loadWrongNotebook();
+};
+
+window.handleWrongQuestionSearch = (value) => {
+  wrongNotebookSearch = String(value || "");
+  renderWrongNotebook();
+};
+
+async function hydrateWrongExamPartConfig(examId) {
+  const cacheKey = String(examId || "");
+  if (!cacheKey || wrongExamPartConfigCache.has(cacheKey)) return;
+  try {
+    const examData = await getWrongSolutionExamData(cacheKey);
+    const parts = getExamPartConfig({ answers: examData.answers || {} });
+    wrongExamPartConfigCache.set(cacheKey, parts);
+    if (String(selectedWrongExamId) === cacheKey) {
+      if (!parts.some((part) => part.key === selectedWrongExamPartKey)) {
+        selectedWrongExamPartKey =
+          parts.find((part) => Number(part.questionCount || 0) > 0)?.key ||
+          "P1";
+      }
+      renderWrongExamDetail();
+    }
+  } catch (error) {
+    console.warn("Chưa tải được cấu trúc phần thi:", error);
+  }
+}
+
+window.selectWrongExam = (examId) => {
+  selectedWrongExamId = String(examId);
+  selectedWrongExamPartKey = null;
+  sessionStorage.setItem("thpt_wrong_exam_id", selectedWrongExamId);
+  wrongNotebookSearch = "";
+  const search = document.getElementById("wrong-question-search");
+  if (search) {
+    search.value = "";
+    search.placeholder = "Tìm số câu hoặc phần thi...";
+  }
+  renderWrongNotebook();
+  void hydrateWrongExamPartConfig(selectedWrongExamId);
+  document.getElementById("review-screen")?.scrollTo({
+    top: document.querySelector(".review-notebook-panel")?.offsetTop || 0,
+    behavior: "smooth",
+  });
+};
+
+window.backToWrongExamList = () => {
+  selectedWrongExamId = null;
+  selectedWrongExamPartKey = null;
+  sessionStorage.removeItem("thpt_wrong_exam_id");
+  wrongNotebookSearch = "";
+  const search = document.getElementById("wrong-question-search");
+  if (search) {
+    search.value = "";
+    search.placeholder = "Tìm tên đề...";
+  }
+  renderWrongNotebook();
+};
+
+window.setWrongQuestionFilter = (filter, button) => {
+  if (!["learning", "mastered", "all"].includes(filter)) return;
+  wrongNotebookFilter = filter;
+  document
+    .querySelectorAll("[data-wrong-filter]")
+    .forEach((item) => item.classList.remove("active"));
+  button?.classList.add("active");
+  selectedWrongExamPartKey = null;
+  renderWrongNotebook();
+};
+
+window.markWrongQuestionStatus = async (itemId, status, button) => {
+  if (wrongNotebookFeatureAvailable === false) return;
+  if (!currentUser) return;
+  const requestedUserId = currentUser.id;
+  if (button) button.disabled = true;
+  try {
+    const { data, error } = await supabase.rpc(
+      "set_wrong_question_status",
+      {
+        p_item_id: Number(itemId),
+        p_status: status,
+      },
+    );
+    if (error) throw error;
+    if (currentUser?.id !== requestedUserId) return;
+    const index = wrongNotebookItems.findIndex(
+      (item) => Number(item.id) === Number(itemId),
+    );
+    if (index >= 0) {
+      wrongNotebookItems[index] = {
+        ...wrongNotebookItems[index],
+        ...(data || {}),
+        status,
+      };
+    }
+    const card = button?.closest(".wrong-notebook-card");
+    card?.classList.add("is-changing-status");
+    updateWrongNotebookStats();
+    window.setTimeout(() => renderWrongNotebook(), card ? 180 : 0);
+  } catch (error) {
+    if (currentUser?.id !== requestedUserId) return;
+    console.error("Không đổi được trạng thái câu sai:", error);
+    window.showNotification(
+      "Chưa cập nhật được",
+      "Em kiểm tra mạng rồi thử lại nhé.",
+    );
+    if (button) button.disabled = false;
+  }
+};
+
+window.startWrongQuestionExam = (examId) => {
+  if (!examId) return;
+  window.startExam(String(examId), "retake");
+};
+
+window.retrySelectedWrongExam = () => {
+  if (selectedWrongExamId) {
+    window.startWrongQuestionExam(selectedWrongExamId);
+  }
+};
+
+function getLatestWrongExamAttemptIndex(examId) {
+  const attempts = userDataCache.history?.[String(examId)];
+  return Array.isArray(attempts) && attempts.length ? attempts.length - 1 : 0;
+}
+
+function getSafeReviewImageUrl(value) {
+  if (!value) return "";
+  try {
+    const url = new URL(String(value), window.location.origin);
+    return ["http:", "https:"].includes(url.protocol) ? url.href : "";
+  } catch (_error) {
+    return "";
+  }
+}
+
+function setWrongSolutionLoading(title = "Đang tải lời giải...") {
+  const content = document.getElementById("wrong-solution-content");
+  const heading = document.getElementById("wrong-solution-title");
+  if (heading) heading.textContent = title;
+  if (!content) return;
+  content.replaceChildren();
+  const state = document.createElement("div");
+  state.className = "review-solution-state";
+  const spinner = document.createElement("span");
+  spinner.className = "wrong-notebook-spinner";
+  const label = document.createElement("strong");
+  label.textContent = "Đang chuẩn bị đáp án của câu này";
+  state.append(spinner, label);
+  content.appendChild(state);
+}
+
+function openWrongSolutionModal() {
+  const modal = document.getElementById("wrong-solution-modal");
+  if (!modal) return;
+  modal.hidden = false;
+  modal.setAttribute("aria-hidden", "false");
+  document.body.classList.add("has-review-solution-modal");
+  requestAnimationFrame(() => modal.classList.add("show"));
+}
+
+window.closeWrongSolutionModal = (event) => {
+  if (event && event.target !== event.currentTarget) return;
+  const modal = document.getElementById("wrong-solution-modal");
+  if (!modal || modal.hidden) return;
+  modal.classList.remove("show");
+  modal.setAttribute("aria-hidden", "true");
+  document.body.classList.remove("has-review-solution-modal");
+  window.setTimeout(() => {
+    if (!modal.classList.contains("show")) modal.hidden = true;
+  }, 180);
+};
+
+async function getWrongSolutionExamData(examId) {
+  const cacheKey = String(examId);
+  if (wrongSolutionAnswersCache.has(cacheKey)) {
+    return wrongSolutionAnswersCache.get(cacheKey);
+  }
+  const { data, error } = await supabase
+    .from("exams")
+    .select("id, title, answers")
+    .eq("id", cacheKey)
+    .single();
+  if (error || !data) throw error || new Error("Không tìm thấy đề thi");
+  wrongSolutionAnswersCache.set(cacheKey, data);
+  return data;
+}
+
+function createReviewSolutionValue(label, value, className = "") {
+  const item = document.createElement("div");
+  item.className = "review-solution-value " + className;
+  const small = document.createElement("span");
+  small.textContent = label;
+  const strong = document.createElement("strong");
+  strong.textContent = value;
+  item.append(small, strong);
+  return item;
+}
+
+function appendReviewSolutionImage(container, imageUrl, questionNumber) {
+  const safeUrl = getSafeReviewImageUrl(imageUrl);
+  if (!safeUrl) return;
+  const image = document.createElement("img");
+  image.className = "review-solution-image";
+  image.src = safeUrl;
+  image.alt = "Hình minh họa câu " + questionNumber;
+  image.loading = "lazy";
+  image.decoding = "async";
+  container.appendChild(image);
+}
+
+function appendReviewExplanation(container, explanation) {
+  const section = document.createElement("section");
+  section.className = "review-solution-explanation";
+  const title = document.createElement("h3");
+  title.textContent = "Hướng dẫn giải";
+  const body = document.createElement("div");
+  body.className = "review-solution-explanation-text";
+  body.textContent = String(explanation || "").trim() ||
+    "Câu này chưa có lời giải chi tiết. Em vẫn có thể đối chiếu đáp án đúng ở phía trên.";
+  section.append(title, body);
+  container.appendChild(section);
+}
+
+function renderWrongSolutionContent({
+  examData,
+  group,
+  item,
+  partKey,
+  questionNumber,
+}) {
+  const content = document.getElementById("wrong-solution-content");
+  const heading = document.getElementById("wrong-solution-title");
+  const partLabel = document.getElementById("wrong-solution-part");
+  if (!content || !heading || !partLabel) return;
+
+  const answers = examData.answers || {};
+  const keyEntry = answers?.[partKey]?.[String(questionNumber)] ?? {};
+  const latestAnswers = group?.latestAttempt?.answers || {};
+  const partTitle =
+    item?.part_title ||
+    answers?._config?.parts?.find((part) => part?.key === partKey)?.title ||
+    ({ P1: "Phần 1", P2: "Phần 2", P3: "Phần 3" }[partKey] || "Phần thi");
+
+  partLabel.textContent = `${partTitle.toUpperCase()} · CÂU ${questionNumber}`;
+  heading.textContent = `Lời giải câu ${questionNumber}`;
+  content.replaceChildren();
+
+  const summary = document.createElement("div");
+  summary.className = "review-solution-summary";
+  const answerBoard = document.createElement("div");
+  answerBoard.className = "review-solution-answer-board";
+  const answerBoardTitle = document.createElement("strong");
+  answerBoardTitle.className = "review-solution-board-title";
+  answerBoardTitle.textContent =
+    partKey === "P2" ? "Đối chiếu từng ý" : "Các phương án";
+  answerBoard.appendChild(answerBoardTitle);
+
+  if (partKey === "P2") {
+    const userValues = {};
+    const correctValues = {};
+    ["a", "b", "c", "d"].forEach((option) => {
+      userValues[option] =
+        latestAnswers[`ans_P2_${questionNumber}${option}`] ??
+        item?.last_user_answer?.[option];
+      correctValues[option] =
+        keyEntry?.[option] ?? item?.last_correct_answer?.[option];
+    });
+    summary.append(
+      createReviewSolutionValue(
+        "Em chọn",
+        formatStoredAnswer(userValues),
+        "student",
+      ),
+      createReviewSolutionValue(
+        "Đáp án đúng",
+        formatStoredAnswer(correctValues),
+        "correct",
+      ),
+    );
+
+    ["a", "b", "c", "d"].forEach((option) => {
+      const row = document.createElement("div");
+      row.className = "review-solution-tf-row";
+      const optionLabel = document.createElement("strong");
+      optionLabel.textContent = option + ")";
+      const correct = document.createElement("span");
+      const correctValue =
+        keyEntry?.[option] ?? item?.last_correct_answer?.[option];
+      correct.className = "correct";
+      correct.textContent =
+        "Đáp án: " +
+        (correctValue === "T" ? "Đúng" : correctValue === "F" ? "Sai" : "Chưa nhập");
+      const student = document.createElement("span");
+      const studentValue =
+        latestAnswers[`ans_P2_${questionNumber}${option}`] ??
+        item?.last_user_answer?.[option];
+      student.textContent =
+        "Em chọn: " +
+        (studentValue === "T" ? "Đúng" : studentValue === "F" ? "Sai" : "Bỏ trống");
+      if (studentValue && studentValue !== correctValue) student.className = "wrong";
+      row.append(optionLabel, correct, student);
+      answerBoard.appendChild(row);
+    });
+  } else {
+    const correctValue =
+      (keyEntry && typeof keyEntry === "object" ? keyEntry.ans : keyEntry) ??
+      item?.last_correct_answer;
+    const answerName = `ans_${partKey}_${questionNumber}`;
+    const studentValue =
+      latestAnswers[answerName] ?? item?.last_user_answer;
+    summary.append(
+      createReviewSolutionValue(
+        "Em chọn",
+        formatStoredAnswer(studentValue),
+        "student",
+      ),
+      createReviewSolutionValue(
+        "Đáp án đúng",
+        formatStoredAnswer(correctValue),
+        "correct",
+      ),
+    );
+
+    if (partKey === "P1") {
+      ["A", "B", "C", "D"].forEach((option) => {
+        const optionElement = document.createElement("span");
+        optionElement.className = "review-solution-option";
+        optionElement.textContent = option;
+        if (option === String(correctValue || "")) {
+          optionElement.classList.add("correct");
+        } else if (option === String(studentValue || "")) {
+          optionElement.classList.add("wrong");
+        }
+        answerBoard.appendChild(optionElement);
+      });
+    }
+  }
+
+  content.append(summary);
+  if (answerBoard.childElementCount > 1) content.appendChild(answerBoard);
+  const imageUrl =
+    keyEntry && typeof keyEntry === "object" ? keyEntry.img || "" : "";
+  appendReviewSolutionImage(content, imageUrl, questionNumber);
+  const explanation =
+    keyEntry && typeof keyEntry === "object" ? keyEntry.exp || "" : "";
+  appendReviewExplanation(content, explanation);
+}
+
+window.openWrongQuestionSolution = async (
+  examId,
+  partKey = "",
+  questionNumber = "",
+) => {
+  if (!examId || !partKey || !questionNumber) return;
+  if (!currentUser) return;
+  const requestedUserId = currentUser.id;
+  openWrongSolutionModal();
+  setWrongSolutionLoading("Câu " + questionNumber);
+  try {
+    const group = getWrongExamGroups().find(
+      (entry) => entry.examId === String(examId),
+    );
+    if (!group) throw new Error("Không tìm thấy lần nộp của đề này");
+    const item = group.items.find(
+      (entry) =>
+        String(entry.part_key) === String(partKey) &&
+        Number(entry.question_number) === Number(questionNumber),
+    );
+    const examData = await getWrongSolutionExamData(examId);
+    if (currentUser?.id !== requestedUserId) {
+      window.closeWrongSolutionModal();
+      return;
+    }
+    renderWrongSolutionContent({
+      examData,
+      group,
+      item,
+      partKey: String(partKey),
+      questionNumber: Number(questionNumber),
+    });
+  } catch (error) {
+    console.error("Không mở được lời giải từng câu:", error);
+    const content = document.getElementById("wrong-solution-content");
+    const heading = document.getElementById("wrong-solution-title");
+    if (heading) heading.textContent = "Chưa mở được lời giải";
+    if (content) {
+      content.replaceChildren();
+      const state = document.createElement("div");
+      state.className = "review-solution-state error";
+      const strong = document.createElement("strong");
+      strong.textContent = "Không tải được đáp án của câu này";
+      const detail = document.createElement("span");
+      detail.textContent = "Em kiểm tra mạng rồi thử bấm lại nhé.";
+      state.append(strong, detail);
+      content.appendChild(state);
+    }
+  }
+};
+
+document.addEventListener("keydown", (event) => {
+  if (event.key === "Escape") {
+    window.closeWrongSolutionModal();
+    window.closeAuthModal();
+  }
+});
+
+window.openWrongNotebookFromResult = () => window.showReviewPage();
+
+function setDocumentsLoadingState() {
+  const list = document.getElementById("documents-list");
+  if (!list) return;
+
+  list.innerHTML = Array.from(
+    { length: window.innerWidth < 760 ? 2 : 3 },
+    (_, index) => `
+      <article class="document-card document-skeleton content-skeleton" aria-hidden="true" data-skeleton="${index}">
+        <div class="skeleton-preview"></div>
+        <div class="skeleton-body">
+          <div class="skeleton-line short"></div>
+          <div class="skeleton-line title"></div>
+          <div class="skeleton-line medium"></div>
+          <div class="skeleton-line button"></div>
+        </div>
+      </article>`,
+  ).join("");
+}
+
+window.showDocumentsPage = async () => {
   sessionStorage.setItem("thpt_current_view", "documents");
   disposeExamPdf();
   document.body.classList.add("is-documents-view");
+  document.body.classList.remove("is-review-view");
   sessionStorage.setItem("thpt_current_tab", "tailieu");
   setMainMenuActive("tailieu");
 
@@ -2003,14 +3632,17 @@ window.showDocumentsPage = async () => {
 
   const profileScreen = document.getElementById("profile-screen");
   const documentsScreen = document.getElementById("documents-screen");
+  const reviewScreen = document.getElementById("review-screen");
   const userMenu = document.getElementById("profile-dropdown-menu");
 
   document.getElementById("home-screen").style.display = "none";
   document.getElementById("exam-workspace").style.display = "none";
   if (profileScreen) profileScreen.style.display = "none";
+  if (reviewScreen) reviewScreen.style.display = "none";
   if (documentsScreen) {
     documentsScreen.style.display = "block";
     documentsScreen.classList.add("is-active-screen");
+    revealScreen(documentsScreen);
     requestAnimationFrame(() => {
       documentsScreen.scrollTop = Number(
         sessionStorage.getItem("thpt_documents_scroll") || 0,
@@ -2020,10 +3652,7 @@ window.showDocumentsPage = async () => {
   if (userMenu) userMenu.classList.remove("show");
 
   document.getElementById("header-timer-box").style.display = "none";
-  document.getElementById("header-user-info").style.display =
-    window.innerWidth <= 1024 ? "none" : "flex";
-  document.getElementById("hamburger-btn").style.display =
-    window.innerWidth <= 1024 ? "block" : "none";
+  syncAuthenticationUI();
 
   setPublicAdsVisibility(true);
   window.updateFabVisibility();
@@ -2057,27 +3686,42 @@ if (documentsScrollElement) {
 
 async function loadDocumentsData() {
   const list = document.getElementById("documents-list");
+  const requestedUserId = currentUser?.id || "";
+  const loadSequence = ++documentLoadSequence;
 
   try {
     const { data: documents, error: documentsError } = await supabase
       .from("documents")
       .select(
-        "id, title, description, category, cohort, pdf_url, file_name, file_size, download_count, like_count, created_at",
+        "id, title, description, category, cohort, pdf_url, file_name, file_size, download_count, like_count, publication_status, created_at",
       )
+      .eq("publication_status", "published")
       .order("created_at", { ascending: false });
 
     if (documentsError) throw documentsError;
 
-    const [likesResult, bookmarksResult] = await Promise.all([
-      supabase
-        .from("document_likes")
-        .select("document_id")
-        .eq("user_id", currentUser.id),
-      supabase
-        .from("document_bookmarks")
-        .select("document_id")
-        .eq("user_id", currentUser.id),
-    ]);
+    const [likesResult, bookmarksResult] = requestedUserId
+      ? await Promise.all([
+          supabase
+            .from("document_likes")
+            .select("document_id")
+            .eq("user_id", requestedUserId),
+          supabase
+            .from("document_bookmarks")
+            .select("document_id")
+            .eq("user_id", requestedUserId),
+        ])
+      : [
+          { data: [], error: null },
+          { data: [], error: null },
+        ];
+
+    if (
+      loadSequence !== documentLoadSequence ||
+      (currentUser?.id || "") !== requestedUserId
+    ) {
+      return;
+    }
 
     if (likesResult.error) throw likesResult.error;
     if (bookmarksResult.error) throw bookmarksResult.error;
@@ -2091,8 +3735,16 @@ async function loadDocumentsData() {
     );
     documentsLoaded = true;
     renderDocuments();
+    // Khách cũng được nhìn thấy số liệu tài liệu công khai thay đổi theo thời
+    // gian thực. Tim, lưu và tải vẫn phải đi qua requireAuthentication().
     startDocumentRealtimeSync();
   } catch (error) {
+    if (
+      loadSequence !== documentLoadSequence ||
+      (currentUser?.id || "") !== requestedUserId
+    ) {
+      return;
+    }
     console.error("Không thể tải thư viện tài liệu:", error);
 
     if (list) {
@@ -2122,6 +3774,12 @@ window.handleSearchDocument = () => {
 };
 
 window.handleFilterDocument = (filter, button) => {
+  if (
+    filter === "saved" &&
+    !requireAuthentication("Đăng nhập để xem các tài liệu em đã lưu.")
+  ) {
+    return;
+  }
   currentDocumentFilter = filter;
   document
     .querySelectorAll(".document-filter-btn")
@@ -2338,6 +3996,9 @@ async function renderDocumentFirstPage(preview) {
 }
 
 window.downloadDocument = async (documentId, button) => {
+  if (!requireAuthentication("Đăng nhập để tải tài liệu PDF về thiết bị.")) {
+    return;
+  }
   const documentItem = DOCUMENT_DATABASE.find((item) => item.id === documentId);
   if (!documentItem?.pdf_url || button?.disabled) return;
 
@@ -2413,7 +4074,8 @@ window.downloadDocument = async (documentId, button) => {
 };
 
 window.toggleDocumentLike = async (documentId, button) => {
-  if (!currentUser || button?.disabled) return;
+  if (!requireAuthentication("Đăng nhập để thả tim tài liệu.")) return;
+  if (button?.disabled) return;
 
   const documentItem = DOCUMENT_DATABASE.find((item) => item.id === documentId);
   if (!documentItem) return;
@@ -2469,7 +4131,8 @@ window.toggleDocumentLike = async (documentId, button) => {
 };
 
 window.toggleDocumentSave = async (documentId, button) => {
-  if (!currentUser || button?.disabled) return;
+  if (!requireAuthentication("Đăng nhập để lưu tài liệu vào tài khoản.")) return;
+  if (button?.disabled) return;
 
   const wasSaved = savedDocumentIds.has(documentId);
   button.disabled = true;
@@ -2508,14 +4171,18 @@ window.toggleDocumentSave = async (documentId, button) => {
 // 10. QUẢN LÝ THÔNG TIN CÁ NHÂN (PROFILE & OTP EMAIL)
 // ==============================================================================
 window.showProfilePage = () => {
+  if (
+    !requireAuthentication(
+      "Đăng nhập để xem và cập nhật thông tin cá nhân của em.",
+    )
+  ) {
+    return;
+  }
   disposeExamPdf();
   document.body.classList.remove("is-documents-view");
+  document.body.classList.remove("is-review-view");
   document.getElementById("documents-screen")?.classList.remove("is-active-screen");
-  if (!currentUser || !userDataCache)
-    return window.showNotification(
-      "Lỗi",
-      "Vui lòng đăng nhập để xem thông tin!",
-    );
+  if (!userDataCache) return;
   sessionStorage.setItem("thpt_current_view", "profile");
   document.body.classList.remove("is-taking-exam");
   document.title = "Thông Tin Cá Nhân - Thi Thử Online";
@@ -2523,6 +4190,8 @@ window.showProfilePage = () => {
   if (homeScreen) homeScreen.style.display = "none";
   const documentsScreen = document.getElementById("documents-screen");
   if (documentsScreen) documentsScreen.style.display = "none";
+  const reviewScreen = document.getElementById("review-screen");
+  if (reviewScreen) reviewScreen.style.display = "none";
   document.getElementById("exam-workspace").style.display = "none";
   const menu = document.getElementById("profile-dropdown-menu");
   if (menu) menu.classList.remove("show");
@@ -2534,6 +4203,7 @@ window.showProfilePage = () => {
     .forEach((el) => el.classList.remove("active"));
   const profileScreen = document.getElementById("profile-screen");
   if (profileScreen) profileScreen.style.display = "block";
+  revealScreen(profileScreen);
   setPublicAdsVisibility(true);
 
   const userFullName =
@@ -3198,20 +4868,51 @@ document.addEventListener("fullscreenchange", () => {
 });
 
 window.startExam = async (eId, mode, attIdx = null) => {
+  if (
+    !requireAuthentication(
+      "Đăng nhập để bắt đầu làm đề, lưu bài và xem kết quả của em.",
+    )
+  ) {
+    return;
+  }
+  // THPT_AUTHORED_CLEAR_START
+  clearAuthoredExam();
+  // THPT_AUTHORED_CLEAR_END
   syncVisibleViewportHeight();
   clearTimeout(drawerBackdropHideTimer);
-  document.body.classList.remove("is-documents-view");
+  document.body.classList.remove("is-documents-view", "is-review-view");
   document.getElementById("documents-screen")?.classList.remove("is-active-screen");
   document.body.classList.remove("has-exam-result");
   document.getElementById("right-panel-drawer").classList.remove("open");
   document.getElementById("drawer-backdrop").classList.remove("show");
   document.getElementById("drawer-backdrop").style.display = "none";
+
+  // Kiểm tra lại trạng thái ngay lúc mở để một đề vừa bị Admin ẩn không thể
+  // tiếp tục được mở từ card cũ hoặc lịch sử đã lưu trong trình duyệt.
+  try {
+    const { data: availableExam, error: availabilityError } = await supabase
+      .from("exams")
+      .select("id")
+      .eq("id", eId)
+      .eq("publication_status", "published")
+      .maybeSingle();
+    if (!availabilityError && !availableExam) {
+      window.showNotification(
+        "Đề thi đang tạm ẩn",
+        "Đề này hiện không còn được công khai. Em hãy chọn một đề khác nhé.",
+      );
+      window.showHome(true);
+      return;
+    }
+  } catch (_error) {}
+
   try {
     if (EXAM_DATABASE.length === 0) {
       window.showLoader("Đang nạp dữ liệu đề thi...");
       const { data: dbExams, error } = await supabase
         .from("exams")
-        .select("id, title, category, cohort, pdf_url, views, likes, created_at")
+        .select("id, title, category, cohort, pdf_url, views, likes, publication_status, created_at")
+        .eq("publication_status", "published")
         .order("created_at", { ascending: false });
       if (!error && dbExams)
         EXAM_DATABASE = dbExams.map((ex) => ({
@@ -3234,8 +4935,9 @@ window.startExam = async (eId, mode, attIdx = null) => {
     try {
       const { data: dbEx, error } = await supabase
         .from("exams")
-        .select("id, title, category, cohort, pdf_url, answers, views, likes")
+        .select("id, title, category, cohort, pdf_url, answers, views, likes, publication_status")
         .eq("id", eId)
+        .eq("publication_status", "published")
         .single();
       if (dbEx) {
         currentExam = {
@@ -3268,8 +4970,9 @@ window.startExam = async (eId, mode, attIdx = null) => {
     try {
       const { data: examDetails, error: detailsError } = await supabase
         .from("exams")
-        .select("answers, pdf_url, title, category, cohort, views, likes")
+        .select("answers, pdf_url, title, category, cohort, views, likes, publication_status")
         .eq("id", eId)
+        .eq("publication_status", "published")
         .single();
       if (detailsError) throw detailsError;
       currentExam.answers = examDetails?.answers || {};
@@ -3441,6 +5144,10 @@ window.startExam = async (eId, mode, attIdx = null) => {
   document.getElementById("home-screen").style.display = "none";
   const documentsScreen = document.getElementById("documents-screen");
   if (documentsScreen) documentsScreen.style.display = "none";
+  const reviewScreen = document.getElementById("review-screen");
+  if (reviewScreen) reviewScreen.style.display = "none";
+  const profileScreen = document.getElementById("profile-screen");
+  if (profileScreen) profileScreen.style.display = "none";
   document.getElementById("exam-workspace").style.display = "flex";
   document.getElementById("header-user-info").style.display = "none";
   document.getElementById("hamburger-btn").style.display = "none";
@@ -3504,6 +5211,9 @@ window.startExam = async (eId, mode, attIdx = null) => {
     startTimer();
     window.updateFabVisibility();
   }
+  // THPT_AUTHORED_HOOK_START
+  mountAuthoredExam({ answers: currentExam.answers, parts: getExamPartConfig(), review: isReviewMode, initialAnswers: isReviewMode ? (userDataCache.history[eId]?.[attIdx ?? (userDataCache.history[eId]?.length - 1)]?.answers || {}) : {} });
+  // THPT_AUTHORED_HOOK_END
 };
 
 const DEFAULT_EXAM_PARTS = [
@@ -3636,6 +5346,15 @@ function fillAnswers(answers) {
       text.value = value;
   });
 }
+
+function getAttemptAnalysis(answers) {
+  return analyzeExamAttempt({
+    answers: answers || {},
+    keys: currentExam?.answers || currentExam?.keys || {},
+    parts: getExamPartConfig(),
+  });
+}
+
 function updateTimerDisplay() {
   let m = Math.floor(totalTime / 60)
     .toString()
@@ -3684,7 +5403,8 @@ window.submitAndGrade = async () => {
   }
 
   const answers = getAllCurrentAnswers();
-  const score = runGradingLogic(answers, null, false);
+  const attemptAnalysis = getAttemptAnalysis(answers);
+  const score = attemptAnalysis.score;
   const examId = currentExam.id;
   const submittedAt = new Date();
   const allowedDurationSeconds = (currentExam.timeMinutes || 90) * 60;
@@ -3742,6 +5462,8 @@ window.submitAndGrade = async () => {
       date: submittedAtText,
       submitted_at: submittedAt.toISOString(),
       duration_seconds: durationSeconds,
+      question_results: attemptAnalysis.questionResults,
+      breakdown: attemptAnalysis.breakdown,
       strokes: JSON.parse(JSON.stringify(strokes)),
     });
 
@@ -3756,22 +5478,43 @@ window.submitAndGrade = async () => {
 
     if (saveError) throw saveError;
 
-    // Bảng xếp hạng là dữ liệu bổ sung; lỗi tại đây không được làm mất bài thi.
+    // Phân tích chi tiết và bảng xếp hạng là dữ liệu bổ sung; lỗi tại đây
+    // không được làm mất bài thi đã lưu trong hồ sơ.
     try {
-      const { error: rankingSaveError } = await supabase.rpc(
-        "record_exam_attempt",
+      const { error: detailedSaveError } = await supabase.rpc(
+        "record_exam_attempt_v2",
         {
           p_exam_id: String(examId),
           p_score: score,
           p_duration_seconds: durationSeconds,
+          p_answers: answers,
+          p_question_results: attemptAnalysis.questionResults,
+          p_breakdown: attemptAnalysis.breakdown,
         },
       );
-      if (rankingSaveError) throw rankingSaveError;
-    } catch (rankingError) {
-      console.warn(
-        "Bài đã lưu nhưng chưa ghi được vào bảng xếp hạng:",
-        rankingError,
-      );
+      if (detailedSaveError) throw detailedSaveError;
+      wrongNotebookFeatureAvailable = true;
+    } catch (detailedError) {
+      if (isMissingInsightsFeature(detailedError)) {
+        wrongNotebookFeatureAvailable = false;
+      }
+      console.warn("Chưa ghi được phân tích từng câu, đang dùng bảng điểm cũ:", detailedError);
+      try {
+        const { error: rankingSaveError } = await supabase.rpc(
+          "record_exam_attempt",
+          {
+            p_exam_id: String(examId),
+            p_score: score,
+            p_duration_seconds: durationSeconds,
+          },
+        );
+        if (rankingSaveError) throw rankingSaveError;
+      } catch (rankingError) {
+        console.warn(
+          "Bài đã lưu nhưng chưa ghi được vào bảng xếp hạng:",
+          rankingError,
+        );
+      }
     }
 
     // Chỉ xóa bản cứu hộ và chuyển sang màn hình kết quả sau khi Supabase xác nhận lưu thành công.
@@ -3849,70 +5592,66 @@ window.submitAndGrade = async () => {
   }
 };
 
-function runGradingLogic(ans, attempt = null, shouldRender = true) {
-  let rawScore = 0;
-  let p1_correct = 0;
-  let p2_score = 0;
-  let p3_correct = 0;
-  const keys = currentExam.answers || currentExam.keys || {};
-  const [part1, part2, part3] = getExamPartConfig();
-  for (let i = 1; i <= part1.questionCount; i++) {
-    let correctAns = null;
-    if (keys.P1 && keys.P1[i])
-      correctAns = typeof keys.P1[i] === "object" ? keys.P1[i].ans : keys.P1[i];
-    const isCorrect = ans[`ans_P1_${i}`] === correctAns;
-    if (isCorrect) p1_correct++;
-  }
-  rawScore += p1_correct * 0.25;
-  for (let i = 1; i <= part2.questionCount; i++) {
-    let opts = 0;
-    const kv = keys.P2 && keys.P2[i];
+function renderResultQuestionInsights(analysis) {
+  const totalsContainer = document.getElementById("result-question-totals");
+  const mapContainer = document.getElementById("result-question-map");
+  if (!totalsContainer || !mapContainer) return;
 
-    // Không tự bịa đáp án khi Admin chưa nhập đủ dữ liệu.
-    if (
-      kv &&
-      ["a", "b", "c", "d"].every(
-        (option) => kv[option] === "T" || kv[option] === "F",
-      )
-    ) {
-      ["a", "b", "c", "d"].forEach((option) => {
-        if (ans[`ans_P2_${i}${option}`] === kv[option]) opts++;
+  const statusLabels = {
+    correct: "Đúng",
+    partial: "Một phần",
+    incorrect: "Sai",
+    unanswered: "Bỏ trống",
+  };
+  const reviewCount = analysis.totals.partial + analysis.totals.incorrect;
+  const totalItems = [
+    [analysis.totals.correct, "Đúng"],
+    [reviewCount, "Cần ôn"],
+    [analysis.totals.unanswered, "Bỏ trống"],
+  ];
+  totalsContainer.replaceChildren();
+  totalItems.forEach(([value, label]) => {
+    const item = document.createElement("span");
+    const strong = document.createElement("b");
+    strong.textContent = String(value);
+    item.append(strong, document.createTextNode(label));
+    totalsContainer.appendChild(item);
+  });
+
+  mapContainer.replaceChildren();
+  analysis.breakdown.forEach((part) => {
+    const section = document.createElement("div");
+    section.className = "result-question-part";
+    const label = document.createElement("div");
+    label.className = "result-question-part-label";
+    label.textContent = part.title;
+    const chips = document.createElement("div");
+    chips.className = "result-question-chips";
+    analysis.questionResults
+      .filter((result) => result.part_key === part.part_key)
+      .forEach((result) => {
+        const chip = document.createElement("span");
+        chip.className = "result-question-chip " + result.status;
+        chip.textContent = String(result.question_number);
+        chip.title =
+          "Câu " +
+          result.question_number +
+          " · " +
+          (statusLabels[result.status] || "Chưa rõ") +
+          " · Em chọn: " +
+          formatStoredAnswer(result.user_answer) +
+          " · Đáp án: " +
+          formatStoredAnswer(result.correct_answer);
+        chips.appendChild(chip);
       });
-    }
+    section.append(label, chips);
+    mapContainer.appendChild(section);
+  });
+}
 
-    const points =
-      opts === 1
-        ? 0.1
-        : opts === 2
-          ? 0.25
-          : opts === 3
-            ? 0.5
-            : opts === 4
-              ? 1
-              : 0;
-    p2_score += points;
-  }
-  rawScore += p2_score;
-  for (let i = 1; i <= part3.questionCount; i++) {
-    let correctAns = null;
-    if (keys.P3 && keys.P3[i])
-      correctAns = typeof keys.P3[i] === "object" ? keys.P3[i].ans : keys.P3[i];
-    const normalizedCorrectAnswer = String(correctAns ?? "").trim();
-    const hasCorrectAnswer = normalizedCorrectAnswer !== "";
-    const isCorrect =
-      hasCorrectAnswer &&
-      String(ans[`ans_P3_${i}`] ?? "").trim() === normalizedCorrectAnswer;
-    if (isCorrect) p3_correct++;
-  }
-  rawScore += p3_correct * 0.5;
-  const maximumRawScore =
-    part1.questionCount * 0.25 +
-    part2.questionCount +
-    part3.questionCount * 0.5;
-  const totalScore = maximumRawScore > 0
-    ? Math.round((rawScore / maximumRawScore) * 1000) / 100
-    : 0;
-
+function runGradingLogic(ans, attempt = null, shouldRender = true) {
+  const analysis = getAttemptAnalysis(ans);
+  const totalScore = analysis.score;
   if (!shouldRender) return totalScore;
 
   document.body.classList.add("has-exam-result");
@@ -3920,12 +5659,16 @@ function runGradingLogic(ans, attempt = null, shouldRender = true) {
   document.getElementById("header-timer-box").style.display = "none";
   const toolbar = document.getElementById("toolbar-wrapper");
   if (toolbar) toolbar.style.display = "none";
-  document.querySelectorAll("#sheets-container input").forEach((e) => {
-    e.disabled = true;
+  document.querySelectorAll("#sheets-container input").forEach((element) => {
+    element.disabled = true;
   });
+
   const resultTitle = document.getElementById("result-exam-title");
-  if (resultTitle) resultTitle.textContent = currentExam?.title || "Tổng kết bài làm";
-  document.getElementById("final-score-text").innerText = totalScore.toFixed(2);
+  if (resultTitle) {
+    resultTitle.textContent = currentExam?.title || "Tổng kết bài làm";
+  }
+  document.getElementById("final-score-text").innerText =
+    totalScore.toFixed(2);
   const scoreRing = document.querySelector(".result-score-ring");
   if (scoreRing) {
     const scorePercent = Math.max(0, Math.min(100, totalScore * 10));
@@ -3937,14 +5680,35 @@ function runGradingLogic(ans, attempt = null, shouldRender = true) {
           : totalScore >= 3
             ? "#f59e0b"
             : "#ef4444";
-    scoreRing.style.setProperty("--result-score-progress", `${scorePercent}%`);
+    scoreRing.style.setProperty("--result-score-progress", scorePercent + "%");
     scoreRing.style.setProperty("--result-score-color", scoreColor);
   }
+
   document.getElementById("summary-desc").innerText = attempt
-    ? `Lần ${attempt}`
+    ? "Lần " + attempt
     : "Kết quả gần nhất";
-  document.getElementById("summary-stats").innerHTML =
-    `<div class="stat-row"><span>${escapeHtml(part1.title)}:</span> <strong>${p1_correct}/${part1.questionCount} câu đúng</strong></div><div class="stat-row"><span>${escapeHtml(part2.title)}:</span> <strong>${p2_score.toFixed(2)}/${part2.questionCount.toFixed(2)} điểm thô</strong></div><div class="stat-row"><span>${escapeHtml(part3.title)}:</span> <strong>${p3_correct}/${part3.questionCount} câu đúng</strong></div>`;
+  const summaryStats = document.getElementById("summary-stats");
+  if (summaryStats) {
+    summaryStats.replaceChildren();
+    analysis.breakdown.forEach((part) => {
+      const row = document.createElement("div");
+      row.className = "stat-row";
+      const label = document.createElement("span");
+      label.textContent = part.title + ":";
+      const value = document.createElement("strong");
+      value.textContent =
+        part.part_key === "P2"
+          ? part.earned_points.toFixed(2) +
+            "/" +
+            part.max_points.toFixed(2) +
+            " điểm thô"
+          : part.correct + "/" + part.total + " câu đúng";
+      row.append(label, value);
+      summaryStats.appendChild(row);
+    });
+  }
+  renderResultQuestionInsights(analysis);
+
   const currentExamHistory = userDataCache.history?.[currentExam.id] || [];
   const resultAttempt = attempt
     ? currentExamHistory[attempt - 1] || {}
@@ -3956,6 +5720,7 @@ function runGradingLogic(ans, attempt = null, shouldRender = true) {
 }
 
 window.showHistory = (eId) => {
+  if (!requireAuthentication("Đăng nhập để xem lịch sử làm đề của em.")) return;
   const historyData = userDataCache.history[eId] || [];
   const ex = EXAM_DATABASE.find((e) => e.id === eId);
   const modal = document.getElementById("custom-modal");
@@ -3989,7 +5754,7 @@ window.showHistory = (eId) => {
               <span class="h-duration">${escapeHtml(durationText)}</span>
             </div>
             <div class="history-result">
-              <span class="h-score">${Number(attempt.score || 0).toFixed(2)}<small>/10</small></span>
+              <span class="h-score">${normalizeAttemptScore(attempt.score).toFixed(2)}<small>/10</small></span>
               <button type="button" class="btn-review-sm" data-history-attempt="${index}">Xem đáp án</button>
             </div>
           </div>`;
@@ -4188,10 +5953,7 @@ window.addEventListener("resize", () => {
     else if (newZ > 1) newZ = 1;
     window.changeZoom(newZ, true);
   } else if (document.getElementById("home-screen").style.display === "block") {
-    document.getElementById("hamburger-btn").style.display =
-      window.innerWidth <= 1024 ? "block" : "none";
-    document.getElementById("header-user-info").style.display =
-      window.innerWidth <= 1024 ? "none" : "flex";
+    syncAuthenticationUI();
   }
   if (window.innerWidth > 1024) {
     const mobileMenu = document.getElementById("mobile-dropdown");
@@ -4865,7 +6627,7 @@ window.goHome = () => {
 document.addEventListener("DOMContentLoaded", () => {
   // Chỉ giữ những tab đã có màn hình thật; không tự mở tab đang phát triển.
   const savedTab = sessionStorage.getItem("thpt_current_tab");
-  if (!["luyenthi", "tailieu"].includes(savedTab)) {
+  if (!["luyenthi", "tailieu", "ontap"].includes(savedTab)) {
     sessionStorage.setItem("thpt_current_tab", "luyenthi");
   }
 });
