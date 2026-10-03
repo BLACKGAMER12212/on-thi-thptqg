@@ -15,3 +15,8 @@
 @import url("./assets/css/rank-character.css");
 @import url("./assets/css/visual-polish.css");
 @import url("./assets/css/performance-polish.css");
+@import url("./assets/css/exam-insights.css?v=20260926-auth-google-smooth-5");
+@import url("./assets/css/design-refresh.css?v=20260926-auth-google-smooth-5");
+
+/* Nội dung câu hỏi trực tiếp và bảng ký hiệu toán. */
+@import url("./assets/css/question-content.css?v=20261002-font-v4");
