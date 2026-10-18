@@ -5804,6 +5804,7 @@ document.addEventListener("DOMContentLoaded", () => {
 document.addEventListener("click", () => {
   if (
     document.body.classList.contains("is-taking-exam") &&
+    
     !document.fullscreenElement
   ) {
     if (window.innerWidth > 1024) {
