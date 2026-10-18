@@ -2,7 +2,7 @@
  * Điểm vào CSS của website.
  * Thứ tự import là một phần của cascade, không tự ý đổi vị trí các file.
  */
-@import url("./assets/css/foundation.css");
+@import url("./assets/css/foundation.css?v=20261016-smooth-navigation-3");
 @import url("./assets/css/dashboard.css");
 @import url("./assets/css/exam.css");
 @import url("./assets/css/ads.css");
@@ -15,8 +15,9 @@
 @import url("./assets/css/rank-character.css");
 @import url("./assets/css/visual-polish.css");
 @import url("./assets/css/performance-polish.css");
-@import url("./assets/css/exam-insights.css?v=20260926-auth-google-smooth-5");
-@import url("./assets/css/design-refresh.css?v=20260926-auth-google-smooth-5");
+@import url("./assets/css/exam-insights.css?v=20261003-remove-review-3");
+@import url("./assets/css/design-refresh.css?v=20261003-remove-review-3");
 
 /* Nội dung câu hỏi trực tiếp và bảng ký hiệu toán. */
-@import url("./assets/css/question-content.css?v=20261002-font-v4");
+@import url("./assets/css/question-content.css?v=20261004-question-dock-4");
+@import url("./assets/css/theme-consistency.css?v=20261003-remove-review-3");
