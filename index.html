@@ -15,7 +15,7 @@
         }
       } catch (_error) {}
     </script>
-    <link rel="stylesheet" href="style.css?v=20261002-font-v4" />
+    <link rel="stylesheet" href="style.css?v=20261016-smooth-navigation-3" />
   </head>
   <body>
     <div
@@ -86,9 +86,19 @@
       </div>
     </aside>
 
-    <div id="global-loader">
-      <div class="spinner"></div>
-      <div id="loader-text">Đang kết nối hệ thống...</div>
+    <div
+      id="global-loader"
+      class="is-visible is-running"
+      role="progressbar"
+      aria-label="Đang tải nội dung"
+      aria-hidden="false"
+    >
+      <div class="loader-progress-track" aria-hidden="true">
+        <span class="loader-progress-bar"></span>
+      </div>
+      <div id="loader-text" class="loader-visually-hidden">
+        Đang kết nối hệ thống...
+      </div>
     </div>
 
     <div id="auth-screen" aria-hidden="true" onclick="window.closeAuthModal(event)">
@@ -441,12 +451,6 @@
         <a
           href="#"
           class="menu-item"
-          onclick="window.switchTab('ontap', this, event)"
-          ><svg class="ui-icon icon-duotone" viewBox="0 0 24 24" aria-hidden="true"><circle class="icon-soft" cx="12" cy="12" r="9"></circle><circle cx="12" cy="12" r="8"></circle><circle class="icon-detail" cx="12" cy="12" r="3"></circle><path d="M12 2v2M22 12h-2M12 22v-2M2 12h2"></path></svg>Ôn tập</a
-        >
-        <a
-          href="#"
-          class="menu-item"
           onclick="window.switchTab('tintuc', this, event)"
           ><svg class="ui-icon icon-duotone" viewBox="0 0 24 24" aria-hidden="true"><path class="icon-soft" d="M7 3h14v18H5a3 3 0 0 0 2-3z"></path><path d="M7 3h14v18H5a3 3 0 0 1-3-3V6h5v12a3 3 0 0 1-3 3"></path><path class="icon-detail" d="M11 8h6M11 12h6M11 16h4"></path></svg>Tin tức</a
         >
@@ -550,12 +554,6 @@
           class="m-menu-item"
           onclick="window.switchTab('tailieu', this, event)"
           ><svg class="ui-icon icon-duotone" viewBox="0 0 24 24" aria-hidden="true"><path class="icon-soft" d="M3 4h5a4 4 0 0 1 4 4v12a3 3 0 0 0-3-3H3z"></path><path d="M3 4h5a4 4 0 0 1 4 4v12a3 3 0 0 0-3-3H3z"></path><path class="icon-detail" d="M21 4h-5a4 4 0 0 0-4 4v12a3 3 0 0 1 3-3h6z"></path></svg>Tài liệu</a
-        >
-        <a
-          href="#"
-          class="m-menu-item"
-          onclick="window.switchTab('ontap', this, event)"
-          ><svg class="ui-icon icon-duotone" viewBox="0 0 24 24" aria-hidden="true"><circle class="icon-soft" cx="12" cy="12" r="9"></circle><circle cx="12" cy="12" r="8"></circle><circle class="icon-detail" cx="12" cy="12" r="3"></circle><path d="M12 2v2M22 12h-2M12 22v-2M2 12h2"></path></svg>Ôn tập</a
         >
         <a
           href="#"
@@ -1053,90 +1051,6 @@
       </section>
     </div>
 
-    <!-- ================== SỔ CÂU SAI / ÔN TẬP ================== -->
-    <div id="review-screen" class="fade-in" style="display: none">
-      <section class="review-notebook-hero">
-        <div class="review-notebook-copy">
-          <span class="review-notebook-eyebrow">ÔN TẬP CÓ TRỌNG TÂM</span>
-          <h2>Sổ câu sai của em</h2>
-          <p>
-            Những câu sai hoặc bỏ trống được tự động gom lại sau mỗi lần nộp.
-            Ôn đúng điểm yếu, đánh dấu đã thuộc và quay lại đề khi cần.
-          </p>
-        </div>
-        <div class="review-notebook-stats" aria-label="Mức độ sẵn sàng">
-          <article class="review-remaining-card">
-            <span>SỐ CÂU CÒN SAI</span>
-            <strong id="wrong-remaining-count">0</strong>
-            <small id="review-priority-message">Không có câu cần ôn hôm nay</small>
-          </article>
-          <article class="review-confidence-card">
-            <div
-              class="review-confidence-ring"
-              id="review-confidence-ring"
-              style="--confidence-value: 0%"
-            >
-              <strong id="review-confidence-value">0%</strong>
-            </div>
-            <span>Tự tin khi thi</span>
-          </article>
-        </div>
-      </section>
-
-      <section class="review-notebook-panel">
-        <div class="review-notebook-toolbar">
-          <label class="review-notebook-search" for="wrong-question-search">
-            <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-3.5-3.5"></path></svg>
-            <input
-              id="wrong-question-search"
-              type="search"
-              placeholder="Tìm tên đề hoặc phần thi..."
-              oninput="window.handleWrongQuestionSearch(this.value)"
-            />
-          </label>
-          <div class="review-notebook-filters" aria-label="Lọc sổ câu sai">
-            <button class="active" data-wrong-filter="all" onclick="window.setWrongQuestionFilter('all', this)"><span>Tất cả</span><b id="wrong-filter-all-count">0</b></button>
-            <button data-wrong-filter="learning" onclick="window.setWrongQuestionFilter('learning', this)"><span>Còn sai</span><b id="wrong-filter-learning-count">0</b></button>
-            <button data-wrong-filter="mastered" onclick="window.setWrongQuestionFilter('mastered', this)"><span>Đã đúng</span><b id="wrong-filter-mastered-count">0</b></button>
-          </div>
-        </div>
-        <div id="wrong-exam-list" class="wrong-exam-list" aria-live="polite">
-          <div class="wrong-notebook-state">
-            <span class="wrong-notebook-spinner"></span>
-            <strong>Đang tải danh sách đề...</strong>
-          </div>
-        </div>
-
-        <section id="wrong-exam-detail" class="wrong-exam-detail" hidden>
-          <div class="wrong-exam-detail-header">
-            <button
-              type="button"
-              class="wrong-exam-back"
-              onclick="window.backToWrongExamList()"
-            >
-              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 18-6-6 6-6"></path></svg>
-              Danh sách đề
-            </button>
-            <div class="wrong-exam-detail-copy">
-              <span id="wrong-exam-detail-eyebrow">CÁC CÂU TRONG ĐỀ</span>
-              <h3 id="wrong-exam-detail-title">Đề thi</h3>
-              <p id="wrong-exam-detail-meta"></p>
-            </div>
-            <div class="wrong-exam-detail-actions">
-              <button
-                type="button"
-                class="wrong-exam-retry"
-                onclick="window.retrySelectedWrongExam()"
-              >
-                Làm lại đề
-              </button>
-            </div>
-          </div>
-          <div id="wrong-notebook-list" class="wrong-notebook-list" aria-live="polite"></div>
-        </section>
-      </section>
-    </div>
-
     <!-- ================== THƯ VIỆN TÀI LIỆU PDF ================== -->
     <div id="documents-screen" class="fade-in" style="display: none">
       <section class="documents-hero">
@@ -1281,12 +1195,15 @@
               Xóa Tất Cả
             </button>
           </div>
-          <div
+          <button
+            type="button"
             class="toolbar-toggle-container"
             onclick="window.toggleToolbar()"
+            aria-expanded="true"
+            aria-label="Thu gọn công cụ viết trên đề"
           >
             <span class="toggle-arrow" id="toggle-arrow">▲</span>
-          </div>
+          </button>
         </div>
 
         <div id="pdf-render-wrapper">
@@ -1299,15 +1216,44 @@
         </div>
 
         <div class="zoom-controls" id="zoom-controls" style="display: none">
-          <button class="zoom-btn" onclick="window.changeZoom(-0.1)">-</button>
-          <span
+          <button
+            type="button"
+            class="zoom-btn"
+            onclick="window.changeZoom(-0.1)"
+            aria-label="Thu nhỏ đề thi"
+            title="Thu nhỏ"
+          >
+            −
+          </button>
+          <button
+            type="button"
             id="zoom-text"
             onclick="window.changeZoom(1, true)"
-            style="cursor: pointer"
-            title="Bấm để reset"
-            >100%</span
+            title="Đưa về 100%"
+            aria-label="Đưa mức thu phóng về 100 phần trăm"
           >
-          <button class="zoom-btn" onclick="window.changeZoom(0.1)">+</button>
+            100%
+          </button>
+          <button
+            type="button"
+            class="zoom-btn"
+            onclick="window.changeZoom(0.1)"
+            aria-label="Phóng to đề thi"
+            title="Phóng to"
+          >
+            +
+          </button>
+          <button
+            type="button"
+            class="zoom-btn zoom-fit-btn"
+            onclick="window.fitPdfToWidth()"
+            aria-label="Căn đề vừa chiều rộng vùng xem"
+            title="Vừa chiều rộng"
+          >
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M8 5H5v3M16 5h3v3M8 19H5v-3M16 19h3v-3M8 12h8"></path>
+            </svg>
+          </button>
         </div>
       </div>
 
@@ -1384,6 +1330,22 @@
 
         <div id="sheets-container"></div>
 
+        <button
+          type="button"
+          id="result-panel-collapse"
+          class="result-panel-collapse"
+          aria-expanded="true"
+          aria-controls="summary-screen"
+          aria-label="Thu gọn bảng kết quả"
+          title="Thu gọn bảng kết quả"
+          onclick="window.toggleResultPanel()"
+        >
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="m15 18-6-6 6-6"></path>
+          </svg>
+          <span class="result-collapse-label">Thu gọn bảng kết quả</span>
+        </button>
+
         <div id="summary-screen" class="fade-in">
           <div class="summary-card">
             <div class="result-summary-top">
@@ -1431,9 +1393,6 @@
                   <span><i class="incorrect"></i>Sai</span>
                   <span><i class="unanswered"></i>Bỏ trống</span>
                 </div>
-                <button type="button" onclick="window.openWrongNotebookFromResult()">
-                  Mở Sổ câu sai
-                </button>
               </div>
             </section>
 
@@ -1442,11 +1401,7 @@
                 <div>
                   <span>BẢNG ĐIỂM CỦA ĐỀ NÀY</span>
                   <h3>Kết quả của các học sinh</h3>
-                  <p>Mỗi học sinh chỉ hiển thị kết quả tốt nhất.</p>
-                </div>
-                <div class="result-sort-controls">
-                  <button class="active" data-order="asc" onclick="window.changeResultLeaderboardSort('asc', this)">Thấp → cao</button>
-                  <button data-order="desc" onclick="window.changeResultLeaderboardSort('desc', this)">Cao → thấp</button>
+                  <p>Điểm cao xếp trước. Kéo xuống để xem thêm kết quả.</p>
                 </div>
               </div>
               <div class="result-leaderboard-list" id="result-exam-leaderboard" aria-live="polite">
@@ -1466,10 +1421,7 @@
               </div>
             </div>
             <div class="result-actions">
-              <button class="result-action-primary" onclick="window.viewDetailedAnswers()">
-                Xem lại đáp án chi tiết
-              </button>
-              <button class="result-action-secondary" onclick="window.goHome()">
+              <button class="result-action-secondary result-action-home" onclick="window.goHome()">
                 Về trang chủ
               </button>
             </div>
@@ -1544,39 +1496,6 @@
       </div>
     </div>
 
-    <div
-      id="wrong-solution-modal"
-      class="review-solution-modal"
-      hidden
-      aria-hidden="true"
-      role="presentation"
-      onclick="window.closeWrongSolutionModal(event)"
-    >
-      <section
-        class="review-solution-dialog"
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby="wrong-solution-title"
-        onclick="event.stopPropagation()"
-      >
-        <header class="review-solution-header">
-          <div>
-            <span id="wrong-solution-part">LỜI GIẢI TỪNG CÂU</span>
-            <h2 id="wrong-solution-title">Đang tải lời giải...</h2>
-          </div>
-          <button
-            type="button"
-            class="review-solution-close"
-            aria-label="Đóng lời giải"
-            onclick="window.closeWrongSolutionModal()"
-          >
-            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"></path></svg>
-          </button>
-        </header>
-        <div id="wrong-solution-content" class="review-solution-content" aria-live="polite"></div>
-      </section>
-    </div>
-
-    <script type="module" src="script.js?v=20260926-auth-google-smooth-5"></script>
+    <script type="module" src="script.js?v=20261016-smooth-navigation-3"></script>
   </body>
 </html>
