@@ -1,0 +1,35 @@
+/* Tương phản cuối cùng cho bảng kết quả và các điều khiển học sinh. */
+:root{
+  --thpt-control-bg:var(--ui-surface,#fff);
+  --thpt-control-soft:var(--ui-surface-soft,#f6f9fc);
+  --thpt-control-border:var(--ui-border,#d7e2ea);
+  --thpt-control-text:var(--ui-text,#132238);
+  --thpt-control-muted:var(--ui-text-soft,#627388);
+}
+
+.result-question-analysis,
+.result-question-totals span,
+.result-question-chip.unanswered{
+  color:var(--thpt-control-muted);
+  background:var(--thpt-control-bg);
+  border-color:var(--thpt-control-border);
+}
+.result-question-heading h3,
+.result-question-part-label,
+.result-question-totals b{color:var(--thpt-control-text)}
+.result-question-heading p,
+.result-question-legend{color:var(--thpt-control-muted)}
+.result-ranking-more{background:var(--thpt-control-soft);border-color:var(--thpt-control-border);color:var(--thpt-control-muted)}
+
+[data-theme="dark"]{
+  --thpt-control-bg:var(--ui-surface,#18263a);
+  --thpt-control-soft:var(--ui-surface-soft,#111d2d);
+  --thpt-control-border:var(--ui-border,#33465d);
+  --thpt-control-text:var(--ui-text,#e8f1f7);
+  --thpt-control-muted:var(--ui-text-soft,#a9bac9);
+}
+[data-theme="dark"] .result-question-chip.correct{color:#8be2c3;background:rgba(12,170,120,.13);border-color:#2d6858}
+[data-theme="dark"] .result-question-chip.partial{color:#f5cf79;background:rgba(245,158,11,.12);border-color:#735d2d}
+[data-theme="dark"] .result-question-chip.incorrect{color:#ff9aaa;background:rgba(219,83,98,.13);border-color:#70404a}
+[data-theme="dark"] .result-question-chip.unanswered{color:var(--thpt-control-muted);background:var(--thpt-control-soft);border-color:var(--thpt-control-border)}
+[data-theme="dark"] .result-ranking-row.is-current-user{background:rgba(8,135,184,.13);box-shadow:inset 3px 0 #22b8d3}

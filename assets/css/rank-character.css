@@ -1,0 +1,457 @@
+/* ==========================================================
+   NHÂN VẬT HẠNG HỌC TẬP
+   SVG nội bộ, không phụ thuộc ảnh hoặc tài nguyên bên ngoài.
+   ========================================================== */
+
+.dashboard-level {
+  --rank-accent: #22d3ee;
+  --rank-accent-strong: #0891b2;
+  --rank-glow: rgba(34, 211, 238, 0.38);
+  min-width: 238px;
+  min-height: 90px;
+  padding: 10px 14px 10px 10px;
+  overflow: hidden;
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  text-align: left;
+  isolation: isolate;
+}
+
+.dashboard-level::after {
+  content: "";
+  width: 82px;
+  height: 82px;
+  position: absolute;
+  left: 0;
+  top: 50%;
+  z-index: -1;
+  border-radius: 50%;
+  background: radial-gradient(circle, var(--rank-glow), transparent 68%);
+  transform: translate(-10%, -50%);
+  opacity: 0.72;
+  pointer-events: none;
+}
+
+.dashboard-level[data-rank="momentum"] {
+  --rank-accent: #60a5fa;
+  --rank-accent-strong: #2563eb;
+  --rank-glow: rgba(59, 130, 246, 0.42);
+}
+
+.dashboard-level[data-rank="scholar"] {
+  --rank-accent: #a78bfa;
+  --rank-accent-strong: #7c3aed;
+  --rank-glow: rgba(139, 92, 246, 0.42);
+}
+
+.dashboard-level[data-rank="warrior"] {
+  --rank-accent: #fbbf24;
+  --rank-accent-strong: #f97316;
+  --rank-glow: rgba(251, 191, 36, 0.46);
+}
+
+.dashboard-level[data-rank="ultimate"] {
+  --rank-accent: #fde047;
+  --rank-accent-strong: #d946ef;
+  --rank-glow: rgba(217, 70, 239, 0.5);
+  border-color: rgba(253, 224, 71, 0.48);
+  background:
+    linear-gradient(120deg, rgba(217, 70, 239, 0.16), rgba(34, 211, 238, 0.09)),
+    rgba(255, 255, 255, 0.1);
+  box-shadow:
+    inset 0 0 24px rgba(253, 224, 71, 0.08),
+    0 0 26px rgba(217, 70, 239, 0.16);
+}
+
+.rank-character-scene {
+  width: 72px;
+  height: 72px;
+  position: relative;
+  flex: 0 0 72px;
+  display: grid;
+  place-items: center;
+}
+
+.rank-character-aura {
+  width: 54px;
+  height: 54px;
+  position: absolute;
+  border: 1px solid var(--rank-accent);
+  border-radius: 50%;
+  box-shadow:
+    0 0 12px var(--rank-glow),
+    inset 0 0 12px var(--rank-glow);
+  opacity: 0.5;
+  animation: rankAuraPulse 2.8s ease-in-out infinite;
+}
+
+.rank-character-orbit {
+  width: 62px;
+  height: 28px;
+  position: absolute;
+  top: 22px;
+  border: 1px solid rgba(255, 255, 255, 0.42);
+  border-radius: 50%;
+  opacity: 0;
+  transform: rotate(-16deg);
+}
+
+.rank-character-orbit::after {
+  content: "";
+  width: 5px;
+  height: 5px;
+  position: absolute;
+  right: 5px;
+  top: 2px;
+  border-radius: 50%;
+  background: var(--rank-accent);
+  box-shadow: 0 0 8px var(--rank-accent);
+}
+
+.rank-character-figure {
+  width: 68px;
+  height: 68px;
+  position: relative;
+  z-index: 2;
+  overflow: visible;
+  animation: rankCharacterFloat 3.4s ease-in-out infinite;
+  filter: drop-shadow(0 8px 8px rgba(2, 8, 23, 0.3));
+}
+
+.rank-character-shadow {
+  fill: rgba(2, 8, 23, 0.32);
+  transform-origin: center;
+  animation: rankShadowPulse 3.4s ease-in-out infinite;
+}
+
+.rank-character-wings {
+  fill: var(--rank-accent);
+  stroke: rgba(255, 255, 255, 0.68);
+  stroke-width: 1.2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  opacity: 0;
+  transform-origin: 40px 42px;
+}
+
+.rank-character-shoulders {
+  fill: var(--rank-accent-strong);
+  stroke: rgba(255, 255, 255, 0.72);
+  stroke-width: 1.25;
+}
+
+.rank-character-armor {
+  fill: var(--rank-accent-strong);
+  stroke: rgba(255, 255, 255, 0.78);
+  stroke-width: 1.35;
+  stroke-linejoin: round;
+}
+
+.rank-character-helmet {
+  fill: var(--rank-accent);
+  stroke: #e0f2fe;
+  stroke-width: 1.5;
+}
+
+.rank-character-face {
+  fill: #101b36;
+  stroke: rgba(255, 255, 255, 0.62);
+  stroke-width: 1;
+}
+
+.rank-character-visor {
+  fill: #ecfeff;
+  filter: drop-shadow(0 0 5px var(--rank-accent));
+  transform-origin: center;
+  animation: rankVisorBlink 5s ease-in-out infinite;
+}
+
+.rank-character-core {
+  fill: #f8fafc;
+  stroke: var(--rank-accent);
+  stroke-width: 2;
+  filter: drop-shadow(0 0 5px var(--rank-accent));
+}
+
+.rank-character-core-mark {
+  fill: var(--rank-accent-strong);
+}
+
+.rank-character-crest {
+  fill: var(--rank-accent);
+  stroke: #ffffff;
+  stroke-width: 1;
+  opacity: 0;
+  transform: translateY(4px) scale(0.72);
+  transform-origin: 40px 16px;
+  transition:
+    opacity 0.35s ease,
+    transform 0.45s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.rank-character-crown {
+  fill: #fde047;
+  stroke: #fff7b2;
+  stroke-width: 1;
+  opacity: 0;
+  transform: translateY(6px) scale(0.7);
+  transform-origin: 40px 16px;
+}
+
+.rank-character-spark {
+  width: 4px;
+  height: 4px;
+  position: absolute;
+  z-index: 3;
+  border-radius: 50%;
+  background: var(--rank-accent);
+  box-shadow: 0 0 8px var(--rank-accent);
+  opacity: 0;
+}
+
+.spark-one {
+  left: 5px;
+  top: 17px;
+}
+
+.spark-two {
+  right: 4px;
+  top: 28px;
+  animation-delay: -0.8s !important;
+}
+
+.spark-three {
+  right: 14px;
+  bottom: 7px;
+  animation-delay: -1.6s !important;
+}
+
+.dashboard-level[data-rank="momentum"] .rank-character-crest,
+.dashboard-level[data-rank="scholar"] .rank-character-crest,
+.dashboard-level[data-rank="warrior"] .rank-character-crest {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+}
+
+.dashboard-level[data-rank="scholar"] .rank-character-orbit,
+.dashboard-level[data-rank="warrior"] .rank-character-orbit,
+.dashboard-level[data-rank="ultimate"] .rank-character-orbit {
+  opacity: 0.7;
+  animation: rankOrbitSpin 7s linear infinite;
+}
+
+.dashboard-level[data-rank="scholar"] .rank-character-wings,
+.dashboard-level[data-rank="warrior"] .rank-character-wings,
+.dashboard-level[data-rank="ultimate"] .rank-character-wings {
+  opacity: 0.68;
+  animation: rankWingPulse 2.6s ease-in-out infinite;
+}
+
+.dashboard-level[data-rank="warrior"] .rank-character-spark,
+.dashboard-level[data-rank="ultimate"] .rank-character-spark {
+  animation: rankSparkRise 2.4s ease-in-out infinite;
+}
+
+.dashboard-level[data-rank="ultimate"] .rank-character-crest {
+  opacity: 0;
+}
+
+.dashboard-level[data-rank="ultimate"] .rank-character-crown {
+  opacity: 1;
+  animation: rankCrownShine 2.1s ease-in-out infinite;
+}
+
+.dashboard-level[data-rank="ultimate"] .rank-character-wings {
+  opacity: 0.9;
+}
+
+.dashboard-level-copy {
+  min-width: 0;
+  flex: 1;
+}
+
+.dashboard-level-copy .dashboard-level-label,
+.dashboard-level-copy strong,
+.dashboard-level-progress {
+  position: relative;
+  z-index: 2;
+}
+
+.dashboard-level-copy strong {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.dashboard-level-progress {
+  display: block;
+  margin-top: 4px;
+  color: rgba(224, 242, 254, 0.78);
+  font-size: 9px;
+  font-weight: 750;
+  font-variant-numeric: tabular-nums;
+}
+
+.dashboard-level-progress-bar {
+  --rank-progress: 0%;
+  height: 3px;
+  margin-top: 5px;
+  overflow: hidden;
+  display: block;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.14);
+}
+
+.dashboard-level-progress-bar::after {
+  content: "";
+  width: var(--rank-progress);
+  height: 100%;
+  display: block;
+  border-radius: inherit;
+  background: linear-gradient(90deg, var(--rank-accent), #ffffff);
+  box-shadow: 0 0 8px var(--rank-glow);
+  transition: width 0.65s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.dashboard-level.rank-awaken {
+  animation: rankAwaken 0.68s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+@media (max-width: 600px) {
+  .dashboard-level {
+    width: 100%;
+    min-height: 82px;
+    padding: 8px 14px 8px 9px;
+  }
+
+  .rank-character-scene {
+    width: 66px;
+    height: 66px;
+    flex-basis: 66px;
+  }
+
+  .rank-character-figure {
+    width: 62px;
+    height: 62px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dashboard-level.rank-awaken,
+  .rank-character-aura,
+  .rank-character-orbit,
+  .rank-character-figure,
+  .rank-character-shadow,
+  .rank-character-visor,
+  .rank-character-wings,
+  .rank-character-crown,
+  .rank-character-spark {
+    animation: none !important;
+  }
+}
+
+@keyframes rankCharacterFloat {
+  0%,
+  100% {
+    transform: translateY(1px);
+  }
+  50% {
+    transform: translateY(-3px);
+  }
+}
+
+@keyframes rankShadowPulse {
+  0%,
+  100% {
+    opacity: 0.34;
+    transform: scaleX(1);
+  }
+  50% {
+    opacity: 0.2;
+    transform: scaleX(0.82);
+  }
+}
+
+@keyframes rankAuraPulse {
+  0%,
+  100% {
+    opacity: 0.34;
+    transform: scale(0.92);
+  }
+  50% {
+    opacity: 0.72;
+    transform: scale(1.08);
+  }
+}
+
+@keyframes rankVisorBlink {
+  0%,
+  43%,
+  47%,
+  100% {
+    transform: scaleY(1);
+    opacity: 1;
+  }
+  45% {
+    transform: scaleY(0.18);
+    opacity: 0.72;
+  }
+}
+
+@keyframes rankOrbitSpin {
+  to {
+    transform: rotate(344deg);
+  }
+}
+
+@keyframes rankWingPulse {
+  0%,
+  100% {
+    transform: scaleX(0.96) translateY(1px);
+  }
+  50% {
+    transform: scaleX(1.06) translateY(-1px);
+  }
+}
+
+@keyframes rankSparkRise {
+  0% {
+    opacity: 0;
+    transform: translateY(7px) scale(0.55);
+  }
+  45% {
+    opacity: 0.9;
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-9px) scale(1.15);
+  }
+}
+
+@keyframes rankCrownShine {
+  0%,
+  100% {
+    filter: drop-shadow(0 0 3px rgba(253, 224, 71, 0.55));
+    transform: translateY(0) scale(1);
+  }
+  50% {
+    filter: drop-shadow(0 0 9px rgba(253, 224, 71, 0.95));
+    transform: translateY(-1px) scale(1.04);
+  }
+}
+
+@keyframes rankAwaken {
+  0% {
+    box-shadow: 0 0 0 rgba(34, 211, 238, 0);
+    transform: scale(0.98);
+  }
+  45% {
+    box-shadow: 0 0 34px var(--rank-glow);
+    transform: scale(1.015);
+  }
+  100% {
+    transform: scale(1);
+  }
+}

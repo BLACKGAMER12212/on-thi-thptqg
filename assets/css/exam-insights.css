@@ -1,0 +1,198 @@
+/* =====================================================================
+   PHÂN TÍCH KẾT QUẢ SAU KHI NỘP BÀI
+   ===================================================================== */
+.result-question-analysis {
+  margin-top: 18px;
+  padding: 20px;
+  background: #fff;
+  border: 1px solid #dfe7f0;
+  border-radius: 16px;
+}
+
+.result-question-heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 18px;
+}
+
+.result-question-heading > div:first-child > span {
+  color: #0284c7;
+  font-size: 9px;
+  font-weight: 900;
+  letter-spacing: 0.11em;
+}
+
+.result-question-heading h3 {
+  margin: 4px 0 4px;
+  color: #0f172a;
+  font-size: 17px;
+}
+
+.result-question-heading p {
+  margin: 0;
+  color: #64748b;
+  font-size: 10px;
+  line-height: 1.45;
+}
+
+.result-question-totals {
+  flex: 0 0 auto;
+  display: flex;
+  gap: 6px;
+}
+
+.result-question-totals span {
+  min-width: 56px;
+  padding: 7px 8px;
+  color: #475569;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 9px;
+  text-align: center;
+  font-size: 9px;
+  font-weight: 800;
+}
+
+.result-question-totals b {
+  display: block;
+  margin-bottom: 2px;
+  color: #0f172a;
+  font-size: 14px;
+}
+
+.result-question-map {
+  margin-top: 16px;
+  display: grid;
+  gap: 13px;
+}
+
+.result-question-part {
+  display: grid;
+  grid-template-columns: minmax(92px, 135px) minmax(0, 1fr);
+  align-items: start;
+  gap: 12px;
+}
+
+.result-question-part-label {
+  padding-top: 6px;
+  color: #334155;
+  font-size: 10px;
+  font-weight: 900;
+}
+
+.result-question-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.result-question-chip {
+  width: 34px;
+  height: 31px;
+  display: grid;
+  place-items: center;
+  border: 1px solid;
+  border-radius: 8px;
+  font-size: 10px;
+  font-weight: 900;
+}
+
+.result-question-chip.correct {
+  color: #047857;
+  background: #ecfdf5;
+  border-color: #a7f3d0;
+}
+
+.result-question-chip.partial {
+  color: #a16207;
+  background: #fffbeb;
+  border-color: #fde68a;
+}
+
+.result-question-chip.incorrect {
+  color: #be123c;
+  background: #fff1f2;
+  border-color: #fecdd3;
+}
+
+.result-question-chip.unanswered {
+  color: #64748b;
+  background: #f1f5f9;
+  border-color: #cbd5e1;
+}
+
+.result-question-footer {
+  margin-top: 16px;
+  padding-top: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  border-top: 1px solid #e2e8f0;
+}
+
+.result-question-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  color: #64748b;
+  font-size: 9px;
+  font-weight: 800;
+}
+
+.result-question-legend span {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.result-question-legend i {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+
+.result-question-legend .correct { background: #10b981; }
+.result-question-legend .partial { background: #f59e0b; }
+.result-question-legend .incorrect { background: #f43f5e; }
+.result-question-legend .unanswered { background: #94a3b8; }
+
+.result-question-footer button {
+  min-height: 36px;
+  padding: 0 13px;
+  color: #0369a1;
+  background: #f0f9ff;
+  border: 1px solid #bae6fd;
+  border-radius: 9px;
+  cursor: pointer;
+  font-size: 10px;
+  font-weight: 900;
+}
+
+[data-theme="dark"] .result-question-analysis{
+  color:#e2e8f0;
+  background:#1e293b;
+  border-color:#334155;
+}
+[data-theme="dark"] .result-question-totals span{
+  color:#cbd5e1;
+  background:#111827;
+  border-color:#334155;
+}
+[data-theme="dark"] .result-question-heading h3,
+[data-theme="dark"] .result-question-part-label,
+[data-theme="dark"] .result-question-totals b{color:#f8fafc}
+[data-theme="dark"] .result-question-heading p,
+[data-theme="dark"] .result-question-legend{color:#94a3b8}
+[data-theme="dark"] .result-question-footer{border-top-color:#334155}
+
+@media (max-width:640px){
+  .result-question-analysis{padding:15px}
+  .result-question-heading{flex-direction:column}
+  .result-question-totals{width:100%;display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}
+  .result-question-totals span{min-width:0}
+  .result-question-part{grid-template-columns:1fr;gap:7px}
+  .result-question-part-label{padding-top:0}
+  .result-question-footer{align-items:stretch;flex-direction:column}
+}
